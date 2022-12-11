@@ -45,3 +45,5 @@ _CoqProject
 
 *.exe
 *.out
+
+artifact
