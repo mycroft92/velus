@@ -168,19 +168,18 @@ Module Type CLOCKSWITCH
       let locs := flat_map (fun '(_, _, nfrees, ndefs) => (map (fun '(_, x, (ty, ck)) => (x, (ty, ck, xH, None))) (nfrees++ndefs))) xs' in
       ret (Blocal (Scope (List.map (fun '(xc, (ty, ck)) => (xc, (ty, ck, xH, None))) xcs++locs) (mergeeqs++concat blks'++map Beq condeqs)))
 
-    | Bauto _ _ _ _ => ret blk
     end.
 
   (** *** Some properties *)
 
-  Lemma switch_not_in_auto_prefs :
-    ~PS.In switch auto_prefs.
+  Lemma switch_not_in_last_prefs :
+    ~PS.In switch last_prefs.
   Proof.
-    unfold auto_prefs, last_prefs, elab_prefs.
-    rewrite 2 PSF.add_iff, PSF.singleton_iff.
+    unfold last_prefs, last_prefs, elab_prefs.
+    rewrite PSF.add_iff, PSF.singleton_iff.
     pose proof gensym_prefs_NoDup as Hnd. unfold gensym_prefs in Hnd.
     repeat rewrite NoDup_cons_iff in Hnd. destruct_conjs.
-    intros [contra|[contra|contra]]; subst; rewrite contra in *; eauto with datatypes.
+    intros [contra|contra]; subst; rewrite contra in *; eauto with datatypes.
   Qed.
 
   Lemma new_idents_old : forall bck xc tx k ids nids st st',
@@ -305,7 +304,7 @@ Module Type CLOCKSWITCH
       (forall x, Env.In x sub -> InMembers x env) ->
       NoDupMembers env ->
       NoDup xs ->
-      noauto_scope P_na (Scope locs blk) ->
+      nolast_scope P_na (Scope locs blk) ->
       VarsDefinedScope P_vd (Scope locs blk) xs ->
       NoDupScope P_nd (map fst env) (Scope locs blk) ->
       switch_scope f_switch env bck sub (Scope locs blk) st = (s', st') ->
@@ -348,7 +347,7 @@ Module Type CLOCKSWITCH
       (forall x, Env.In x sub -> InMembers x env) ->
       NoDupMembers env ->
       NoDup xs ->
-      noauto_block blk ->
+      nolast_block blk ->
       VarsDefined blk xs ->
       NoDupLocals (map fst env) blk ->
       switch_block env bck sub blk st = (blk', st') ->
@@ -538,7 +537,6 @@ Module Type CLOCKSWITCH
       simpl_Forall. destruct b; repeat inv_bind. simpl_Forall.
       eapply mmap_st_follows in H6; eauto.
       simpl_Forall; eauto.
-    - reflexivity.
     - (* local *)
       eapply mmap_st_follows; eauto.
       simpl_Forall; eauto.
@@ -612,14 +610,14 @@ Module Type CLOCKSWITCH
         (fun blk => forall xs env bck sub blk' st st',
              NoDup xs ->
              NoDupLocals xs blk ->
-             Forall (fun x : ident => AtomOrGensym auto_prefs x \/ In x (st_ids st)) xs ->
-             GoodLocals auto_prefs blk ->
+             Forall (fun x : ident => AtomOrGensym last_prefs x \/ In x (st_ids st)) xs ->
+             GoodLocals last_prefs blk ->
              switch_block env bck sub blk st = (blk', st') ->
              NoDupLocals xs blk') blks ->
       NoDup xs ->
       Forall (NoDupLocals xs) blks ->
-      Forall (fun x => AtomOrGensym auto_prefs x \/ In x (st_ids st)) xs ->
-      Forall (GoodLocals auto_prefs) blks ->
+      Forall (fun x => AtomOrGensym last_prefs x \/ In x (st_ids st)) xs ->
+      Forall (GoodLocals last_prefs) blks ->
       mmap (switch_block env bck sub) blks st = (blks', st') ->
       Forall (NoDupLocals xs) blks'.
   Proof.
@@ -636,13 +634,13 @@ Module Type CLOCKSWITCH
     forall locs (blk: A) xs env bck sub s' st st',
       NoDup xs ->
       NoDupScope P_nd xs (Scope locs blk) ->
-      Forall (fun x => AtomOrGensym auto_prefs x \/ In x (st_ids st)) xs ->
-      GoodLocalsScope P_good auto_prefs (Scope locs blk) ->
+      Forall (fun x => AtomOrGensym last_prefs x \/ In x (st_ids st)) xs ->
+      GoodLocalsScope P_good last_prefs (Scope locs blk) ->
       switch_scope f_switch env bck sub (Scope locs blk) st = (s', st') ->
       (forall xs env blk' st st',
           NoDup xs ->
           P_nd xs blk ->
-          Forall (fun x => AtomOrGensym auto_prefs x \/ In x (st_ids st)) xs ->
+          Forall (fun x => AtomOrGensym last_prefs x \/ In x (st_ids st)) xs ->
           P_good blk ->
           f_switch env blk st = (blk', st') ->
           P_nd xs blk') ->
@@ -668,8 +666,8 @@ Module Type CLOCKSWITCH
   Lemma switch_block_NoDupLocals : forall blk xs env bck sub blk' st st',
       NoDup xs ->
       NoDupLocals xs blk ->
-      Forall (fun x => AtomOrGensym auto_prefs x \/ In x (st_ids st)) xs ->
-      GoodLocals auto_prefs blk ->
+      Forall (fun x => AtomOrGensym last_prefs x \/ In x (st_ids st)) xs ->
+      GoodLocals last_prefs blk ->
       switch_block env bck sub blk st = (blk', st') ->
       NoDupLocals xs blk'.
   Proof.
@@ -696,7 +694,7 @@ Module Type CLOCKSWITCH
         erewrite new_idents_st_ids', cond_eq_st_ids, <-app_assoc in Hnd; eauto.
         apply NoDup_app'; eauto using NoDup_app_r.
         eapply Forall_impl; [|eauto]; intros ? [?|?].
-        - intros Hin. eapply st_valid_AtomOrGensym_nIn; eauto using switch_not_in_auto_prefs.
+        - intros Hin. eapply st_valid_AtomOrGensym_nIn; eauto using switch_not_in_last_prefs.
           erewrite new_idents_st_ids', cond_eq_st_ids, <-app_assoc; eauto.
           apply in_app_iff; auto.
         - eapply NoDup_app_In in Hnd; eauto.
@@ -712,7 +710,7 @@ Module Type CLOCKSWITCH
         assert (Forall (fun blks => NoDupBranch (Forall (NoDupLocals xs')) (snd blks)) branches) as Hnd2'.
         { subst. simpl_Forall.
           destruct b. repeat inv_branch. constructor; auto.
-          simpl_Forall. take (NoDupLocals _ _) and eapply NoDupLocals_incl' in it; eauto using switch_not_in_auto_prefs.
+          simpl_Forall. take (NoDupLocals _ _) and eapply NoDupLocals_incl' in it; eauto using switch_not_in_last_prefs.
           - intros ? Hin. rewrite in_app_iff in *. destruct Hin as [|]; auto. right.
             assert (Hincl1:=H0). eapply cond_eq_incl in Hincl1.
             assert (Hincl2:=H2). eapply new_idents_st_ids' in Hincl2.
@@ -720,7 +718,7 @@ Module Type CLOCKSWITCH
             rewrite <-Hincl2 in H3.
             specialize (st_valid_prefixed x2) as Hvalid'. simpl_Forall; eauto.
         } clear H3.
-        assert (Forall (fun x0 : ident => AtomOrGensym auto_prefs x0 \/ In x0 (st_ids x2)) xs') as Hat'.
+        assert (Forall (fun x0 : ident => AtomOrGensym last_prefs x0 \/ In x0 (st_ids x2)) xs') as Hat'.
         { subst. apply Forall_app; split; auto.
           1,2:apply Forall_forall; intros ? Hin.
           - eapply Forall_forall in Hat1 as [|]; eauto.
@@ -869,7 +867,6 @@ Module Type CLOCKSWITCH
           eapply new_idents_AtomOrGensym in H1. eapply new_idents_AtomOrGensym in H7.
           eapply in_app_iff in Hin as [Hin|Hin]; simpl_Forall; eauto.
       + simpl_Forall. constructor.
-    - (* automaton *) constructor; auto.
     - (* local *)
       constructor.
       eapply switch_scope_GoodLocals in H0; eauto.
@@ -881,7 +878,7 @@ Module Type CLOCKSWITCH
   (** *** noswitch_block *)
 
   Lemma switch_noswitch : forall blk env bck sub blk' st st',
-      noauto_block blk ->
+      nolast_block blk ->
       switch_block env bck sub blk st = (blk', st') ->
       noswitch_block blk'.
   Proof.
@@ -914,7 +911,7 @@ Module Type CLOCKSWITCH
 
   (** ** Transformation of a node and program *)
 
-  Program Definition switch_node (n: @node noauto_block auto_prefs) : @node noswitch_block switch_prefs :=
+  Program Definition switch_node (n: @node nolast_block last_prefs) : @node noswitch_block switch_prefs :=
     let res := switch_block (senv_of_inout (n_in n ++ n_out n)) Cbase (@Env.empty _) (n_block n) init_st in
     {| n_name := n_name n;
        n_hasstate := n_hasstate n;
@@ -964,10 +961,10 @@ Module Type CLOCKSWITCH
   Global Program Instance switch_node_transform_unit: TransformUnit node node :=
     { transform_unit := switch_node }.
 
-  Global Program Instance switch_global_without_units : TransformProgramWithoutUnits (@global noauto_block auto_prefs) (@global noswitch_block switch_prefs) :=
+  Global Program Instance switch_global_without_units : TransformProgramWithoutUnits (@global nolast_block last_prefs) (@global noswitch_block switch_prefs) :=
     { transform_program_without_units := fun g => Global g.(types) g.(externs) [] }.
 
-  Definition switch_global : @global noauto_block auto_prefs -> @global noswitch_block switch_prefs :=
+  Definition switch_global : @global nolast_block last_prefs -> @global noswitch_block switch_prefs :=
     transform_units.
 
   (** *** Equality of interfaces *)

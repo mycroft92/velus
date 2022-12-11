@@ -233,17 +233,6 @@ Module Type LCLOCKEDSEMANTICS
           Forall2 (sem_var (fst H)) xs (concat ss) ->
           sem_equation_ck H b (xs, es)
 
-    with sem_transitions_ck : Sem.history -> Stream bool -> list (exp * (enumtag * bool)) -> (enumtag * bool) -> Stream (synchronous (enumtag * bool)) -> Prop :=
-    | Stransdef : forall H bs default stres,
-        stres ≡ const_stres bs default ->
-        sem_transitions_ck H bs [] default stres
-    | Strans : forall H bs e C r trans default vs bs' stres1 stres,
-        sem_exp_ck H bs e [vs] ->
-        bools_of vs bs' ->
-        sem_transitions_ck H bs trans default stres1 ->
-        stres ≡ choose_first (const_stres bs' (C, r)) stres1 ->
-        sem_transitions_ck H bs ((e, (C, r))::trans) default stres
-
     with sem_block_ck: Sem.history -> Stream bool -> block -> Prop :=
     | Sbeq:
       forall H b eq,
@@ -266,50 +255,6 @@ Module Type LCLOCKEDSEMANTICS
                          /\ let bi := fwhenb (fst blks) sc b in
                            sem_branch (Forall (sem_block_ck Hi' bi)) (snd blks)) branches ->
         sem_block_ck Hi b (Bswitch ec branches)
-
-    | SautoWeak:
-      forall H bs ini oth states ck bs' stres0 stres1 stres,
-        sem_clock (fst H) bs ck bs' ->
-        sem_transitions_ck H bs' (List.map (fun '(e, t) => (e, (t, false))) ini) (oth, false) stres0 ->
-        fby stres0 stres1 stres ->
-        Forall (fun state =>
-                  let tag := fst (fst state) in
-                  forall k, exists Hik, Sem.select_hist tag k stres H Hik
-                              /\ let bik := fselectb tag k stres bs in
-                                sem_branch
-                                  (fun blks =>
-                                     sem_scope_ck (fun Hi' => sem_exp_ck Hi' bik)
-                                       (fun Hi' blks =>
-                                          Forall (sem_block_ck Hi' bik) (fst blks)
-                                          /\ sem_transitions_ck Hi' bik (snd blks) (tag, false) (fselect absent tag k stres stres1)
-                                       ) Hik bik (snd blks)) (snd state)
-               ) states ->
-        sem_block_ck H bs (Bauto Weak ck (ini, oth) states)
-
-    | SautoStrong:
-      forall H bs ini states ck bs' stres stres1,
-        sem_clock (fst H) bs ck bs' ->
-        fby (const_stres bs' (ini, false)) stres1 stres ->
-        Forall (fun state =>
-                  let tag := fst (fst state) in
-                  forall k, exists Hik, Sem.select_hist tag k stres H Hik
-                              /\ let bik := fselectb tag k stres bs in
-                                sem_branch
-                                  (fun blks =>
-                                     sem_transitions_ck Hik bik (fst blks) (tag, false) (fselect absent tag k stres stres1)
-                                  ) (snd state)
-               ) states ->
-        Forall (fun state =>
-                  let tag := fst (fst state) in
-                  forall k, exists Hik, Sem.select_hist tag k stres1 H Hik
-                              /\ let bik := fselectb tag k stres1 bs in
-                                sem_branch
-                                  (fun blks =>
-                                     sem_scope_ck (fun Hi' => sem_exp_ck Hi' bik)
-                                       (fun Hi' blks => Forall (sem_block_ck Hi' bik) (fst blks)
-                                       ) Hik bik (snd blks)) (snd state)
-               ) states ->
-        sem_block_ck H bs (Bauto Strong ck ([], ini) states)
 
     | Slocal:
       forall Hi bs scope,
@@ -510,70 +455,6 @@ Module Type LCLOCKEDSEMANTICS
                                     ) (snd blks)) branches ->
         P_block Hi b (Bswitch ec branches).
 
-    Hypothesis TransDefCase:
-      forall Hi bs default stres,
-        stres ≡ const_stres bs default ->
-        P_transitions Hi bs [] default stres.
-
-    Hypothesis TransCase:
-      forall Hi bs e C r trans default vs bs' stres1 stres,
-        sem_exp_ck G Hi bs e [vs] ->
-        P_exp Hi bs e [vs] ->
-        bools_of vs bs' ->
-        sem_transitions_ck G Hi bs trans default stres1 ->
-        P_transitions Hi bs trans default stres1 ->
-        stres ≡ choose_first (const_stres bs' (C, r)) stres1 ->
-        P_transitions Hi bs ((e, (C, r))::trans) default stres.
-
-    Hypothesis BautoWeakCase:
-      forall Hi bs ini oth states ck bs' stres0 stres1 stres,
-        sem_clock (fst Hi) bs ck bs' ->
-        sem_transitions_ck G Hi bs' (List.map (fun '(e, t) => (e, (t, false))) ini) (oth, false) stres0 ->
-        P_transitions Hi bs' (List.map (fun '(e, t) => (e, (t, false))) ini) (oth, false) stres0 ->
-        fby stres0 stres1 stres ->
-        Forall (fun '((tag, _), br) =>
-                  forall k, exists Hik,
-                    Sem.select_hist tag k stres Hi Hik
-                    /\ let bik := fselectb tag k stres bs in
-                      sem_branch
-                        (fun '(_, scope) =>
-                           sem_scope_ck
-                             (fun Hi' e vs => sem_exp_ck G Hi' bik e vs /\ P_exp Hi' bik e vs)
-                             (fun Hi' blks => Forall (sem_block_ck G Hi' bik) (fst blks)
-                                           /\ Forall (P_block Hi' bik) (fst blks)
-                                           /\ sem_transitions_ck G Hi' bik (snd blks) (tag, false) (fselect absent tag k stres stres1)
-                                           /\ P_transitions Hi' bik (snd blks) (tag, false) (fselect absent tag k stres stres1)
-                             ) Hik bik scope)
-                        br) states ->
-        P_block Hi bs (Bauto Weak ck (ini, oth) states).
-
-    Hypothesis BautoStrongCase:
-      forall Hi bs ini states ck bs' stres0 stres1,
-        sem_clock (fst Hi) bs ck bs' ->
-        fby (const_stres bs' (ini, false)) stres1 stres0 ->
-        Forall (fun '((tag, _), br) =>
-                  forall k, exists Hik, Sem.select_hist tag k stres0 Hi Hik
-                              /\ let bik := fselectb tag k stres0 bs in
-                                sem_branch
-                                  (fun '(unl, _) =>
-                                     sem_transitions_ck G Hik bik unl (tag, false) (fselect absent tag k stres0 stres1)
-                                     /\ P_transitions Hik bik unl (tag, false) (fselect absent tag k stres0 stres1)
-                                  ) br
-          ) states ->
-        Forall (fun '((tag, _), br) =>
-                  forall k, exists Hik,
-                    Sem.select_hist tag k stres1 Hi Hik
-                    /\ let bik := fselectb tag k stres1 bs in
-                      sem_branch
-                        (fun '(_, scope) =>
-                           sem_scope_ck
-                             (fun Hi' e vs => sem_exp_ck G Hi' bik e vs /\ P_exp Hi' bik e vs)
-                             (fun Hi' blks => Forall (sem_block_ck G Hi' bik) (fst blks)
-                                           /\ Forall (P_block Hi' bik) (fst blks)
-                             ) Hik bik scope)
-                        br) states ->
-        P_block Hi bs (Bauto Strong ck ([], ini) states).
-
     Hypothesis BlocalCase:
       forall Hi bs scope,
         sem_scope_ck (fun Hi' e vs => sem_exp_ck G Hi' bs e vs /\ P_exp Hi' bs e vs)
@@ -611,11 +492,6 @@ Module Type LCLOCKEDSEMANTICS
            (Sem: sem_equation_ck G H b e)
            {struct Sem}
       : P_equation H b e
-    with sem_transitions_ind2
-           (H: Sem.history) (b: Stream bool) trans default stres
-           (Sem: sem_transitions_ck G H b trans default stres)
-           {struct Sem}
-      : P_transitions H b trans default stres
     with sem_block_ck_ind2
            (H: Sem.history) (b: Stream bool) (d: block)
            (Sem: sem_block_ck G H b d)
@@ -651,9 +527,6 @@ Module Type LCLOCKEDSEMANTICS
       - inv Sem.
         eapply Equation with (ss:=ss); eauto; clear H2; SolveForall.
       - inv Sem.
-        + eapply TransDefCase; eauto.
-        + eapply TransCase; eauto.
-      - inv Sem.
         + eapply BeqCase; eauto.
         + eapply BresetCase; eauto.
           intros k. specialize (H3 k). split; eauto. SolveForall.
@@ -662,31 +535,10 @@ Module Type LCLOCKEDSEMANTICS
           destruct_conjs. inv H4. do 2 esplit; eauto.
           econstructor; eauto. split; auto.
           simpl. SolveForall.
-        + eapply BautoWeakCase; eauto.
-          SolveForall; destruct_conjs. constructor; auto.
-      intros k. specialize (H0 k). destruct_conjs.
-      inv_branch'. inv_scope'.
-      do 2 esplit; eauto.
-      do 2 econstructor; eauto. 2:split; [|split; [|split]]; eauto.
-      * intros * Hin. eapply H10 in Hin as (?&?&?&?&?&?&?). do 3 esplit; eauto.
-        repeat split; eauto.
-      * simpl. SolveForall.
-      + eapply BautoStrongCase; eauto.
-        * clear - H3 sem_transitions_ind2. SolveForall. destruct_conjs. constructor; auto.
-          intros k. specialize (H0 k). destruct_conjs. take (sem_branch _ _) and inv it. destruct_conjs.
-          do 2 esplit; eauto. econstructor; eauto.
-        * clear H3. SolveForall. destruct_conjs. constructor; auto.
-          intros k. specialize (H0 k). destruct_conjs.
-          inv_branch'. inv_scope'.
-          do 2 esplit; eauto. do 2 econstructor; eauto.
-          2:split; auto; simpl.
-          -- intros * Hin. eapply H9 in Hin as (?&?&?&?&?&?&?). do 3 esplit; eauto.
-             repeat split; eauto.
-          -- SolveForall.
-      + eapply BlocalCase; eauto.
-        inv H0. econstructor; eauto. 2:split; auto; SolveForall.
-        intros. edestruct H3 as (?&?&?&?&?&?&?); eauto.
-        do 3 esplit; eauto. repeat split; eauto.
+        + eapply BlocalCase; eauto.
+          inv H0. econstructor; eauto. 2:split; auto; SolveForall.
+          intros. edestruct H3 as (?&?&?&?&?&?&?); eauto.
+          do 3 esplit; eauto. repeat split; eauto.
       - inv Sem.
         eapply Node; eauto.
     Qed.
@@ -711,22 +563,6 @@ Module Type LCLOCKEDSEMANTICS
       simpl_Exists. simpl_Forall.
       eapply H in H7; eauto.
       destruct H1. eapply FEnv.In_refines; eauto.
-    - (* automaton (weak) *)
-      simpl_Exists; simpl_Forall. specialize (H11 0); destruct_conjs.
-      repeat inv_branch'. repeat inv_scope'.
-      simpl_Exists. simpl_Forall.
-      destruct H1. eapply FEnv.In_refines; eauto.
-      eapply H, FEnv.union_In in H4 as [|Hin']; eauto.
-      exfalso. take (~ _) and eapply it.
-      take (forall x, _ <-> IsVar _ _) and apply it in Hin'. inv Hin'. solve_In.
-    - (* automaton (strong) *)
-      simpl_Exists; simpl_Forall. specialize (H11 0); destruct_conjs.
-      repeat inv_branch'. repeat inv_scope'.
-      simpl_Exists. simpl_Forall.
-      destruct H1. eapply FEnv.In_refines; eauto.
-      eapply H, FEnv.union_In in H17 as [|Hin']; eauto.
-      exfalso. take (~ _) and eapply it.
-      take (forall x, _ <-> IsVar _ _) and apply it in Hin'. inv Hin'. solve_In.
     - (* local *)
       repeat inv_scope'. simpl_Exists; simpl_Forall.
       eapply H, FEnv.union_In in H12 as [|Hin']; eauto.
@@ -769,15 +605,6 @@ Module Type LCLOCKEDSEMANTICS
       eapply sem_clock_refines; eauto. eapply Hsc1; eauto.
       eapply sem_var_refines'; eauto.
       inv H0. eapply Href2; eauto using In_InMembers, sem_var_In.
-    Qed.
-
-    Fact sem_transitions_refines : forall H H' Hl b trans default stres,
-        H ⊑ H' ->
-        sem_transitions_ck G (H, Hl) b trans default stres ->
-        sem_transitions_ck G (H', Hl) b trans default stres.
-    Proof with eauto.
-      induction trans; intros * Href Hsem; inv Hsem;
-        econstructor; eauto using sem_exp_refines.
     Qed.
 
     Lemma sem_scope_refines {A} P_sem : forall locs (blk: A) H H' Hl bs,
@@ -825,28 +652,6 @@ Module Type LCLOCKEDSEMANTICS
         intros ?? Hfind. apply Href1 in Hfind as (?&Hfilter&Hfind').
         apply Href in Hfind' as (?&?&?). do 2 esplit; [|eauto].
         now rewrite <-H5.
-      - (* automaton (weak) *)
-        econstructor; eauto using sem_clock_refines, sem_transitions_refines.
-        simpl_Forall. specialize (H11 k); destruct_conjs.
-        do 2 esplit; [|eauto].
-        destruct H2 as (Href1&?); split; simpl in *; [|auto].
-        intros ?? Hfind. apply Href1 in Hfind as (?&Hfilter&Hfind').
-        apply Href in Hfind' as (?&?&?). do 2 esplit; [|eauto].
-        now rewrite <-H4.
-      - (* automaton (strong) *)
-        econstructor; eauto using sem_clock_refines, sem_transitions_refines.
-        + simpl_Forall. specialize (H10 k); destruct_conjs.
-          do 2 esplit; eauto.
-          destruct H2 as (Href1&?); split; simpl in *; [|auto].
-          intros ?? Hfind. apply Href1 in Hfind as (?&Hfilter&Hfind').
-          apply Href in Hfind' as (?&?&?). do 2 esplit; [|eauto].
-          now rewrite <-H4.
-        + simpl_Forall. specialize (H11 k); destruct_conjs.
-          do 2 esplit; [|eauto].
-          destruct H2 as (Href1&?); split; simpl in *; [|auto].
-          intros ?? Hfind. apply Href1 in Hfind as (?&Hfilter&Hfind').
-          apply Href in Hfind' as (?&?&?). do 2 esplit; [|eauto].
-          now rewrite <-H4.
       - (* local *)
         constructor. eapply sem_scope_refines; eauto.
         intros; simpl_Forall; eauto.
@@ -862,21 +667,6 @@ Module Type LCLOCKEDSEMANTICS
       intros.
       eapply sem_scope_refines; eauto.
       intros; simpl_Forall; eauto using sem_block_refines.
-    Qed.
-
-    Corollary sem_scope_refines2 : forall locs blk def stres H H' Hl bs,
-        H ⊑ H' ->
-        sem_scope_ck (fun Hi e => sem_exp_ck G Hi bs e)
-          (fun Hi blks => Forall (sem_block_ck G Hi bs) (fst blks)
-                       /\ sem_transitions_ck G Hi bs (snd blks) def stres) (H, Hl) bs (Scope locs blk) ->
-        sem_scope_ck (fun Hi e => sem_exp_ck G Hi bs e)
-          (fun Hi blks => Forall (sem_block_ck G Hi bs) (fst blks)
-                       /\ sem_transitions_ck G Hi bs (snd blks) def stres) (H', Hl) bs (Scope locs blk).
-    Proof.
-      intros.
-      eapply sem_scope_refines; eauto.
-      intros; destruct_conjs.
-      split; simpl_Forall; eauto using sem_block_refines, sem_transitions_refines.
     Qed.
 
     Corollary sem_scope_refines3 {T} : forall locs (blk: _ * T) H H' Hl bs,
@@ -934,16 +724,6 @@ Module Type LCLOCKEDSEMANTICS
       intros * _ Hla. apply Hnl in Hla as [].
     Qed.
 
-    Lemma sem_transitions_change_lasts : forall Γ H Hl Hl' b trans def stres,
-        (forall x, ~IsLast Γ x) ->
-        Forall (fun '(e, _) => wx_exp Γ e) trans ->
-        sem_transitions_ck G (H, Hl) b trans def stres ->
-        sem_transitions_ck G (H, Hl') b trans def stres.
-    Proof with eauto with datatypes.
-      induction trans; intros * Hnl Hwx Hsem; inv Hwx; inv Hsem;
-        econstructor; eauto using sem_exp_change_lasts.
-    Qed.
-
     Lemma sem_scope_change_lasts {A} P_nolast P_wx P_sem : forall Γ H Hl Hl' bs locs (blks: A),
         nolast_scope P_nolast (Scope locs blks) ->
         (forall x, ~IsLast Γ x) ->
@@ -987,29 +767,6 @@ Module Type LCLOCKEDSEMANTICS
             intros ?? Hempty. inv Hempty.
           * repeat inv_branch'.
             constructor. simpl_Forall; eauto.
-      - (* automaton (weak) *)
-        econstructor; eauto.
-        + eapply sem_transitions_change_lasts... simpl_Forall; auto.
-        + simpl_Forall. specialize (H17 k); destruct_conjs.
-          exists (t, FEnv.empty _); split.
-          * destruct H3; split; auto. intros ?? Hempty. inv Hempty.
-          * repeat inv_branch'. econstructor.
-            destruct s. eapply sem_scope_change_lasts; eauto.
-            intros; split; destruct_conjs; simpl_Forall; eauto using sem_transitions_change_lasts.
-      - (* automaton (strong) *)
-        econstructor; eauto.
-        + simpl_Forall. specialize (H16 k); destruct_conjs.
-          repeat inv_branch'.
-          do 2 esplit. 2:econstructor; eapply sem_transitions_change_lasts...
-          destruct H3; split; auto.
-          instantiate (1:=FEnv.empty _). intros ?? Hempty. inv Hempty.
-        + simpl_Forall. specialize (H17 k); destruct_conjs.
-          exists (t, FEnv.empty _); split.
-          * destruct H3; split; auto.
-            intros ?? Hempty. inv Hempty.
-          * repeat inv_branch'; econstructor.
-            destruct s. eapply sem_scope_change_lasts; eauto.
-            intros; simpl_Forall; eauto.
       - (* locals *)
         constructor. eapply sem_scope_change_lasts; eauto.
         intros; simpl_Forall; eauto.
@@ -1265,19 +1022,6 @@ Module Type LCLOCKEDSEMANTICS
       destruct EH as (EH&_). now rewrite <-EH.
   Qed.
 
-  Add Parametric Morphism {PSyn prefs} (G: @global PSyn prefs) : (sem_transitions_ck G)
-      with signature history_equiv ==> @EqSt bool ==> eq ==> eq ==> @EqSt _ ==> Basics.impl
-        as sem_transitions_ck_morph.
-  Proof.
-    intros H H' EH ?? Eb ???? Estres Hsem.
-    revert dependent y3.
-    induction Hsem; intros * Heq; econstructor; eauto.
-    - rewrite <-Heq, <-Eb; auto.
-    - now rewrite <-EH, <-Eb.
-    - eapply IHHsem; eauto. reflexivity.
-    - now rewrite <-Heq.
-  Qed.
-
   Fact sem_scope_ck_morph {A} P_blk1 (P_blk2: _ -> _ -> Prop) {PSyn prefs} (G: @global PSyn prefs) :
     forall Hi1 Hi2 bs1 bs2 locs (blks: A),
       sem_scope_ck (fun Hi => sem_exp_ck G Hi bs1) P_blk1 Hi1 bs1 (Scope locs blks) ->
@@ -1306,7 +1050,6 @@ Module Type LCLOCKEDSEMANTICS
       with (P_block := fun H bs b => forall H' bs', history_equiv H H' -> bs ≡ bs' -> sem_block_ck G H' bs' b)
            (P_exp := fun _ _ _ _ => True)
            (P_equation := fun _ _ _ => True)
-           (P_transitions := fun _ _ _ _ _ => True)
            (P_node := fun _ _ _ => True); intros; eauto;
       take (_ ≡ _) and rename it into Eb; take (history_equiv _ _) and rename it into EH.
     - constructor. eapply sem_equation_ck_morph; eauto.
@@ -1324,35 +1067,6 @@ Module Type LCLOCKEDSEMANTICS
         do 2 esplit. 2:econstructor; eauto.
         * destruct EH as (EH1&EH2); unfold when_hist in *.
           destruct H3. split. rewrite <-EH1 at 1. eauto. rewrite <-EH2 at 1. eauto.
-        * simpl_Forall. eapply H6; eauto. reflexivity. now rewrite <-Eb.
-    - econstructor; eauto.
-      + destruct EH as (EH1&EH2). rewrite <-EH1, <-Eb; eauto.
-      + now rewrite <-EH.
-      + simpl_Forall. specialize (H4 k) as ((Hik&Hikl)&?). destruct_conjs.
-        inv_branch'. inv_scope'.
-        exists (Hik, Hikl). split; [|do 2 econstructor]; eauto.
-        * destruct EH as (EH1&EH2). destruct H4 as (Hsel1&Hsel2).
-          split. rewrite <-EH1; auto. rewrite <-EH2; auto.
-        * intros * Hin. edestruct H11 as (?&?&?&(?&_)&?&?&?); eauto.
-          do 3 esplit. repeat (split; eauto).
-          now rewrite <-Eb.
-        * now rewrite <-Eb.
-        * split; simpl_Forall. eapply H7; eauto. reflexivity. 1,2:now rewrite <-Eb.
-    - econstructor; eauto.
-      + destruct EH as (EH1&EH2). rewrite <-EH1, <-Eb; eauto.
-      + simpl_Forall. specialize (H2 k) as ((Hik&Hikl)&?). destruct_conjs. inv_branch'.
-        do 2 esplit; eauto. 2:econstructor; rewrite <-Eb; eauto.
-        destruct EH as (EH1&EH2). destruct H2 as (Hsel1&Hsel2).
-        split. rewrite <-EH1; auto. rewrite <-EH2; auto.
-      + simpl_Forall. specialize (H3 k) as ((Hik&Hikl)&?). destruct_conjs.
-        inv_branch'. inv_scope'.
-        exists (Hik, Hikl). split; [|do 2 econstructor]; eauto.
-        * destruct EH as (EH1&EH2). destruct H3 as (Hsel1&Hsel2).
-          split. rewrite <-EH1; auto. rewrite <-EH2; auto.
-        * intros * Hin. edestruct H10 as (?&?&?&(?&_)&?&?&?); eauto.
-          do 3 esplit. repeat (split; eauto).
-          now rewrite <-Eb.
-        * now rewrite <-Eb.
         * simpl_Forall. eapply H6; eauto. reflexivity. now rewrite <-Eb.
     - constructor. destruct Hi as (Hi&Hl), H' as (Hi2&Hl2).
       inv_scope'.
@@ -1430,15 +1144,6 @@ Module Type LCLOCKEDSEMANTICS
         eapply Forall_forall in Hwc1; eauto. 2:solve_In. auto.
     Qed.
 
-    Fact sem_transitions_restrict : forall Γ H Hl b trans default stres,
-        Forall (fun '(e, _) => wx_exp Γ e) trans ->
-        sem_transitions_ck G (H, Hl) b trans default stres ->
-        sem_transitions_ck G (FEnv.restrict H (List.map fst Γ), Hl) b trans default stres.
-    Proof with eauto.
-      induction trans; intros * Hwx Hsem; inv Hwx; inv Hsem;
-        econstructor; eauto using sem_exp_restrict.
-    Qed.
-
     Lemma sem_scope_restrict {A} (P_wc: _ -> _ -> Prop) (sem_block : _ -> _ -> Prop) :
       forall Γ Hi Hl bs locs (blks : A),
         wc_env (idck Γ) ->
@@ -1514,55 +1219,6 @@ Module Type LCLOCKEDSEMANTICS
           eapply Href1 in Hfind as (?&Hfilter&Hfind').
           do 2 esplit; eauto. apply FEnv.restrict_find; auto.
           simpl_In. edestruct H6 as (?&?); eauto with senv. inv H2. solve_In.
-      - (* automaton (weak) *)
-        econstructor; eauto.
-        + eapply sem_clock_restrict; eauto with lclocking.
-        + eapply sem_transitions_restrict; eauto. simpl_Forall.
-          eapply wx_exp_incl with (Γ:=Γ'); eauto with lclocking.
-          intros * Hv. inv Hv. apply fst_InMembers in H4; simpl_In.
-          edestruct H8 as (?&?); eauto with senv.
-        + simpl_Forall. specialize (H18 k); destruct_conjs.
-          esplit; split.
-          2:{ repeat (Clo.inv_branch || inv_branch). constructor.
-              destruct s. eapply sem_scope_restrict with (Γ:=Γ') in H12; eauto.
-              - eapply Forall_forall. intros (?&?) Hin. simpl_In. edestruct H8 as (?&Heq); eauto with senv; subst.
-                rewrite Heq. constructor.
-              - intros; simpl in *; destruct_conjs.
-                split; simpl_Forall; eauto.
-                + eapply sem_block_ck_morph, H; eauto; try reflexivity. split; [now symmetry|reflexivity].
-                + eapply sem_transitions_ck_morph, sem_transitions_restrict; eauto; try reflexivity.
-                  split; [symmetry; eauto|reflexivity].
-                  simpl_Forall; eauto with lclocking. }
-          destruct H2 as (Href1&Href2). split; auto.
-          intros ?? Hfind. apply FEnv.restrict_find_inv in Hfind as (Hin&Hfind).
-          eapply Href1 in Hfind as (?&Hfilter&Hfind').
-          do 2 esplit; eauto. apply FEnv.restrict_find; auto.
-          simpl_In. edestruct H8 as (?&?); eauto with senv. inv H2. solve_In.
-      - (* automaton (strong) *)
-        econstructor; eauto.
-        + eapply sem_clock_restrict; eauto with lclocking.
-        + simpl_Forall. specialize (H17 k); destruct_conjs.
-          do 2 esplit.
-          2:{ repeat (Clo.inv_branch || inv_branch). constructor.
-              eapply sem_transitions_restrict; [|eauto]; simpl_Forall; eauto with lclocking. }
-          destruct H2 as (Href1&Href2). split; auto.
-          intros ?? Hfind. apply FEnv.restrict_find_inv in Hfind as (Hin&Hfind).
-          eapply Href1 in Hfind as (?&Hfilter&Hfind').
-          do 2 esplit; eauto. apply FEnv.restrict_find; auto.
-          simpl_In. edestruct H8 as (?&?); eauto with senv. inv H2. solve_In.
-        + simpl_Forall. specialize (H18 k); destruct_conjs.
-          esplit; split.
-          2:{ repeat (Clo.inv_branch || inv_branch). constructor.
-              destruct s. eapply sem_scope_restrict with (Γ:=Γ') in H11; eauto.
-              - eapply Forall_forall. intros (?&?) Hin. simpl_In. edestruct H8 as (?&Heq); eauto with senv; subst.
-                rewrite Heq. constructor.
-              - intros; simpl in *; destruct_conjs. simpl_Forall.
-                eapply sem_block_ck_morph, H; eauto; try reflexivity. split; [now symmetry|reflexivity]. }
-          destruct H2 as (Href1&Href2). split; auto.
-          intros ?? Hfind. apply FEnv.restrict_find_inv in Hfind as (Hin&Hfind).
-          eapply Href1 in Hfind as (?&Hfilter&Hfind').
-          do 2 esplit; eauto. apply FEnv.restrict_find; auto.
-          simpl_In. edestruct H8 as (?&?); eauto with senv. inv H2. solve_In.
       - (* locals *)
         constructor. eapply sem_scope_restrict; eauto.
         intros; simpl_Forall.
@@ -1580,47 +1236,6 @@ Module Type LCLOCKEDSEMANTICS
       intros.
       eapply sem_scope_restrict; eauto.
       intros; simpl_Forall; eauto.
-      eapply sem_block_ck_morph, sem_block_restrict; eauto; [split|]; try reflexivity.
-      now symmetry.
-    Qed.
-
-    Corollary sem_scope_restrict2 : forall locs blk def stres Γ H Hl bs,
-        wc_env (idck Γ) ->
-        wc_scope (fun Γ blks => Forall (wc_block G Γ) (fst blks)
-                             /\ Forall (fun '(e, (_, _)) => wc_exp G Γ e /\ clockof e = [Cbase]) (snd blks))
-                 G Γ (Scope locs blk) ->
-        sem_scope_ck (fun Hi => sem_exp_ck G Hi bs)
-                     (fun Hi blks => Forall (sem_block_ck G Hi bs) (fst blks)
-                                  /\ sem_transitions_ck G Hi bs (snd blks) def stres) (H, Hl) bs (Scope locs blk) ->
-        sem_scope_ck (fun Hi => sem_exp_ck G Hi bs)
-                     (fun Hi blks => Forall (sem_block_ck G Hi bs) (fst blks)
-                                  /\ sem_transitions_ck G Hi bs (snd blks) def stres)
-                     (FEnv.restrict H (map fst Γ), Hl) bs (Scope locs blk).
-    Proof.
-      intros.
-      eapply sem_scope_restrict; eauto.
-      intros; destruct_conjs.
-      split; simpl_Forall; eauto;
-        [eapply sem_block_ck_morph, sem_block_restrict
-        |eapply sem_transitions_ck_morph, sem_transitions_restrict]; eauto; try split; try reflexivity.
-      1,2:symmetry; eauto.
-      simpl_Forall; eauto with lclocking.
-    Qed.
-
-    Corollary sem_scope_restrict3 : forall locs (blk: _ * list transition) Γ H Hl bs,
-        wc_env (idck Γ) ->
-        wc_scope (fun Γ blks => Forall (wc_block G Γ) (fst blks)
-                             /\ Forall (fun '(e, (_, _)) => wc_exp G Γ e /\ clockof e = [Cbase]) (snd blks))
-                 G Γ (Scope locs blk) ->
-        sem_scope_ck (fun Hi => sem_exp_ck G Hi bs)
-                     (fun Hi blks => Forall (sem_block_ck G Hi bs) (fst blks)) (H, Hl) bs (Scope locs blk) ->
-        sem_scope_ck (fun Hi => sem_exp_ck G Hi bs)
-                     (fun Hi blks => Forall (sem_block_ck G Hi bs) (fst blks))
-                     (FEnv.restrict H (map fst Γ), Hl) bs (Scope locs blk).
-    Proof.
-      intros.
-      eapply sem_scope_restrict; eauto.
-      intros; destruct_conjs. simpl_Forall.
       eapply sem_block_ck_morph, sem_block_restrict; eauto; [split|]; try reflexivity.
       now symmetry.
     Qed.
@@ -1652,12 +1267,10 @@ Module Type LCLOCKEDSEMANTICS
                                 -> sem_exp_ck (Global types0 externs0 nds) H bk e ss)
         (P_equation := fun H bk eq => ~Is_node_in_eq nd.(n_name) eq
                                    -> sem_equation_ck (Global types0 externs0 nds) H bk eq)
-        (P_transitions := fun bk H trans default stres => ~List.Exists (fun '(e, _) => Is_node_in_exp nd.(n_name) e) trans
-                                                       -> sem_transitions_ck (Global types0 externs0 nds) bk H trans default stres)
         (P_block := fun H bk d => ~Is_node_in_block nd.(n_name) d
                                -> sem_block_ck (Global types0 externs0 nds) H bk d)
         (P_node := fun f ins outs => nd.(n_name) <> f
-                                  -> sem_node_ck (Global types0 externs0 nds) f ins outs). 25:eauto.
+                                  -> sem_node_ck (Global types0 externs0 nds) f ins outs). 21:eauto.
     all:econstructor; eauto; repeat sem_cons.
     - eapply find_node_later_not_Is_node_in; eauto.
   Qed.
@@ -1691,12 +1304,10 @@ Module Type LCLOCKEDSEMANTICS
                                 -> sem_exp_ck (Global types0 externs0 (nd::nds)) H bk e ss)
         (P_equation := fun H bk eq => ~Is_node_in_eq nd.(n_name) eq
                                    -> sem_equation_ck (Global types0 externs0 (nd::nds)) H bk eq)
-        (P_transitions := fun bk H trans default stres => ~List.Exists (fun '(e, _) => Is_node_in_exp nd.(n_name) e) trans
-                                                       -> sem_transitions_ck (Global types0 externs0 (nd::nds)) bk H trans default stres)
         (P_block := fun H bk d => ~Is_node_in_block nd.(n_name) d
                                -> sem_block_ck (Global types0 externs0 (nd::nds)) H bk d)
         (P_node := fun f ins outs => nd.(n_name) <> f
-                                  -> sem_node_ck (Global types0 externs0 (nd::nds)) f ins outs). 25:eauto.
+                                  -> sem_node_ck (Global types0 externs0 (nd::nds)) f ins outs). 21:eauto.
     all:econstructor; eauto; repeat sem_cons.
     - eapply find_node_later_not_Is_node_in; eauto.
   Qed.
@@ -1741,25 +1352,14 @@ Module Type LCLOCKEDSEMANTICS
       intros * Hsem.
       eapply sem_exp_ck_ind2 with
           (P_equation := fun H b eq => sem_equation G H b eq)
-          (P_transitions := fun H b trans default stres => sem_transitions G H b trans default stres)
           (P_block := fun H b blk => sem_block G H b blk)
-          (P_node := fun f xs ys => sem_node G f xs ys). 25:eauto.
+          (P_node := fun f xs ys => sem_node G f xs ys). 21:eauto.
       all:intros; econstructor; eauto.
       1,2:intros k.
       - specialize (H6 k) as (?&?); auto.
       - specialize (H4 k) as (?&?); auto.
       - simpl_Forall; eauto.
         do 2 esplit; eauto. inv_branch'. econstructor; eauto.
-      - simpl_Forall. specialize (H4 k); destruct_conjs.
-        do 2 esplit; eauto. inv_branch'; inv_scope'. do 2 econstructor; eauto.
-        intros. edestruct H11; eauto; destruct_conjs.
-        do 3 esplit. repeat split; eauto.
-      - simpl_Forall. specialize (H2 k); destruct_conjs. inv_branch'.
-        do 2 esplit; eauto. econstructor; eauto.
-      - simpl_Forall. specialize (H3 k); destruct_conjs.
-        do 2 esplit; eauto. inv_branch'; inv_scope'; do 2 econstructor; eauto.
-        + intros. edestruct H10; eauto; destruct_conjs.
-          do 3 esplit. repeat split; eauto.
       - inv_scope'; econstructor; eauto.
         + intros. edestruct H3; eauto; destruct_conjs.
           do 3 esplit. repeat split; eauto.
@@ -1772,14 +1372,6 @@ Module Type LCLOCKEDSEMANTICS
       intros.
       eapply Forall2_impl_In; [|eauto]; intros.
       eapply sem_exp_ck_sem_exp; eauto.
-    Qed.
-
-    Corollary sem_transitions_ck_sem_transitions : forall Hi bs trans def stres,
-        sem_transitions_ck G Hi bs trans def stres ->
-        sem_transitions G Hi bs trans def stres.
-    Proof.
-      induction trans; intros * Htr; inv Htr;
-        econstructor; eauto using sem_exp_ck_sem_exp.
     Qed.
 
   End sem_ck_sem.
@@ -2245,51 +1837,6 @@ Module Type LCLOCKEDSEMANTICS
         eapply sem_clock_det in Hsemck; eauto. rewrite Hsemck; eauto using ac_slower.
   Qed.
 
-  Lemma sem_clock_select : forall Hi Hi' bs ck e k sc,
-      sem_clock Hi bs ck (abstract_clock sc) ->
-      sem_clock Hi' (fselectb e k sc bs) Cbase (fselectb e k sc (abstract_clock sc)).
-  Proof.
-    intros * Hsemck.
-    constructor.
-    eapply ntheq_eqst. intros. setoid_rewrite maskb_nth. rewrite 2 fwhenb_nth, ac_nth.
-    destruct (_ ==b _) eqn:Heqsc, (_ =? _); auto.
-    apply svalue_eqb_eq in Heqsc. setoid_rewrite Str_nth_map in Heqsc.
-    destruct (sc # n) as [|(?&?)] eqn:Hscn; simpl in *; try congruence.
-    eapply sem_clock_equiv in Hsemck. specialize (Hsemck n). repeat rewrite tr_Stream_nth in Hsemck.
-    setoid_rewrite ac_nth in Hsemck. setoid_rewrite Hscn in Hsemck.
-    apply IStr.sem_clock_instant_true_inv in Hsemck; auto.
-  Qed.
-
-  Lemma sc_vars_select : forall Γ Γ' Hi Hl Hi' Hl' bs ck e k sc,
-      sc_vars Γ (Hi, Hl) bs ->
-      sem_clock Hi bs ck (abstract_clock sc) ->
-      (forall x ck', HasClock Γ' x ck' -> HasClock Γ x ck /\ ck' = Cbase) ->
-      (forall x, IsLast Γ' x -> IsLast Γ x) ->
-      Sem.select_hist e k sc (Hi, Hl) (Hi', Hl') ->
-      sc_vars Γ' (Hi', Hl') (fselectb e k sc bs).
-  Proof.
-    intros * (Hsc1&Hsc2) Hsemck Hclocks Hlasts (Hw1&Hw2).
-    split.
-    - intros * Hck Hv.
-      edestruct Hclocks as (?&?); eauto; subst.
-      eapply sem_var_select_inv in Hv as (?&Hv&Hselect); eauto.
-      apply select_fselect in Hselect. rewrite Hselect, ac_fselect.
-      constructor. apply fselectb_both_slower.
-      + take (sem_clock _ _ _ _) and eapply sc_slower in it. 2:rewrite <-stres_st_ac; eauto using ac_aligned.
-        eapply slower_ac_morph; [|eauto]. apply stres_st_ac.
-      + eapply Hsc1 in Hv; eauto.
-        eapply sem_clock_det in Hsemck; eauto. rewrite Hsemck; eauto using ac_slower.
-    - intros * Hck Hla Hv.
-      edestruct Hclocks as (?&?); eauto; subst.
-      eapply sem_var_select_inv in Hv as (?&Hv&Hselect); eauto.
-      apply select_fselect in Hselect. rewrite Hselect, ac_fselect.
-      constructor. apply fselectb_both_slower.
-      + take (sem_clock _ _ _ _) and eapply sc_slower in it. 2:rewrite <-stres_st_ac; eauto using ac_aligned.
-        eapply slower_ac_morph; [|eauto]. apply stres_st_ac.
-      + eapply Hsc2 in Hv; eauto.
-        eapply sem_clock_det in Hsemck; eauto. rewrite Hsemck; eauto using ac_slower.
-  Qed.
-
   Lemma sc_vars_slower_hist : forall Γ H b,
       sc_vars Γ H b ->
       FEnv.dom_ub (fst H) (map fst Γ) ->
@@ -2545,51 +2092,6 @@ Module Type LCLOCKEDSEMANTICS
     constructor; eauto.
   Qed.
 
-  Fact const_stres_ac {A} : forall bs (x : A),
-      abstract_clock (const_stres bs x) ≡ bs.
-  Proof.
-    intros *.
-    apply ntheq_eqst; intros n. rewrite ac_nth. setoid_rewrite Str_nth_map.
-    destruct (bs # n); auto.
-  Qed.
-
-  Fact choose_first_ac {A} : forall bs xs ys,
-      slower xs bs ->
-      abstract_clock ys ≡ bs ->
-      @abstract_clock A (choose_first xs ys) ≡ bs.
-  Proof.
-    intros * Hslow Hac.
-    apply ntheq_eqst; intros n. apply eqst_ntheq with (n:=n) in Hac.
-    rewrite ac_nth in Hac.
-    rewrite ac_nth, choose_first_nth.
-    destruct (xs # n) eqn:Hx; auto.
-    destruct (bs # n) eqn:Hb; auto.
-    eapply slower_nth in Hslow; eauto. congruence.
-  Qed.
-
-  Lemma sc_transitions {PSyn prefs} (G: @global PSyn prefs) Γ : forall Hi bs' trans def stres,
-      wc_global G ->
-      sc_vars Γ Hi bs' ->
-
-      Forall (fun '(e, _) => wc_exp G Γ e /\ clockof e = [Cbase]) trans ->
-      sem_transitions_ck G Hi bs' trans def stres ->
-      abstract_clock stres ≡ bs'.
-  Proof.
-    induction trans; intros * HwG Hsc Hwc Hsem;
-      inv Hwc; inv Hsem; destruct_conjs.
-    - rewrite H0, const_stres_ac. reflexivity.
-    - rewrite H11. apply choose_first_ac; eauto.
-      eapply sc_exp in H4; eauto.
-      take (clockof _ = _) and rewrite it in H4. simpl in *. simpl_Forall.
-      eapply sc_slower in H6; eauto using ac_aligned.
-      apply slower_nth; intros * Hbs. setoid_rewrite Str_nth_map.
-      apply slower_nth with (n:=n) in H6; auto.
-      apply bools_of_nth with (n:=n) in H5 as [(Hv&Hx)|[(Hv&Hx)|(?&Hx)]].
-      + setoid_rewrite H6 in Hv; congruence.
-      + setoid_rewrite H6 in Hv; congruence.
-      + rewrite Hx; auto.
-  Qed.
-
   Fact wc_global_Ordered_nodes {PSyn prefs} : forall (G: @global PSyn prefs),
       wc_global G ->
       Ordered_nodes G.
@@ -2673,15 +2175,6 @@ Module Type LCLOCKEDSEMANTICS
       eapply sem_ref_sem_exp; eauto.
     Qed.
 
-    Fact sem_ref_sem_transitions : forall G G' H b trans def stres,
-        global_sem_refines G G' ->
-        sem_transitions_ck G H b trans def stres ->
-        sem_transitions_ck G' H b trans def stres.
-    Proof.
-      induction trans; intros * Href Hsem; inv Hsem;
-        econstructor; eauto using sem_ref_sem_exp.
-    Qed.
-
     Fact sem_ref_sem_block : forall G G' blk H b,
         global_sem_refines G G' ->
         sem_block_ck G H b blk ->
@@ -2700,24 +2193,6 @@ Module Type LCLOCKEDSEMANTICS
         simpl_Forall; do 2 esplit; eauto.
         inv_branch'; econstructor; eauto.
         simpl_Forall; eauto.
-      - (* automaton (weak) *)
-        econstructor; eauto using sem_ref_sem_transitions.
-        simpl_Forall. specialize (H11 k); destruct_conjs.
-        do 2 esplit; eauto.
-        inv_branch'; inv_scope'; do 2 econstructor; eauto.
-        + intros. edestruct H11 as (?&?&?&?&?&?&?); eauto.
-          do 3 esplit; eauto using sem_ref_sem_exp.
-        + destruct_conjs. split; simpl_Forall; eauto using sem_ref_sem_transitions.
-      - (* automaton (strong) *)
-        econstructor; eauto.
-        + simpl_Forall. specialize (H10 k); destruct_conjs.
-          inv_branch'. do 2 esplit; eauto. econstructor; eauto using sem_ref_sem_transitions.
-        + simpl_Forall. specialize (H11 k); destruct_conjs.
-          do 2 esplit; eauto.
-          inv_branch'; inv_scope'; do 2 econstructor; eauto.
-          * intros. edestruct H11 as (?&?&?&?&?&?&?); eauto.
-            do 3 esplit; eauto using sem_ref_sem_exp.
-          * destruct_conjs. simpl_Forall; eauto.
       - (* local *)
         constructor. inv_scope'; econstructor; eauto.
         + intros. edestruct H6 as (?&?&?&?&?&?&?); eauto.
@@ -2906,8 +2381,6 @@ Module Type LCLOCKEDSEMANTICS
                                                 (Streams.const false) e (List.map (fun _ => Streams.const absent) vs))
              (P_equation := fun H _ eq => sem_equation_ck G (FEnv.map (fun _ => Streams.const absent) (fst H), FEnv.map (fun _ => Streams.const absent) (snd H))
                                                        (Streams.const false) eq)
-             (P_transitions := fun H _ trans def _ => sem_transitions_ck G (FEnv.map (fun _ => Streams.const absent) (fst H), FEnv.map (fun _ => Streams.const absent) (snd H))
-                                                                      (Streams.const false) trans def (Streams.const absent))
              (P_block := fun H _ bck => sem_block_ck G (FEnv.map (fun _ => Streams.const absent) (fst H), FEnv.map (fun _ => Streams.const absent) (snd H))
                                                   (Streams.const false) bck)
              (P_node := fun f xs ys => sem_node_ck G f (map (fun _ => Streams.const absent) xs) (map (fun _ => Streams.const absent) ys));
@@ -3025,69 +2498,6 @@ Module Type LCLOCKEDSEMANTICS
           split; simpl in *.
           * eapply when_hist_absent; eauto.
           * eapply when_hist_absent; eauto.
-      - (* default transition *)
-        constructor. apply ntheq_eqst; intros.
-        setoid_rewrite Str_nth_map. rewrite 2 const_nth. auto.
-      - (* transition *)
-        econstructor; eauto using bools_of_absent.
-        apply ntheq_eqst; intros.
-        rewrite choose_first_nth. setoid_rewrite Str_nth_map. rewrite 2 const_nth; auto.
-      - (* Bauto (weak) *)
-        econstructor; eauto using sem_clock_absent, fby_absent.
-        simpl_Forall. specialize (H4 k); destruct_conjs.
-        destruct H4 as (Hsel1&Hsel2).
-        do 2 esplit; eauto.
-        2:{ inv_branch'. econstructor. destruct s. eapply sem_scope_absent in H4; eauto.
-            eapply sem_scope_ck_morph with (P_blk1:=fun Hi blks => Forall (sem_block_ck _ _ _) (fst blks) /\ sem_transitions_ck _ _ _ (snd blks) _ _); eauto.
-            - reflexivity.
-            - now rewrite fselectb_absent.
-            - intros; destruct_conjs; split.
-              + simpl_Forall.
-                eapply sem_block_ck_morph; eauto. reflexivity.
-              + eapply sem_transitions_ck_morph; eauto. 1,2:reflexivity.
-            - intros; destruct_conjs; simpl.
-              eapply sem_exp_ck_morph; eauto. split; simpl; symmetry; auto. 1,2:reflexivity.
-            - intros; destruct_conjs; split.
-              + simpl_Forall.
-                eapply sem_block_ck_morph. instantiate (1:=(_,_)).
-                split; symmetry; eauto. 1,2:reflexivity. now rewrite fselectb_absent.
-              + eapply sem_transitions_ck_morph. instantiate (1:=(_,_)).
-                split; symmetry; eauto. 1-4:reflexivity. now rewrite fselect_absent, fselectb_absent.
-        }
-        split; simpl in *.
-        + eapply select_hist_absent; eauto.
-        + eapply select_hist_absent; eauto.
-      - (* Bauto (strong) *)
-        econstructor; eauto using sem_clock_absent, fby_absent.
-        + assert (const_stres (Streams.const false) (ini, false) ≡ Streams.const absent) as Habs.
-          2:rewrite Habs; apply fby_absent.
-          apply ntheq_eqst; intros.
-          setoid_rewrite Str_nth_map. rewrite 2 const_nth. auto.
-        + simpl_Forall. specialize (H2 k); destruct_conjs.
-          destruct H2 as (Hsel1&Hsel2). do 2 esplit; [split|].
-          * instantiate (1:=(_,_)). eapply select_hist_absent; eauto.
-          * eapply select_hist_absent; eauto.
-          * inv_branch'. econstructor. now rewrite fselectb_absent, fselect_absent.
-        + simpl_Forall. specialize (H3 k); destruct_conjs.
-          destruct H3 as (Hsel1&Hsel2).
-          do 2 esplit; eauto.
-          2:{ inv_branch'. econstructor. destruct s. eapply sem_scope_absent in H3; eauto.
-              eapply sem_scope_ck_morph with (P_blk1:=fun Hi blks => Forall (sem_block_ck _ _ _) (fst blks)); eauto.
-              - reflexivity.
-              - now rewrite fselectb_absent.
-              - intros; destruct_conjs.
-                + simpl_Forall.
-                  eapply sem_block_ck_morph; eauto. reflexivity.
-              - intros; destruct_conjs; simpl.
-                eapply sem_exp_ck_morph; eauto. split; simpl; symmetry; auto. 1,2:reflexivity.
-              - intros; destruct_conjs.
-                + simpl_Forall.
-                  eapply sem_block_ck_morph. instantiate (1:=(_,_)).
-                  split; symmetry; eauto. 1,2:reflexivity. now rewrite fselectb_absent.
-          }
-          split; simpl in *.
-          * eapply select_hist_absent; eauto.
-          * eapply select_hist_absent; eauto.
       - (* Blocal *)
         econstructor. destruct scope0.
         eapply sem_scope_absent in H0; eauto.

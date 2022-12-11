@@ -311,12 +311,12 @@ Module Type ILCLOCKING
     Opaque inlinelocal_block.
     destruct blk; intros * Hnl Hns Hnd Hgood Hwenv Hwc Hwcck Hil; try destruct s; repeat inv_bind; simpl.
     3:inv Hns.
-    1-3:eapply inlinelocal_block_wc with (Γ':=[]); try rewrite app_nil_r; eauto.
-    10:repeat inv_block; repeat inv_scope.
-    10:eapply mmap_inlinelocal_block_wc with (Γ:=Γ++senv_of_locs locs') (Γ':=[]) in H as (Hwc1&Hwc2); try rewrite app_nil_r; eauto.
-    1,4,7,13:intros *; rewrite Env.Props.P.F.empty_in_iff; split; intros [].
-    1,3,5,10:intros * Hfind _; rewrite Env.gempty in Hfind; try congruence.
-    1,2,3,7:intros * Hfind; eapply Env.Props.P.F.empty_mapsto_iff in Hfind as [].
+    1-2:eapply inlinelocal_block_wc with (Γ':=[]); try rewrite app_nil_r; eauto.
+    7:repeat inv_block; repeat inv_scope.
+    7:eapply mmap_inlinelocal_block_wc with (Γ:=Γ++senv_of_locs locs') (Γ':=[]) in H as (Hwc1&Hwc2); try rewrite app_nil_r; eauto.
+    1,4,10:intros *; rewrite Env.Props.P.F.empty_in_iff; split; intros [].
+    1,3,8:intros * Hfind _; rewrite Env.gempty in Hfind; try congruence.
+    1,2,6:intros * Hfind; eapply Env.Props.P.F.empty_mapsto_iff in Hfind as [].
     - simpl_app. split; auto. rewrite Forall_app; split; simpl_Forall; auto.
       eapply wc_clock_incl; [|eauto]. solve_incl_app.
     - eapply Forall_forall; intros; eauto using inlinelocal_block_wc.

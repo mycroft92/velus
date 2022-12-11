@@ -221,56 +221,6 @@ Module Type DLTYPING
         eapply mmap_values, Forall2_ignore1 in H7; eauto.
         simpl_Forall; eauto.
 
-    - (* automaton (weak) *)
-      assert (map fst x = map fst states) as Heq.
-      { apply mmap_values in H0. clear - H0.
-        induction H0; destruct_conjs; try destruct b0 as [?(?&[?(?&?)])]; simpl; auto; repeat inv_bind. auto. }
-      assert (forall y, InMembers y (map fst states) -> InMembers y (map fst x)) as Hinm.
-      { intros. congruence. }
-      econstructor; eauto using wt_clock_incl.
-      + simpl_Forall. split; [|split]; eauto using rename_in_exp_wt.
-        now rewrite rename_in_exp_typeof.
-      + setoid_rewrite Heq. erewrite <-map_length. setoid_rewrite Heq. rewrite map_length; auto.
-      + now setoid_rewrite Heq.
-      + apply mmap_values in H0; inv H0; congruence.
-      + eapply mmap_values, Forall2_ignore1 in H0; eauto. simpl_Forall.
-        destruct b0 as [?(?&[?(?&?)])]. repeat inv_bind.
-        take (NoDupBranch _ _) and inv it. take (wt_branch _ _) and inv it. destruct_conjs; subst.
-        constructor; split; auto. eapply delast_scope_wt; eauto.
-        * intros; repeat inv_bind; split.
-          -- eapply mmap_values, Forall2_ignore1 in H17; eauto.
-             simpl_Forall; eauto.
-          -- simpl_Forall; simpl_In; simpl_Forall.
-             split; [|split]; eauto using rename_in_exp_wt.
-             ++ now rewrite rename_in_exp_typeof.
-             ++ setoid_rewrite Heq. solve_In.
-        * intros. destruct_conjs. split; auto. apply Forall_app; auto.
-
-    - (* automaton (strong) *)
-      assert (map fst x = map fst states) as Heq.
-      { apply mmap_values in H0. clear - H0.
-        induction H0; destruct_conjs; try destruct b0 as [?(?&[?(?&?)])]; simpl; auto; repeat inv_bind. auto. }
-      assert (forall y, InMembers y (map fst states) -> InMembers y (map fst x)) as Hinm.
-      { intros * Hinm. congruence. }
-      econstructor; eauto using wt_clock_incl.
-      + setoid_rewrite Heq. erewrite <-map_length. setoid_rewrite Heq. rewrite map_length; auto.
-      + now setoid_rewrite Heq.
-      + apply mmap_values in H0; inv H0; congruence.
-      + eapply mmap_values, Forall2_ignore1 in H0; eauto.
-        simpl_Forall; repeat inv_bind.
-        destruct b0 as [?(?&[?(?&?)])]. repeat inv_bind.
-        take (NoDupBranch _ _) and inv it. take (wt_branch _ _) and inv it. destruct_conjs; subst.
-        constructor; split; auto.
-        * simpl_Forall. simpl_In. simpl_Forall. rewrite rename_in_exp_typeof.
-          repeat split; eauto using rename_in_exp_wt.
-          setoid_rewrite Heq. solve_In.
-        * eapply delast_scope_wt; eauto.
-          -- intros; destruct_conjs; subst; repeat inv_bind; split; auto.
-             eapply mmap_values, Forall2_ignore1 in H17; eauto.
-             simpl_Forall; eauto.
-          -- intros; destruct_conjs; subst.
-             split; auto. apply Forall_app; auto.
-
     - (* local *)
       constructor.
       eapply delast_scope_wt; eauto.

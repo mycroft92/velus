@@ -481,8 +481,6 @@ Module Type TRCLOCKING
         inv H7; inv H1. solve_In.
       - inv Htr.
       - inv Htr.
-      - inv Htr.
-      - inv Htr.
     Qed.
 
     Fact idck_idty : forall (xs : list (_ * (type * clock * ident))),

@@ -56,10 +56,6 @@ module type SYNTAX =
 
     type equation = idents * exp list
 
-    type transition = exp * (enumtag * bool)
-
-    type auto_type = Weak | Strong
-
     type 'a scope =
     | Scope of (ident * (((typ * clock) * ident) * (exp * ident) option)) list * 'a
 
@@ -70,8 +66,6 @@ module type SYNTAX =
     | Beq of equation
     | Breset of block list * exp
     | Bswitch of exp * (enumtag * (block list) branch) list
-    | Bauto of auto_type * clock * ((exp * enumtag) list * enumtag) *
-               ((enumtag * ident) * (transition list * (block list * transition list) scope) branch) list
     | Blocal of (block list) scope
 
     type node = {
@@ -302,24 +296,8 @@ module PrintFun
       in if ini = [] then fprintf p "%a" print_state_tag (oth, ty)
       else aux p ini
 
-    let print_transition ty p (e, (k, r)) =
-      fprintf p "@[<h> %a %s %a@]"
-        print_exp e
-        (if r then "then" else "continue")
-        print_state_tag (k, ty)
-
     let print_bar_list p =
       pp_print_list ~pp_sep:(fun p () -> fprintf p "@;|") p
-
-    let print_until_list ty p xs =
-      if xs = [] then () else
-        fprintf p "@;@[<h>until@[<v -1>%a@]@]@;"
-          (print_bar_list (print_transition ty)) xs
-
-    let print_unless_list ty p xs =
-      if xs = [] then () else
-        fprintf p "@;@[<h>unless@[<v -1>%a@]@]@;"
-          (print_bar_list (print_transition ty)) xs
 
     let rec print_block p = function
       | L.Beq eq -> print_equation p eq
@@ -332,11 +310,6 @@ module PrintFun
         fprintf p "@[<v 0>@[<h 2>switch@ %a@]@ %a@]@ end"
           print_exp ec
           (pp_print_list (fun p blks -> print_switch_branch p (blks, ty))) brs
-      | L.Bauto (_, _, ini, states) ->
-        let ty = List.map (fun ((_, c), _) -> c) states in
-        fprintf p "@[<v 2>automaton@;initially %a@;%a@;end@]"
-          (print_initially ty) ini
-          (pp_print_list (print_state ty)) states
       | L.Blocal (Scope (locals, blks)) ->
         fprintf p "%a@[<v 2>let@ %a@;<0 -2>@]tel"
           (print_semicol_list_as "var" print_local_decl) locals
@@ -349,14 +322,6 @@ module PrintFun
       fprintf p "@[<v 2>| %a do@ %a@]"
         PrintOps.print_enumtag (e, ty)
         print_blocks blks
-
-    and print_state ty p ((_, e), Branch (_, (unl, Scope (locs, (blks, unt))))) =
-      fprintf p "@[<v 2>state %a %ado@ %a%a%a@]"
-        print_ident e
-        (print_semicol_list_as "var" print_local_decl) locs
-        (print_semicol_list print_block) blks
-        (print_until_list ty) unt
-        (print_unless_list ty) unl
 
     let print_node p { L.n_name     = name;
                        L.n_hasstate = hasstate;

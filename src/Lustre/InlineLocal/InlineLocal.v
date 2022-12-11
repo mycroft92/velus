@@ -159,7 +159,7 @@ Module Type INLINELOCAL
   Proof.
     Opaque inlinelocal_block.
     destruct blk; intros * Hil; try destruct s; repeat inv_bind.
-    1-4:eapply inlinelocal_block_st_follows; eauto.
+    1-3:eapply inlinelocal_block_st_follows; eauto.
     eapply mmap_st_follows; eauto.
     eapply Forall_forall; intros; eauto using inlinelocal_block_st_follows.
     Transparent inlinelocal_block.
@@ -261,11 +261,11 @@ Module Type INLINELOCAL
   Proof.
     Opaque inlinelocal_block.
     destruct blk; intros * Hns Hvars Hnd Hil; try destruct s; repeat inv_bind; simpl.
-    1-4:eapply inlinelocal_block_vars_perm in H as (?&?&Hperm); eauto.
-    5:(inv Hvars; inv Hnd;
+    1-3:eapply inlinelocal_block_vars_perm in H as (?&?&Hperm); eauto.
+    4:(inv Hvars; inv Hnd;
        take (VarsDefinedScope _ _ _) and inv it; inv_VarsDefined;
        take (NoDupScope _ _ _) and inv it; eapply mmap_vars_perm in H as (?&?&Hperm'); eauto).
-    1-5:try rewrite rename_vars_empty in Hperm; eauto.
+    1-4:try rewrite rename_vars_empty in Hperm; eauto.
     - rewrite rename_vars_empty in Hperm'; eauto.
       do 2 esplit; eauto. rewrite Hperm', Hperm, <-app_assoc; auto.
     - eapply Forall_forall; intros; eauto using inlinelocal_block_vars_perm.
@@ -305,7 +305,7 @@ Module Type INLINELOCAL
   Proof.
     Opaque inlinelocal_block.
     destruct blk; intros * Hns Hil; try destruct s; repeat inv_bind.
-    1-4:eapply inlinelocal_block_GoodLocals; eauto.
+    1-3:eapply inlinelocal_block_GoodLocals; eauto.
     apply Forall_concat.
     eapply mmap_values, Forall2_ignore1 in H. inv Hns.
     rewrite Forall_forall in *; intros * Hin.
@@ -365,7 +365,7 @@ Module Type INLINELOCAL
   Proof.
     Opaque inlinelocal_block.
     destruct blk; intros * Hns Hil; try destruct s; repeat inv_bind.
-    1-4:eapply inlinelocal_block_NoDupLocals; eauto.
+    1-3:eapply inlinelocal_block_NoDupLocals; eauto.
     eapply mmap_values, Forall2_ignore1 in H. inv Hns.
     eapply Forall_concat. rewrite Forall_forall in *; intros.
     edestruct H as (?&?&?&?&?); eauto using inlinelocal_block_NoDupLocals.
@@ -379,7 +379,7 @@ Module Type INLINELOCAL
   Proof.
     Opaque inlinelocal_block.
     destruct blk; intros * Hnd Hil; inv Hnd; try destruct s; repeat inv_bind; auto.
-    1-4:constructor.
+    1-3:constructor.
     inv H1; auto.
     Transparent inlinelocal_block.
   Qed.
@@ -425,7 +425,7 @@ Module Type INLINELOCAL
   Proof.
     Opaque inlinelocal_block.
     destruct blk; intros * Hns Hil; try destruct s; repeat inv_bind.
-    1-4:eapply inlinelocal_block_nolocal; eauto.
+    1-3:eapply inlinelocal_block_nolocal; eauto.
     eapply mmap_values, Forall2_ignore1 in H. inv Hns.
     eapply Forall_concat.
     rewrite Forall_forall in *; intros.
@@ -447,11 +447,11 @@ Module Type INLINELOCAL
   Lemma local_not_in_switch_prefs :
     ~PS.In local switch_prefs.
   Proof.
-    unfold switch_prefs, auto_prefs, last_prefs, elab_prefs.
-    rewrite 3 PS.add_spec, PSF.singleton_iff.
+    unfold switch_prefs, last_prefs, elab_prefs.
+    rewrite 2 PS.add_spec, PSF.singleton_iff.
     pose proof gensym_prefs_NoDup as Hnd. unfold gensym_prefs in Hnd.
     repeat rewrite NoDup_cons_iff in Hnd. destruct_conjs.
-    intros [contra|[contra|[contra|contra]]]; subst; rewrite contra in *; eauto 10 with datatypes.
+    intros [contra|[contra|contra]]; subst; rewrite contra in *; eauto 10 with datatypes.
   Qed.
 
   Program Definition inlinelocal_node (n: @node noswitch_block switch_prefs) : @node nolocal_top_block local_prefs :=

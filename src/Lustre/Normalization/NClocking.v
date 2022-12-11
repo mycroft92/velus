@@ -1436,9 +1436,6 @@ Module Type NCLOCKING
       - (* switch *)
         constructor; auto.
         eapply iface_incl_wc_block; eauto. econstructor; eauto.
-      - (* automaton *)
-        constructor; eauto.
-        eapply iface_incl_wc_block; eauto. econstructor; eauto.
       - (* locals *)
         constructor; eauto.
         eapply iface_incl_wc_block; eauto. econstructor; eauto.
@@ -2120,7 +2117,6 @@ Module Type NCLOCKING
         eapply iface_incl_wc_exp; eauto.
         repeat solve_incl.
         1,2:eapply normfby_block_st_follows; eauto.
-      - split; auto. constructor; eauto using iface_incl_wc_block.
       - split; auto. constructor; eauto using iface_incl_wc_block.
       - split; auto. constructor; eauto using iface_incl_wc_block.
     Qed.

@@ -33,11 +33,11 @@ Module Type NORMFBY
   Lemma norm2_not_in_norm1_prefs :
     ~PS.In norm2 norm1_prefs.
   Proof.
-    unfold norm1_prefs, local_prefs, switch_prefs, auto_prefs, last_prefs, elab_prefs.
-    rewrite 5 PSF.add_iff, PSF.singleton_iff.
+    unfold norm1_prefs, local_prefs, switch_prefs, last_prefs, elab_prefs.
+    rewrite 4 PSF.add_iff, PSF.singleton_iff.
     pose proof gensym_prefs_NoDup as Hnd. unfold gensym_prefs in Hnd.
     repeat rewrite NoDup_cons_iff in Hnd. destruct_conjs.
-    intros [contra|[contra|[contra|[contra|[contra|contra]]]]]; rewrite contra in *; eauto 10 with datatypes.
+    intros [contra|[contra|[contra|[contra|contra]]]]; rewrite contra in *; eauto 10 with datatypes.
   Qed.
 
   Definition FreshAnn A := Fresh norm2 A (type * clock).
@@ -302,9 +302,6 @@ Module Type NORMFBY
     - exists [xs]. split; try constructor; auto.
       + econstructor; eauto.
       + simpl; rewrite app_nil_r; auto.
-    - exists [xs]. split; try constructor; auto.
-      + econstructor; eauto.
-      + simpl; rewrite app_nil_r; auto.
   Qed.
 
   Corollary normfby_blocks_vars_perm : forall G blks blks' xs st st',
@@ -563,7 +560,6 @@ Module Type NORMFBY
       rewrite Forall_map. eapply Forall_impl; [|eauto]. intros ??. constructor; auto.
     - do 2 (constructor; auto).
     - do 2 (constructor; auto).
-    - do 2 (constructor; auto).
   Qed.
 
   Corollary normfby_blocks_GoodLocals to_cut : forall prefs blks blks' st st',
@@ -729,7 +725,7 @@ Module Type NORMFBY
   Next Obligation.
     pose proof (n_good n) as (Hgood1&Hgood&_).
     pose proof (n_nodup n) as (Hndup&Hndl).
-    destruct (n_block n) as [| | | |[locs blks]] eqn:Hblk; eauto.
+    destruct (n_block n) as [| | |[locs blks]] eqn:Hblk; eauto.
     destruct (normfby_blocks _ blks init_st) as (blks'&st') eqn:Hunn.
     repeat rewrite app_nil_r. split; simpl in *; auto.
     inv Hndl. inv H1.
@@ -756,7 +752,7 @@ Module Type NORMFBY
   Qed.
   Next Obligation.
     specialize (n_good n) as (Hgood1&Hgood2&Hname). repeat split; eauto using AtomOrGensym_add.
-    destruct (n_block n) as [| | | |[locs blks]] eqn:Hblk; eauto using GoodLocals_add.
+    destruct (n_block n) as [| | |[locs blks]] eqn:Hblk; eauto using GoodLocals_add.
     destruct (normfby_blocks _ blks init_st) as (blks'&st') eqn:Heqres.
     inv Hgood2. inv H0.
     do 2 constructor.

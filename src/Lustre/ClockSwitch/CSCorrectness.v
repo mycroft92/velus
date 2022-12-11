@@ -39,7 +39,7 @@ Module Type CSCORRECTNESS
   Import Fresh Facts Tactics List.
 
   Section switch_block.
-    Variable G1 : @global noauto_block auto_prefs.
+    Variable G1 : @global nolast_block last_prefs.
     Variable G2 : @global noswitch_block switch_prefs.
 
     Hypothesis HwcG1 : wc_global G1.
@@ -139,7 +139,7 @@ Module Type CSCORRECTNESS
     Qed.
 
     Lemma cond_eq_sem envty : forall Hi Hl bs e ty ck vs x xcs eqs' st st',
-        Forall (AtomOrGensym auto_prefs) envty ->
+        Forall (AtomOrGensym last_prefs) envty ->
         FEnv.dom_ub Hi (envty ++ st_ids st) ->
         sem_exp_ck G2 (Hi, Hl) bs e [vs] ->
         sem_clock Hi bs ck (abstract_clock vs) ->
@@ -163,7 +163,7 @@ Module Type CSCORRECTNESS
         assert (FEnv.In x Hi) as Hin by (econstructor; eauto).
         eapply Hdom, in_app_iff in Hin as [Hin|Hin].
         - eapply fresh_ident_prefixed in Hfresh. simpl_Forall; subst.
-          eapply contradict_AtomOrGensym; eauto using switch_not_in_auto_prefs.
+          eapply contradict_AtomOrGensym; eauto using switch_not_in_last_prefs.
         - eapply fresh_ident_nIn in Hfresh; eauto.
       }
       destruct e; simpl in *; repeat (take ann and destruct it); repeat inv_bind.
@@ -194,7 +194,7 @@ Module Type CSCORRECTNESS
 
     Lemma new_idents_sem {A} envty frees defs bck tx tn xc :
       forall Hi1 Hi2 Hl bs' (branches : list (enumtag * A)) xs sc st st',
-        Forall (AtomOrGensym auto_prefs) envty ->
+        Forall (AtomOrGensym last_prefs) envty ->
         FEnv.dom_ub Hi2 (envty ++ st_ids st) ->
         sem_var Hi2 xc sc ->
         sem_clock Hi2 bs' bck (abstract_clock sc) ->
@@ -237,7 +237,7 @@ Module Type CSCORRECTNESS
         assert (FEnv.In x Hi2) as Hin2 by (econstructor; eauto).
         apply Hdomub, in_app_iff in Hin2 as [Hin2|Hin2].
         - eapply Forall_forall in Hat; eauto.
-          eapply st_valid_AtomOrGensym_nIn; eauto using switch_not_in_auto_prefs.
+          eapply st_valid_AtomOrGensym_nIn; eauto using switch_not_in_last_prefs.
           rewrite Hmmap. apply in_or_app, or_intror. solve_In. auto.
         - specialize (st_valid_NoDup st') as Hvalid'. rewrite Hmmap in Hvalid'.
           eapply NoDup_app_In in Hvalid'; eauto.
@@ -288,15 +288,15 @@ Module Type CSCORRECTNESS
                incl (map fst Γck) (map fst Γty) ->
                NoDupMembers Γty ->
                NoDupMembers Γck ->
-               Forall (AtomOrGensym auto_prefs) (map fst Γty) ->
+               Forall (AtomOrGensym last_prefs) (map fst Γty) ->
                FEnv.dom_ub Hi (map fst Γty) ->
                FEnv.dom_lb Hi (map fst Γck) ->
                sc_vars Γck (Hi, Hl) bs ->
                FEnv.dom_ub Hi' (map fst Γty ++ st_ids st) ->
                sem_clock Hi' bs' bck bs ->
-               noauto_block blk ->
+               nolast_block blk ->
                NoDupLocals (map fst Γty) blk ->
-               GoodLocals auto_prefs blk ->
+               GoodLocals last_prefs blk ->
                wt_block G1 Γty blk ->
                wc_block G1 Γck blk ->
                sem_block_ck G1 (Hi, Hl) bs blk ->
@@ -310,15 +310,15 @@ Module Type CSCORRECTNESS
         incl (map fst Γck) (map fst Γty) ->
         NoDupMembers Γty ->
         NoDupMembers Γck ->
-        Forall (AtomOrGensym auto_prefs) (map fst Γty) ->
+        Forall (AtomOrGensym last_prefs) (map fst Γty) ->
         FEnv.dom_ub Hi (map fst Γty) ->
         FEnv.dom_lb Hi (map fst Γck) ->
         sc_vars Γck (Hi, Hl) bs ->
         FEnv.dom_ub Hi' (map fst Γty ++ st_ids st) ->
         sem_clock Hi' bs' bck bs ->
-        Forall noauto_block blks ->
+        Forall nolast_block blks ->
         Forall (NoDupLocals (map fst Γty)) blks ->
-        Forall (GoodLocals auto_prefs) blks ->
+        Forall (GoodLocals last_prefs) blks ->
         Forall (wt_block G1 Γty) blks ->
         Forall (wc_block G1 Γck) blks ->
         Forall (sem_block_ck G1 (Hi, Hl) bs) blks ->
@@ -344,15 +344,15 @@ Module Type CSCORRECTNESS
         incl (map fst Γck) (map fst Γty) ->
         NoDupMembers Γty ->
         NoDupMembers Γck ->
-        Forall (AtomOrGensym auto_prefs) (map fst Γty) ->
+        Forall (AtomOrGensym last_prefs) (map fst Γty) ->
         FEnv.dom_ub Hi (map fst Γty) ->
         FEnv.dom_lb Hi (map fst Γck) ->
         sc_vars Γck (Hi, Hl) bs ->
         FEnv.dom_ub Hi' (map fst Γty ++ st_ids st) ->
         sem_clock Hi' bs' bck bs ->
-        noauto_scope P_na (Scope locs blk) ->
+        nolast_scope P_na (Scope locs blk) ->
         NoDupScope P_nd (map fst Γty) (Scope locs blk) ->
-        GoodLocalsScope P_good auto_prefs (Scope locs blk) ->
+        GoodLocalsScope P_good last_prefs (Scope locs blk) ->
         wt_scope P_wt G1 Γty (Scope locs blk) ->
         wc_scope P_wc G1 Γck (Scope locs blk) ->
         sem_scope_ck (fun Hi => sem_exp_ck G1 Hi bs) P_sem1 (Hi, Hl) bs (Scope locs blk) ->
@@ -366,7 +366,7 @@ Module Type CSCORRECTNESS
             incl (map fst Γck) (map fst Γty) ->
             NoDupMembers Γty ->
             NoDupMembers Γck ->
-            Forall (AtomOrGensym auto_prefs) (map fst Γty) ->
+            Forall (AtomOrGensym last_prefs) (map fst Γty) ->
             FEnv.dom_ub Hi (map fst Γty) ->
             FEnv.dom_lb Hi (map fst Γck) ->
             sc_vars Γck (Hi, Hl) bs ->
@@ -388,7 +388,7 @@ Module Type CSCORRECTNESS
       { intros ? Hinm Hin.
         eapply Hdomub1, in_app_iff in Hin as [|]; eauto.
         - take (forall x, InMembers x locs -> ~_) and eapply it; eauto.
-        - eapply st_valid_AtomOrGensym_nIn; eauto using switch_not_in_auto_prefs.
+        - eapply st_valid_AtomOrGensym_nIn; eauto using switch_not_in_last_prefs.
           eapply fst_InMembers, Forall_forall in Hinm; eauto.
       }
       assert (Hi' ⊑ Hi' + Hi'0) as Href.
@@ -405,7 +405,7 @@ Module Type CSCORRECTNESS
         - eapply sem_var_union2; eauto.
           rewrite H17, IsVar_senv_of_locs. intros contra. simpl_In. simpl_Forall.
           eapply Hsubat in Hfind; destruct_conjs; subst.
-          eapply contradict_AtomOrGensym; eauto using switch_not_in_auto_prefs.
+          eapply contradict_AtomOrGensym; eauto using switch_not_in_last_prefs.
         - exfalso.
           apply Sem.sem_var_In, H17, IsVar_senv_of_locs in Hv.
           take (forall x, InMembers x locs -> ~In _ _) and eapply it; eauto.
@@ -467,15 +467,15 @@ Module Type CSCORRECTNESS
         incl (map fst Γck) (map fst Γty) ->
         NoDupMembers Γty ->
         NoDupMembers Γck ->
-        Forall (AtomOrGensym auto_prefs) (map fst Γty) ->
+        Forall (AtomOrGensym last_prefs) (map fst Γty) ->
         FEnv.dom_ub Hi (map fst Γty) ->
         FEnv.dom_lb Hi (map fst Γck) ->
         sc_vars Γck (Hi, Hl) bs ->
         FEnv.dom_ub Hi' (map fst Γty ++ st_ids st) ->
         sem_clock Hi' bs' bck bs ->
-        noauto_block blk ->
+        nolast_block blk ->
         NoDupLocals (map fst Γty) blk ->
-        GoodLocals auto_prefs blk ->
+        GoodLocals last_prefs blk ->
         wt_block G1 Γty blk ->
         wc_block G1 Γck blk ->
         sem_block_ck G1 (Hi, Hl) bs blk ->
@@ -706,7 +706,7 @@ Module Type CSCORRECTNESS
              - simpl_Forall. erewrite map_ext, <-map_map. eapply sem_block_restrict; eauto.
                3:intros; destruct_conjs; auto.
                + unfold wc_env. simpl_Forall. simpl_In. constructor.
-               + eapply sem_block_change_lasts; eauto using noauto_nolast.
+               + eapply sem_block_change_lasts; eauto using noswitch_nolast.
                  * eapply wx_block_incl. 3:eauto with lclocking. 2:eauto.
                    intros * Hv; inv Hv. take (InMembers _ _) and apply InMembers_In in it as (?&?).
                    edestruct H14 as (?&Hck); eauto with senv.

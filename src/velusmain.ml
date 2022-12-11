@@ -9,7 +9,6 @@ open Ctypes
 let print_c = ref false
 let write_lustre = ref false
 let write_nolast = ref false
-let write_noauto = ref false
 let write_noswitch = ref false
 let write_nolocal = ref false
 let write_nlustre = ref false
@@ -110,8 +109,6 @@ let compile source_name out_name =
   then Veluslib.lustre_destination := Some (out_name ^ ".parsed.lus");
   if !write_nolast
   then Veluslib.nolast_destination := Some (out_name ^ ".nolast.lus");
-  if !write_noauto
-  then Veluslib.noauto_destination := Some (out_name ^ ".noauto.lus");
   if !write_noswitch
   then Veluslib.noswitch_destination := Some (out_name ^ ".noswitch.lus");
   if !write_nolocal
@@ -173,7 +170,6 @@ let speclist = [
 
   "-dlustre", Arg.Set write_lustre, " Save the parsed Lustre in <output>.parsed.lus";
   "-dnolast", Arg.Set write_nolast, " Save Lustre without last in <output>.nolast.lus";
-  "-dnoauto", Arg.Set write_noauto, " Save Lustre without automaton in <output>.noauto.lus";
   "-dnoswitch", Arg.Set write_noswitch, " Save Lustre without switch blocks in <output>.noswitch.lus";
   "-dnolocal", Arg.Set write_nolocal, " Save Lustre without local blocks in <output>.nolocal.lus";
   "-dnlustre", Arg.Set write_nlustre,

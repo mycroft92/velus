@@ -1824,10 +1824,6 @@ Module Type CORRECTNESS
           constructor; eauto. eapply sem_ref_sem_block; eauto. econstructor; eauto.
         - exists H0. repeat (split; auto). reflexivity.
           constructor; eauto. eapply sem_ref_sem_block; eauto. econstructor; eauto.
-        - exists H0. repeat (split; auto). reflexivity.
-          constructor; eauto. eapply sem_ref_sem_block; eauto. econstructor; eauto.
-        - exists H0. repeat (split; auto). reflexivity.
-          constructor; eauto. eapply sem_ref_sem_block; eauto. econstructor; eauto.
       Qed.
 
       Corollary unnest_blocks_sem : forall b blocks H Hl blocks' st st',
@@ -1899,7 +1895,7 @@ Module Type CORRECTNESS
         assert (Forall (sem_block_ck G1 (H + Hi', FEnv.empty _ + Hl') (clocks_of ins)) blks) as Hsem.
         { simpl_Forall.
           eapply sem_block_change_lasts;
-            eauto using nolocal_noswitch, noswitch_noauto, noauto_nolast with lclocking.
+            eauto using nolocal_noswitch, noswitch_nolast with lclocking.
         }
 
         eapply unnest_blocks_sem with (vars:=senv_of_inout (n_in n0 ++ n_out n0) ++ senv_of_locs locs)
@@ -2620,7 +2616,7 @@ Module Type CORRECTNESS
         assert (Forall (sem_block_ck G1 (H + Hi', FEnv.empty _ + Hl') (clocks_of ins)) blks) as Hsem.
         { simpl_Forall. eapply sem_block_change_lasts; eauto with lclocking.
           - pose proof (n_syn n0) as Hsyn. inv Hsyn. rewrite Hblk in H5; inv H5.
-            simpl_Forall; eauto using nolocal_noswitch, noswitch_noauto, noauto_nolast.
+            simpl_Forall; eauto using nolocal_noswitch, noswitch_nolast.
           - destruct G1; eauto.
         }
 

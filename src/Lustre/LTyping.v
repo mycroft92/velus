@@ -222,42 +222,6 @@ Module Type LTYPING
       Forall (fun blks => wt_branch (Forall (wt_block G Γ)) (snd blks)) branches ->
       wt_block G Γ (Bswitch ec branches)
 
-  | wt_BautoWeak : forall Γ ini oth states ck,
-      wt_clock G.(types) Γ ck ->
-      Forall (fun '(e, t) => wt_exp G Γ e /\ typeof e = [bool_velus_type] /\ InMembers t (map fst states)) ini ->
-      InMembers oth (map fst states) ->
-      Permutation (map fst (map fst states)) (seq 0 (length states)) ->
-      NoDup (map snd (map fst states)) ->
-      states <> [] ->
-      Forall (fun blks =>
-                wt_branch
-                  (fun blks =>
-                     fst blks = []
-                     /\ wt_scope (fun Γ' blks => Forall (wt_block G Γ') (fst blks)
-                                             /\ Forall (fun '(e, (t, _)) => wt_exp G Γ' e
-                                                                        /\ typeof e = [bool_velus_type]
-                                                                        /\ InMembers t (map fst states)) (snd blks))
-                         G Γ (snd blks))
-                  (snd blks)) states ->
-      wt_block G Γ (Bauto Weak ck (ini, oth) states)
-
-  | wt_BautoStrong : forall Γ oth states ck,
-      wt_clock G.(types) Γ ck ->
-      InMembers oth (map fst states) ->
-      Permutation (map fst (map fst states)) (seq 0 (length states)) ->
-      NoDup (map snd (map fst states)) ->
-      states <> [] ->
-      Forall (fun blks =>
-                wt_branch
-                  (fun blks =>
-                     Forall (fun '(e, (t, _)) => wt_exp G Γ e
-                                              /\ typeof e = [bool_velus_type]
-                                              /\ InMembers t (map fst states)) (fst blks)
-                     /\ wt_scope (fun Γ' blks => Forall (wt_block G Γ') (fst blks) /\ snd blks = [])
-                         G Γ (snd blks))
-                  (snd blks)) states ->
-      wt_block G Γ (Bauto Strong ck ([], oth) states)
-
   | wt_Blocal: forall Γ scope,
       wt_scope (fun Γ' => Forall (wt_block G Γ')) G Γ scope ->
       wt_block G Γ (Blocal scope).
@@ -481,16 +445,6 @@ Module Type LTYPING
         simpl_Forall; eauto.
         destruct b. take (wt_branch _ _) and inv it. constructor.
         simpl_Forall; eauto.
-      - econstructor; auto; simpl_Forall; eauto using wt_exp_incl, wt_clock_incl.
-        inv_branch. constructor.
-        split; auto.
-        destruct s. eapply wt_scope_incl; eauto.
-        intros * Hty' Hl' (?&?); split; simpl_Forall; eauto using wt_exp_incl.
-      - econstructor; auto; simpl_Forall; eauto using wt_exp_incl, wt_clock_incl.
-        inv_branch. constructor.
-        split; simpl_Forall; eauto using wt_exp_incl.
-        destruct s. eapply wt_scope_incl; eauto.
-        intros * Hty' Hl' (?&?); split; simpl_Forall; eauto using wt_exp_incl.
       - econstructor.
         eapply wt_scope_incl; eauto.
         intros; simpl_Forall; eauto.
@@ -1203,33 +1157,6 @@ Module Type LTYPING
             && forallb (fun '(_, Branch _ blks) => forallb (check_block venv venvl) blks) brs
         | _ => false
         end
-      | Bauto Weak ck (ini, oth) states =>
-          check_clock tenv venv ck
-          && forallb (fun '(e, t) => check_bool_exp venv venvl e && check_tag states t) ini
-          && check_tag states oth
-          && check_perm_seq (map fst (map fst states)) (length states)
-          && check_nodup (map snd (map fst states))
-          && (negb (is_nil states))
-          && forallb (fun '(_, Branch _ (unl, blks)) =>
-                        is_nil unl
-                        && check_scope (fun venv' venvl' '(blks, trans) =>
-                                          forallb (check_block venv' venvl') blks
-                                          && forallb (fun '(e, (t, _)) => check_bool_exp venv' venvl' e
-                                                                       && check_tag states t) trans) venv venvl blks)
-                     states
-      | Bauto Strong ck (ini, oth) states =>
-          check_clock tenv venv ck
-          && is_nil ini
-          && check_tag states oth
-          && check_perm_seq (map fst (map fst states)) (length states)
-          && check_nodup (map snd (map fst states))
-          && (negb (is_nil states))
-          && forallb (fun '(_, Branch _ (unl, blks)) =>
-                        forallb (fun '(e, (t, _)) => check_bool_exp venv venvl e && check_tag states t) unl
-                        && check_scope (fun venv' venvl' '(blks, trans) =>
-                                          forallb (check_block venv' venvl') blks
-                                          && is_nil trans) venv venvl blks)
-                     states
       | Blocal s =>
           check_scope (fun venv' venvl' => forallb (check_block venv' venvl')) venv venvl s
       end.
@@ -1296,7 +1223,7 @@ Module Type LTYPING
         wt_block G env blk.
     Proof.
       Opaque check_scope.
-      induction blk using block_ind2; intros * Henv Henvl CD; simpl in *. 4:destruct type0.
+      induction blk using block_ind2; intros * Henv Henvl CD; simpl in *.
       - (* equation *)
         eapply check_equation_correct in CD; eauto with ltyping.
       - (* reset *)
@@ -1316,43 +1243,6 @@ Module Type LTYPING
         + eapply forallb_Forall in CBrs. simpl_Forall.
           destruct b. constructor.
           eapply forallb_Forall in CBrs. simpl_Forall; eauto.
-      - (* automaton (weak) *)
-        destruct_conjs. repeat rewrite Bool.andb_true_iff in CD.
-        destruct CD as ((((((CC&CI)&CO)&CP)&CND)&CN)&CB).
-        repeat (take (forallb _ _ = true) and apply forallb_Forall in it).
-        constructor; eauto using check_tag_correct; simpl_Forall.
-        + eapply check_clock_correct in CC; eauto.
-        + apply Bool.andb_true_iff in it as (Hce&Htag).
-          eapply check_bool_exp_correct in Hce as (?&?); eauto using check_tag_correct.
-        + apply check_perm_seq_spec; auto.
-        + now apply check_nodup_correct.
-        + contradict CN; subst; simpl in *. auto.
-        + destruct b as [?(?&[?(?&?)])]. rewrite Bool.andb_true_iff, is_nil_spec in it0. destruct it0. constructor. split; auto.
-          eapply check_scope_correct; eauto.
-          intros * ?? Hc; simpl in *.
-          rewrite Bool.andb_true_iff, 2 forallb_Forall in Hc. destruct Hc as (?&CT).
-          split; simpl_Forall; eauto.
-          apply Bool.andb_true_iff in CT as (CE&?).
-          eapply check_bool_exp_correct in CE as (?&?); eauto using check_tag_correct.
-      - (* automaton (strong) *)
-        destruct_conjs. repeat rewrite Bool.andb_true_iff in CD.
-        destruct CD as ((((((CC&CI)&CO)&CP)&CND)&CN)&CB).
-        repeat (take (forallb _ _ = true) and apply forallb_Forall in it).
-        apply is_nil_spec in CI; subst.
-        constructor; eauto using check_tag_correct; simpl_Forall.
-        + eapply check_clock_correct in CC; eauto.
-        + apply check_perm_seq_spec; auto.
-        + now apply check_nodup_correct.
-        + contradict CN; subst; simpl in *. auto.
-        + destruct b as [?(?&[?(?&?)])].
-          rewrite Bool.andb_true_iff, forallb_Forall in it. destruct it. constructor; split.
-          * simpl_Forall.
-            apply Bool.andb_true_iff in H1 as (CE&?).
-            eapply check_bool_exp_correct in CE as (?&?); eauto using check_tag_correct.
-          * eapply check_scope_correct; eauto.
-            intros * ?? Hc; simpl in *.
-            rewrite Bool.andb_true_iff, is_nil_spec, forallb_Forall in Hc. destruct Hc as (?&CT).
-            split; simpl_Forall; eauto.
 
       - (* local *)
         constructor. eapply check_scope_correct; eauto.
@@ -1534,17 +1424,6 @@ Module Type LTYPING
         + apply Heq; auto.
         + simpl_Forall. take (wt_branch _ _) and inv it. constructor.
           simpl_Forall; eauto.
-      - econstructor; eauto; simpl_Forall; eauto using iface_incl_wt_exp, iface_incl_wt_clock.
-        take (wt_branch _ _) and inv it. destruct_conjs. constructor.
-        split; auto. destruct s; destruct_conjs.
-        eapply iface_incl_wt_scope; eauto.
-        intros ? (?&?); split; simpl_Forall; eauto using iface_incl_wt_exp.
-      - econstructor; eauto; simpl_Forall; eauto using iface_incl_wt_exp, iface_incl_wt_clock.
-        take (wt_branch _ _) and inv it. destruct_conjs. constructor.
-        split; simpl_Forall; eauto using iface_incl_wt_exp.
-        destruct s; destruct_conjs.
-        eapply iface_incl_wt_scope; eauto.
-        intros ? (?&?); split; simpl_Forall; eauto using iface_incl_wt_exp.
       - constructor.
         eapply iface_incl_wt_scope; eauto. intros; simpl_Forall; eauto.
     Qed.
@@ -1637,18 +1516,6 @@ Module Type LTYPING
       + rewrite <-length_typeof_numstreams, H3; auto.
       + simpl_Forall; eauto.
         take (wt_branch _ _) and inv it. constructor. simpl_Forall; eauto.
-    - econstructor; simpl_Forall; eauto.
-      + split; eauto with ltyping. now rewrite <-length_typeof_numstreams, H2.
-      + take (wt_branch _ _) and inv it. destruct_conjs. constructor.
-        subst; split; simpl; auto.
-        destruct s; destruct_conjs. eapply wt_scope_wl_scope; eauto.
-        intros * (?&?); split; simpl_Forall; eauto.
-        split; eauto with ltyping. now rewrite <-length_typeof_numstreams, H11.
-    - econstructor; simpl_Forall; eauto.
-      take (wt_branch _ _) and inv it. destruct_conjs. constructor. split; simpl_Forall.
-      + split; eauto with ltyping. now rewrite <-length_typeof_numstreams, H6.
-      + destruct s; destruct_conjs. eapply wt_scope_wl_scope; eauto.
-        intros * (?&?); simpl in *; subst; split; auto. simpl_Forall; eauto.
     - constructor. eapply wt_scope_wl_scope; eauto.
       intros; simpl_Forall; eauto.
   Qed.
@@ -1811,15 +1678,6 @@ Module Type LTYPING
     induction blk using block_ind2; intros * Wt; inv Wt; eauto with ltyping.
     all:econstructor; simpl_Forall; eauto with ltyping.
     - take (wt_branch _ _) and inv it. constructor. simpl_Forall; eauto.
-    - take (wt_branch _ _) and inv it. destruct_conjs. constructor.
-      destruct s; destruct_conjs. subst; split; auto.
-      eapply wt_scope_wx_scope; eauto.
-      intros * (?&?); split; simpl_Forall; eauto with ltyping.
-    -  take (wt_branch _ _) and inv it. destruct_conjs. constructor.
-      split; simpl_Forall; eauto with ltyping.
-      destruct s; destruct_conjs.
-      eapply wt_scope_wx_scope; eauto.
-      intros * (?&?); simpl in *; subst; split; auto; simpl_Forall; eauto with ltyping.
     - eapply wt_scope_wx_scope; eauto.
       intros; simpl_Forall; eauto with ltyping.
   Qed.

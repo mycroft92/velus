@@ -1045,8 +1045,6 @@ Module Type NTYPING
           eapply Forall_impl; [|eauto]; intros; constructor; auto.
       - constructor; auto. eapply iface_incl_wt_block; eauto. econstructor; eauto.
       - constructor; auto. eapply iface_incl_wt_block; eauto. econstructor; eauto.
-      - constructor; auto. eapply iface_incl_wt_block; eauto. econstructor; eauto.
-      - constructor; auto. eapply iface_incl_wt_block; eauto. econstructor; eauto.
     Qed.
 
     Corollary unnest_blocks_wt_block : forall vars blocks blocks' st st' ,
@@ -1977,7 +1975,6 @@ Module Type NTYPING
         constructor; auto. repeat solve_incl.
       - repeat inv_bind. constructor; auto. repeat solve_incl.
       - repeat inv_bind. constructor; auto. repeat solve_incl.
-      - repeat inv_bind. constructor; auto. repeat solve_incl.
     Qed.
 
     Corollary normfby_blocks_wt : forall vars to_cut blocks blocks' st st' ,
@@ -2077,7 +2074,6 @@ Module Type NTYPING
         cases; repeat inv_bind; auto.
         inv Hwt. apply Forall_singl in H3.
         apply Forall_singl in H; eauto.
-      - repeat inv_bind; auto.
       - repeat inv_bind; auto.
       - repeat inv_bind; auto.
     Qed.
@@ -2194,7 +2190,6 @@ Module Type NTYPING
         simpl in Hnorm. cases; repeat inv_bind; auto.
         inv Hwt. apply Forall_singl in H3.
         apply Forall_singl in H; eauto.
-      - repeat inv_bind; auto.
       - repeat inv_bind; auto.
       - repeat inv_bind; auto.
     Qed.

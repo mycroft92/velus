@@ -362,56 +362,6 @@ Module Type DLCLOCKING
           apply H6 in Hck as (Hck&?); subst. inv Hck.
           apply Hincl; solve_In.
 
-    - (* automaton *)
-      assert (forall x ck',
-                 HasClock Γ'0 x ck' ->
-                 HasClock
-                   (map_filter
-                      (fun '(x, e0) =>
-                         if clo e0 ==b ck then Some (x, ann_with_clock e0 Cbase) else None) Γ') x ck') as Hvar'.
-      { intros * Hck. apply H8 in Hck as (?&?); subst; eauto.
-        eapply Hvar in H1. inv H1. econstructor; solve_In. simpl. rewrite equiv_decb_refl; eauto. auto.
-      }
-      assert (forall x ck',
-                 HasClock Γ'0 x ck' ->
-                 IsLast Γ'0 x ->
-                 HasClock
-                   (map_filter
-                      (fun '(x, e0) =>
-                         if clo e0 ==b ck then Some (x, ann_with_clock e0 Cbase) else None) Γ') (rename_in_var sub x) ck') as Hlast'.
-      { intros * Hck Hl. apply H8 in Hck as (Hck&?); subst.
-        eapply H9, Hlast in Hl; eauto.
-        inv Hl. econstructor; solve_In. simpl. rewrite equiv_decb_refl. eauto. auto.
-      }
-      eapply wc_Bauto with (Γ':=map_filter (fun '(x, e) => if e.(clo) ==b ck then Some (x, Build_annotation e.(typ) Cbase e.(causl) e.(causl_last)) else None) Γ').
-      + eapply wc_clock_incl; eauto. intros ? Hin; simpl_In.
-        assert (HasClock Γ i0 a0.(clo)) as Hck by (eauto with senv).
-        apply Hvar in Hck; inv Hck. solve_In. congruence.
-      + apply mmap_values in H0. inv H0; auto. congruence.
-      + intros * Hca. inv Hca. simpl_In. destruct (clo a ==b ck) eqn:Hck; inv Hf; simpl.
-        rewrite equiv_decb_equiv in Hck. inv Hck.
-        split; eauto with senv.
-      + intros * Hl. inv Hl. simpl_In. destruct (clo a ==b ck) eqn:Hck; inv Hf; simpl.
-        eauto with senv.
-      + simpl_Forall. split; eauto using rename_in_exp_wc.
-        now rewrite rename_in_exp_clockof.
-      + eapply mmap_values, Forall2_ignore1 in H0; eauto.
-        simpl_Forall. destruct b0 as [?(?&[?(?&?)])]. repeat inv_bind.
-        take (NoDupBranch _ _) and inv it. take (wc_branch _ _) and inv it. destruct_conjs.
-        constructor; split.
-        2:eapply delast_scope_wc in H3; eauto.
-        * simpl_Forall. simpl_In. simpl_Forall.
-          rewrite rename_in_exp_clockof; eauto using rename_in_exp_wc.
-        * intros ? Hin. simpl_In. assert (HasClock Γ'0 a a0.(clo)) as Hck by eauto with senv.
-          apply H8 in Hck as (Hck&?); subst. inv Hck.
-          apply Hincl; solve_In.
-        * intros; destruct_conjs; repeat inv_bind. split.
-          -- eapply mmap_values, Forall2_ignore1 in H18. simpl_Forall; eauto.
-          -- simpl_Forall; split; eauto using rename_in_exp_wc.
-             now rewrite rename_in_exp_clockof.
-        * intros; simpl in *. destruct_conjs.
-          split; auto. apply Forall_app; auto.
-
     - (* local *)
       constructor. eapply delast_scope_wc; eauto.
         * intros; simpl in *.

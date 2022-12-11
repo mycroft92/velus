@@ -1434,10 +1434,6 @@ Section ElabBlock.
     | BRESET blocks _ _ => PSUnion (map vars_defined blocks)
     | BSWITCH _ branches _ =>
         PSUnion (map (fun '(_, blks) => PSUnion (map vars_defined blks)) branches)
-    | BAUTO _ states _ =>
-        PSUnion (map (fun '(_, (locs, blks, _, _)) =>
-                        let locs := ps_from_list (map fst locs) in
-                        PS.filter (fun x => negb (PS.mem x locs)) (PSUnion (map vars_defined blks))) states)
     | BLOCAL locs blks _ =>
         let locs := ps_from_list (map fst locs) in
         PS.filter (fun x => negb (PS.mem x locs)) (PSUnion (map vars_defined blks))
@@ -1493,38 +1489,6 @@ Section ElabBlock.
         do _ <- check_duplicates loc cs;
         do _ <- check_exhaustivity loc (length (snd tn)) cs;
         ret (Bswitch ec brs)
-    | BAUTO (ini, oth) states loc =>
-        let ck := find_a_clock_of_defined env (BAUTO (ini, oth) states loc) in
-        let env := Env.map (fun '(ty, _, b) => (ty, Cbase, b)) (Env.Props.P.filter (fun _ '(_, ck', _) => ck ==b ck') env) in
-        let tenv' := Env.add xH (List.map fst states) (@Env.empty _) in
-        let xs := vars_defined ab in
-        do (oth, _) <- elab_enum tenv' loc oth;
-        do ini <- mmap (fun '(e, t, loc) =>
-                         do (t, _) <- elab_enum tenv' loc t;
-                         do e <- elab_transition_cond env nenv e loc;
-                         ret (e, t)) ini;
-        do states <- mmap (fun '(constr, (locs, ablks, unt, unl)) =>
-                            do (t, _) <- elab_enum tenv' loc constr;
-                            do unl <- mmap (fun '(e, (t, b), loc) =>
-                                             do (t, _) <- elab_enum tenv' loc t;
-                                             do e <- elab_transition_cond env nenv e loc;
-                                             ret (e, (t, b))) unl;
-                            do env <- elab_var_decls tenv loc env locs;
-                            do locs <- mmap (annotate tenv extenv nenv env) locs;
-                            do _ <- mmap (check_atom loc) (map fst locs);
-                            do blks <- mmap (elab_block env) ablks;
-                            do unt <- mmap (fun '(e, (t, b), loc) =>
-                                             do (t, _) <- elab_enum tenv' loc t;
-                                             do e <- elab_transition_cond env nenv e loc;
-                                             ret (e, (t, b))) unt;
-                            do caus <- mmap (fun x => do cx <- fresh_ident; ret (x, cx)) (PSP.to_list xs);
-                            ret ((t, constr), Branch caus (unl, (Scope locs (blks, unt))))
-                      ) states;
-        do type <-
-             if forallb (fun '(_, Branch _ (unl, _)) => is_nil unl) states then ret Weak
-             else if is_nil ini && forallb (fun '(_, Branch _ (_, Scope _ (_, unt))) => is_nil unt) states then ret Strong
-                  else err_loc loc (msg "Strong and Weak transitions cannot be mixed in the same state-machine");
-        ret (Bauto type ck (ini, oth) states)
     | BSWITCH _ _ loc => err_not_singleton loc
     | BLOCAL locs ablks loc =>
         do env <- elab_var_decls tenv loc env locs;
@@ -1630,12 +1594,6 @@ Section ElabDeclaration.
                        check_nodupbranch (mmap (check_noduplocals loc env)) loc s)
                     branches;
         ret tt
-    | Bauto _ _ _ states =>
-        do _ <- mmap (fun '(_, br) =>
-                       check_nodupbranch (fun '(_, s) =>
-                                            check_nodupscope (fun env '(blks, _) => mmap (check_noduplocals loc env) blks)
-                                              loc env s) loc br) states;
-      ret tt
     | Blocal s => check_nodupscope (fun env => mmap (check_noduplocals loc env)) loc env s
     end.
 
@@ -1693,12 +1651,6 @@ Section ElabDeclaration.
       apply mmap_values, Forall2_ignore2 in Hbind. simpl_Forall; eauto.
       destruct b. eapply check_nodupbranch_spec; eauto. intros; simpl in *.
       destruct res. apply mmap_values, Forall2_ignore2 in H3. simpl_Forall; eauto.
-    - (* automaton *)
-      constructor.
-      apply mmap_values, Forall2_ignore2 in Hbind. simpl_Forall; eauto.
-      destruct b as [?(?&[?(?&?)])]. eapply check_nodupbranch_spec; eauto.
-      intros; simpl in *. eapply check_nodupscope_spec; eauto. intros; simpl in *.
-      destruct res0. apply mmap_values, Forall2_ignore2 in H5. simpl_Forall; eauto.
     - (* local *)
       constructor.
       eapply check_nodupscope_spec; eauto. intros; simpl in *.
@@ -1796,18 +1748,6 @@ Section ElabDeclaration.
                                                  ret (concat xs)) loc (snd blks);
                             check_defined_vars loc xs xs') tl;
       ret xs
-    | Bauto _ _ _ [] => err_loc loc (msg "state machines should have at least one branch")
-    | Bauto _ _ _ ((_, hd)::tl) =>
-      do xs <- check_defined_branch
-                (fun '(_, s) => check_defined_scope
-                               (fun '(blks, _) => mmap (check_defined_block loc) blks) loc s) loc hd;
-      do _ <- check_nodup loc xs;
-      do _ <- mmap (fun '(_, br) =>
-                     do xs' <- check_defined_branch
-                                (fun '(_, s) => check_defined_scope
-                                               (fun '(blks, _) => mmap (check_defined_block loc) blks) loc s) loc br;
-                     check_defined_vars loc xs xs') tl;
-      ret xs
     | Blocal s => check_defined_scope (mmap (check_defined_block loc)) loc s
     end.
 
@@ -1865,7 +1805,7 @@ Section ElabDeclaration.
       VarsDefined blk xs.
   Proof.
     Opaque check_defined_scope.
-    induction blk as [(?&?)| | | |] using block_ind2;
+    induction blk as [(?&?)| | |] using block_ind2;
       intros * Hnd Hc; inv Hnd; repeat monadInv.
     - (* equation *)
       econstructor.
@@ -1890,27 +1830,6 @@ Section ElabDeclaration.
           do 2 esplit; eauto. now rewrite Hperm.
         * intros. repeat monadInv. do 2 esplit; [|reflexivity].
           eapply check_defined_blocks_spec; eauto.
-    - (* automaton *)
-      simpl in *. cases. repeat monadInv. inv H. inv H2.
-      repeat constructor.
-      + congruence.
-      + destruct b as [?(?&[?(?&?)])]. eapply check_defined_branch_spec; intros; eauto using VarsDefinedScope_Perm1.
-        repeat monadInv.
-        eapply check_defined_scope_spec; intros; eauto.
-        * inv_VarsDefined. do 2 esplit; eauto. etransitivity; eauto.
-        * intros; simpl in *. do 2 esplit; [|reflexivity].
-          eapply check_defined_blocks_spec in H6; eauto.
-      + take unit and destruct it. take (check_nodup _ _ _ = _) and apply check_nodup_spec in it as Hnd.
-        clear - Hnd Hbind0 H4 H5. revert x2 x3 st' Hbind0.
-        induction H4; intros * Hbind; inv H5; repeat monadInv; constructor; eauto.
-        destruct x as (?&?); repeat monadInv. eapply check_defined_vars_spec in Hbind2; eauto.
-        destruct b as [?(?&[])]. eapply check_defined_branch_spec in Hbind1; intros; eauto.
-        * eapply VarsDefinedBranch_Perm2; [|eauto]. now symmetry.
-        * intros; simpl in *; inv_VarsDefined; eauto using VarsDefinedScope_Perm1.
-        * intros; simpl in *. eapply check_defined_scope_spec; intros; destruct_conjs; eauto.
-          -- do 2 esplit; eauto. etransitivity; eauto.
-          -- simpl in *. do 2 esplit; [|reflexivity].
-             eapply check_defined_blocks_spec; eauto.
     - (* local *)
       constructor; simpl in *; repeat monadInv.
       eapply check_defined_scope_spec; eauto.
@@ -1940,13 +1859,6 @@ Section ElabDeclaration.
       constructor.
       apply mmap_values, Forall2_ignore1 in Hbind3. simpl_Forall; repeat monadInv.
       repeat constructor. apply mmap_values, Forall2_ignore1 in Hbind6. simpl_Forall; eauto.
-    - (* automaton *)
-      cases. repeat monadInv.
-      constructor.
-      apply mmap_values, Forall2_ignore1 in Hbind0. simpl_Forall; repeat monadInv.
-      repeat constructor.
-      + eapply mmap_check_atom_AtomOrGensym; eauto.
-      + apply mmap_values, Forall2_ignore1 in Hbind7. simpl_Forall; eauto.
     - (* local *)
       repeat constructor.
       + eapply mmap_check_atom_AtomOrGensym; eauto.

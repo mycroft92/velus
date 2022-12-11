@@ -231,11 +231,11 @@ Module Type ILTYPING
   Proof.
     Opaque inlinelocal_block.
     destruct blk; intros * Hnl Hns Hnd Hgood Hwt Hwtc Hil; try destruct s; repeat inv_bind; simpl. 3:inv Hns.
-    1-3:eapply inlinelocal_block_wt with (Γ':=[]); try rewrite app_nil_r; eauto.
-    7:inv Hnd; inv Hgood; inv Hwt; inv H1; inv H2; inv H4; inv_VarsDefined;
+    1-2:eapply inlinelocal_block_wt with (Γ':=[]); try rewrite app_nil_r; eauto.
+    5:inv Hnd; inv Hgood; inv Hwt; inv H1; inv H2; inv H4; inv_VarsDefined;
       eapply mmap_inlinelocal_block_wt with (Γ:=Γ++senv_of_locs locs') (Γ':=[]) in H as (Hwt1&Hwt2); try rewrite app_nil_r; eauto.
-    2,4,6,11:intros * Hfind _; rewrite Env.gempty in Hfind; try congruence.
-    1,2,3,7:intros *; rewrite Env.Props.P.F.empty_in_iff; split; intros [].
+    2,4,9:intros * Hfind _; rewrite Env.gempty in Hfind; try congruence.
+    1,2,6:intros *; rewrite Env.Props.P.F.empty_in_iff; split; intros [].
     - rewrite <-app_assoc in Hwt1, Hwt2. split; eauto.
       apply Forall_app. unfold wt_clocks, Common.idty in *. split; auto; simpl_Forall.
       eapply wt_clock_incl; [|eauto]. intros *. repeat rewrite HasType_app. intros [|]; auto.
@@ -305,7 +305,7 @@ Module Type ILTYPING
   Proof.
     Opaque inlinelocal_block.
     destruct blk; intros * Hns Hnd Hwt Hwte Hil; try destruct s; repeat inv_bind; simpl.
-    1-4:eapply inlinelocal_block_wt_type; eauto.
+    1-3:eapply inlinelocal_block_wt_type; eauto.
     inv Hns. inv Hwt. inv Hnd. repeat inv_scope. repeat Syn.inv_scope.
     repeat setoid_rewrite map_app. apply Forall_app; split; auto.
     eapply mmap_inlinelocal_block_wt_type in H; eauto.

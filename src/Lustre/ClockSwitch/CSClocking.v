@@ -158,7 +158,7 @@ Module Type CSCLOCKING
         NoDupMembers Γck ->
         wc_env (idck Γck) ->
         wc_clock (idck Γck') bck ->
-        noauto_scope P_na (Scope locs blk) ->
+        nolast_scope P_na (Scope locs blk) ->
         NoDupScope P_nd (map fst Γck) (Scope locs blk) ->
         wc_scope P_wc G Γck (Scope locs blk) ->
         switch_scope f_switch Γck bck sub (Scope locs blk) st = (s', st') ->
@@ -221,7 +221,7 @@ Module Type CSCLOCKING
         NoDupMembers Γ ->
         wc_env (idck Γ) ->
         wc_clock (idck Γ') bck ->
-        noauto_block blk ->
+        nolast_block blk ->
         NoDupLocals (map fst Γ) blk ->
         wc_block G Γ blk ->
         switch_block Γ bck sub blk st = (blk', st') ->

@@ -139,7 +139,6 @@ Inductive bisim_IO {PSyn prefs} (G: @global PSyn prefs) (f: ident) (ins outs: li
 Local Hint Resolve
       wc_global_Ordered_nodes
       delast_global_wt delast_global_wc
-      auto_global_wt auto_global_wc
       switch_global_wt switch_global_wc
       inlinelocal_global_wt inlinelocal_global_wc inlinelocal_global_sem
       normalize_global_normalized_global normalized_global_unnested_global
@@ -168,7 +167,7 @@ Proof.
   intros G * Hwt Hwc Hsem Hwcins Hltonl.
   unfold_l_to_nl Hltonl.
   eapply TR.Correctness.sem_l_nl in Hltonl; eauto 12 with ltyping.
-  eapply normalize_global_sem, inlinelocal_global_sem, switch_global_sem, auto_global_sem, delast_global_sem; eauto.
+  eapply normalize_global_sem, inlinelocal_global_sem, switch_global_sem, delast_global_sem; eauto.
   eapply sem_node_sem_node_ck; eauto with ltyping.
 Qed.
 
@@ -186,7 +185,6 @@ Proof.
       eapply global_iface_eq_trans, normalize_global_iface_eq.
       eapply global_iface_eq_trans, inlinelocal_global_iface_eq.
       eapply global_iface_eq_trans, switch_global_iface_eq. apply global_iface_eq_refl. }
-  apply auto_global_find_node' in Hfind as (?&Hfind&(_&_&Hin'&Hout')).
   eapply global_iface_eq_find in Hfind as (?&Hfind&(_&_&Hin''&Hout'')); eauto.
   2:apply global_iface_eq_sym, delast_global_iface_eq.
   do 2 esplit; eauto; split.

@@ -159,16 +159,6 @@ Module Type DELAST
                                do blks' <- mmap (delast_block sub) blks;
                                ret (k, Branch [] blks')) branches;
         ret (Bswitch (rename_in_exp sub ec) branches')
-    | Bauto type ck (ini, oth) states =>
-        do states' <- mmap (fun '(k, Branch _ (unl, scope)) =>
-                             let unl' := map (fun '(e, k) => (rename_in_exp sub e, k)) unl in
-                             do scope' <- delast_scope (fun sub '(blks, trans) =>
-                                                        do blks' <- mmap (delast_block sub) blks;
-                                                        ret (blks', map (fun '(e, k) => (rename_in_exp sub e, k)) trans))
-                                                     (fun eqs '(blks, trans) => (eqs++blks, trans))
-                                                     sub scope;
-                             ret (k, Branch [] (unl', scope'))) states;
-        ret (Bauto type ck (map (fun '(e, k) => (rename_in_exp sub e, k)) ini, oth) states')
     | Blocal scope =>
         do scope' <- delast_scope (fun sub => mmap (delast_block sub))
                                  (fun eqs blks => eqs++blks) sub scope;
@@ -291,12 +281,6 @@ Module Type DELAST
       eapply mmap_st_follows; eauto. simpl_Forall; repeat inv_bind.
       destruct b0. repeat inv_bind.
       eapply mmap_st_follows; eauto. simpl_Forall; eauto.
-    - (* automaton *)
-      destruct ini; repeat inv_bind.
-      eapply mmap_st_follows; eauto. simpl_Forall; repeat inv_bind.
-      destruct b0 as [?(?&[?(?&?)])]; destruct_conjs. repeat inv_bind. eapply delast_scope_st_follows; eauto.
-      intros; repeat inv_bind.
-      eapply mmap_st_follows; eauto. simpl_Forall; eauto.
     - (* local *)
       eapply delast_scope_st_follows; eauto.
       intros; simpl in *.
@@ -369,20 +353,6 @@ Module Type DELAST
         destruct b0. repeat inv_bind. take (VarsDefinedBranch _ _ _) and inv it. inv_VarsDefined.
         constructor; simpl; auto using incl_nil'.
         eapply mmap_vars_perm in H3; eauto.
-    - (* automaton *)
-      destruct ini; repeat inv_bind.
-      constructor.
-      + apply mmap_values in H0. inv H0; congruence.
-      + eapply mmap_values, Forall2_ignore1 in H0. simpl_Forall; repeat inv_bind.
-        destruct b0 as [?(?&[?(?&?)])]. repeat inv_bind.
-        take (VarsDefinedBranch _ _ _) and inv it. inv_VarsDefined.
-        econstructor; simpl; auto using incl_nil'.
-        eapply delast_scope_vars_perm; eauto.
-        * intros; repeat inv_bind; destruct_conjs. do 2 esplit; [|eauto].
-          eapply mmap_vars_perm; eauto.
-        * intros; destruct_conjs.
-          do 2 esplit. eapply Forall2_app; eauto.
-          now rewrite concat_app, Permutation_app_comm, H7.
     - (* local *)
       constructor. eapply delast_scope_vars_perm; eauto.
       * intros; simpl in *; destruct_conjs. do 2 esplit; [|eauto].
@@ -449,15 +419,6 @@ Module Type DELAST
       destruct b0. repeat inv_bind.
       take (GoodLocalsBranch _ _) and inv it. constructor.
       eapply mmap_values, Forall2_ignore1 in H3. simpl_Forall; eauto.
-    - (* automaton *)
-      destruct ini; repeat inv_bind.
-      repeat constructor.
-      eapply mmap_values, Forall2_ignore1 in H0. simpl_Forall. destruct b0 as [?(?&[?(?&?)])]. repeat inv_bind.
-      take (GoodLocalsBranch _ _) and inv it. constructor.
-      eapply delast_scope_GoodLocals; eauto.
-      + intros; repeat inv_bind. eapply mmap_values, Forall2_ignore1 in H5.
-        simpl_Forall; eauto.
-      + intros. destruct blks2. apply Forall_app; auto.
     - (* local *)
       constructor.
       eapply delast_scope_GoodLocals; eauto.
@@ -620,24 +581,6 @@ Module Type DELAST
       eapply mmap_delast_NoDupLocals in H1; eauto.
       simpl_Forall. destruct Hat; auto. right.
       eapply incl_map; eauto. apply st_follows_incl; eauto with fresh.
-    - (* automaton *)
-      destruct ini; repeat inv_bind.
-      eapply mmap_values_follows in H0; eauto.
-      2:{ intros; destruct_conjs; repeat inv_bind.
-          destruct b0 as [?(?&[?(?&?)])]. repeat inv_bind.
-          eapply delast_scope_st_follows; eauto.
-          intros; repeat inv_bind; eapply mmap_st_follows; eauto.
-          simpl_Forall. eapply delast_block_st_follows; eauto. }
-      constructor. eapply Forall2_ignore1 in H0; simpl_Forall; repeat inv_bind.
-      destruct b0 as [?(?&[?(?&?)])]. take (NoDupBranch _ _) and inv it. take (GoodLocalsBranch _ _) and inv it.
-      repeat inv_bind. repeat constructor.
-      eapply delast_scope_NoDupLocals in H1; eauto.
-      + simpl_Forall. destruct Hat; auto.
-        right. eapply incl_map; eauto. apply st_follows_incl; eauto with fresh.
-      + intros; simpl in *. simpl_Forall.
-        eapply NoDupLocals_incl'; eauto using last_not_in_elab_prefs.
-      + intros; repeat inv_bind. eapply mmap_delast_NoDupLocals; eauto.
-      + intros. destruct blks2. apply Forall_app; auto.
     - (* local *)
       constructor.
       eapply delast_scope_NoDupLocals; eauto.
@@ -685,15 +628,6 @@ Module Type DELAST
       eapply mmap_values, Forall2_ignore1 in H0. simpl_Forall; repeat inv_bind.
       destruct b0. repeat inv_bind. constructor.
       eapply mmap_values, Forall2_ignore1 in H2. simpl_Forall; eauto.
-    - (* automaton *)
-      destruct ini; repeat inv_bind.
-      constructor.
-      eapply mmap_values, Forall2_ignore1 in H0. simpl_Forall. repeat inv_bind.
-      destruct b0 as [?(?&[?(?&?)])]; repeat inv_bind. constructor.
-      eapply delast_scope_nolast; eauto.
-      + intros; repeat inv_bind. eapply mmap_values, Forall2_ignore1 in H3.
-        simpl_Forall; eauto.
-      + intros. destruct blks2. apply Forall_app; auto.
     - (* local *)
       constructor. eapply delast_scope_nolast; eauto.
       + intros. eapply mmap_values, Forall2_ignore1 in H1.

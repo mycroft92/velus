@@ -174,7 +174,7 @@ Module Type CSTYPING
         NoDupMembers Γck ->
         Forall (wt_type G.(types)) (map (fun '(_, a) => a.(typ)) Γty) ->
         wt_clock G.(types) Γty' bck ->
-        noauto_scope P_na (Scope locs blk) ->
+        nolast_scope P_na (Scope locs blk) ->
         NoDupScope P_nd (map fst Γty) (Scope locs blk) ->
         wt_scope P_wt G Γty (Scope locs blk) ->
         switch_scope f_switch Γck bck sub (Scope locs blk) st = (s', st') ->
@@ -255,7 +255,7 @@ Module Type CSTYPING
         NoDupMembers Γck ->
         Forall (wt_type G.(types)) (map (fun '(_, a) => a.(typ)) Γty) ->
         wt_clock G.(types) Γty' bck ->
-        noauto_block blk ->
+        nolast_block blk ->
         NoDupLocals (map fst Γty) blk ->
         wt_block G Γty blk ->
         switch_block Γck bck sub blk st = (blk', st') ->

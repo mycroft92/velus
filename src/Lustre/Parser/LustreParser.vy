@@ -61,7 +61,6 @@ Definition false_id := Ident.str_to_pos "False"%string.
 %token<LustreAst.astloc> RESET RESTART EVERY
 %token<LustreAst.astloc> SWITCH END
 %token<LustreAst.astloc> DO IN DONE
-%token<LustreAst.astloc> AUTOMATON INITIALLY OTHERWISE STATE UNLESS UNTIL CONTINUE
 
 %token<LustreAst.astloc> EOF
 
@@ -95,13 +94,6 @@ Definition false_id := Ident.str_to_pos "False"%string.
 %type<LustreAst.block> block
 %type<list LustreAst.block> blocks
 %type<list (Common.ident * list LustreAst.block)> switch_branch_list
-%type<list (list LustreAst.expression * Common.ident * LustreAst.astloc) * Common.ident> initially
-%type<LustreAst.transition> transition
-%type<list LustreAst.transition> transitions
-%type<list LustreAst.transition> untils
-%type<list LustreAst.transition> unless
-%type<Common.ident * (LustreAst.local_decls * list LustreAst.block * list LustreAst.transition * list LustreAst.transition)> auto_state
-%type<list (Common.ident * (LustreAst.local_decls * list LustreAst.block * list LustreAst.transition * list LustreAst.transition))> auto_state_list
 %type<unit> optsemicolon optbar
 %type<bool * LustreAst.astloc> node_or_function
 %type<LustreAst.declaration> declaration
@@ -493,48 +485,6 @@ switch_branch_list:
 | BAR c=ENUM_NAME DO blk=blocks bs=switch_branch_list
     { (fst c, blk) :: bs }
 
-initially:
-| c=ENUM_NAME
-  { ([], fst c) }
-| OTHERWISE c=ENUM_NAME
-  { ([], fst c) }
-| loc=IFTE e=expression THEN c=ENUM_NAME SEMICOLON ini=initially
-  { let '(ini, oth) := ini in ((e, fst c, loc)::ini, oth) }
-
-transition:
-| e=expression loc=CONTINUE c=ENUM_NAME
-  { (e, (fst c, false), loc) }
-| e=expression loc=THEN c=ENUM_NAME
-  { (e, (fst c, true), loc) }
-
-transitions:
-| tr=transition
-  { [tr] }
-| tr=transition BAR trs=transitions
-  { tr::trs }
-
-untils:
-| /* empty */
-  { [] }
-| UNTIL trs=transitions
-  { trs }
-
-unless:
-| /* empty */
-  { [] }
-| UNLESS trs=transitions
-  { trs }
-
-auto_state:
-| loc=STATE c=ENUM_NAME DO blks=blocks unt=untils unl=unless
-  { (fst c, ([], blks, unt, unl)) }
-| loc=STATE c=ENUM_NAME locals=local_decl DO blks=blocks unt=untils unl=unless
-  { (fst c, (locals, blks, unt, unl)) }
-
-auto_state_list:
-| st=auto_state { [st] }
-| st=auto_state sts=auto_state_list { st::sts }
-
 block:
 | eq=equation
    { LustreAst.BEQ eq } 
@@ -542,8 +492,6 @@ block:
    { LustreAst.BRESET blks er loc }
 | loc=SWITCH ec=expression brs=switch_branch_list END
    { LustreAst.BSWITCH ec brs loc }
-| loc=AUTOMATON INITIALLY ini=initially states=auto_state_list END
-   { LustreAst.BAUTO ini states loc }
 /* Supporting both heptagon and var/let/tel syntax */
 | loc=DO locals=local_decl IN blks=blocks DONE
 | locals=local_decl loc=LET blks=blocks TEL
