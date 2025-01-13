@@ -113,6 +113,30 @@ Section KWHEN.
     - firstorder; intros HHH%tag_eqb_eq; congruence.
   Qed.
 
+  Lemma pppp :
+    forall k,
+    forall x : errv A * errv B,
+  {match x with
+   | (val _, val c0) =>
+       match tag_of_val c0 with
+       | Some t => if tag_eqb k t then True else False
+       | None => True
+       end
+   | _ => True
+   end} +
+  {~
+   match x with
+   | (val _, val c0) =>
+       match tag_of_val c0 with
+       | Some t => if tag_eqb k t then True else False
+       | None => True
+       end
+   | _ => True
+   end}.
+    intros ? [].
+    cases.
+  Qed.
+
   (* le when Kahnien *)
   Definition kwhen (k : enumtag) : DS (errv A) -C-> DS (errv B) -C-> DS (errv A).
     refine (curry (MAP (fun '(x,c) =>
@@ -133,8 +157,46 @@ Section KWHEN.
                                    end
                                | _, _ => True
                                end
-                     ) _ @_ uncurry (ZIP pair))).
- Defined.
+                     ) (pppp _) @_ uncurry (ZIP pair))).
+  Defined.
+
+  (* Lemma swhen_eq : forall k c C x X, *)
+  (*     swhen k (cons x X) (cons c C) *)
+  (*     == cons match x, c with *)
+  (*          | abs, abs => abs *)
+  (*          | pres x, pres c => *)
+  (*              match tag_of_val c with *)
+  (*              | None => err error_Ty *)
+  (*              | Some t => *)
+  (*                  if tag_eqb k t *)
+  (*                  then pres x *)
+  (*                  else abs *)
+  (*              end *)
+  (*          | err e, _ | _, err e => err e *)
+  (*          | _, _ => err error_Cl *)
+  (*          end (swhen k X C). *)
+
+  Lemma kwhen_eq : forall k c C x X,
+      kwhen k (cons x X) (cons c C)
+      == match x, c with
+         | val x, val c =>
+             match tag_of_val c with
+             | None => cons (err' error_Ty') 0
+             | Some t =>
+                 if tag_eqb k t
+                 then cons (val x) (kwhen k X C)
+                 else kwhen k X C
+             end
+         | err' e, _ | _, err' e => cons (err' e) 0
+         end.
+  Proof.
+    intros.
+    unfold kwhen at 1.
+    autorewrite with cpodb.
+    simpl.
+    rewrite zip_cons, filter_eq_cons.
+    (* TODO: faire un filter booléen, c'est vachement plus simple? *)
+  Qed.
 
 
 End KWHEN.
@@ -168,7 +230,7 @@ Definition kdenot_exp_ (ins : list ident)
   - (* Eunop *)
 
 TODO.
-
+ 
 
 
     eapply fcont_comp. 2: apply (denot_exp_ e0).
