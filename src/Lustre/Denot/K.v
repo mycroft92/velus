@@ -1,0 +1,289 @@
+From Coq Require Import BinPos List.
+
+From Velus Require Import Common Ident Operators Clocks CoindStreams.
+From Velus Require Import Lustre.StaticEnv Lustre.LSyntax Lustre.LSemantics Lustre.LOrdered.
+From Velus Require Import Lustre.Denot.Cpo Lustre.Denot.SD.
+
+Close Scope equiv_scope. (* conflicting notation "==" *)
+Import ListNotations.
+
+Require Import CommonList2 SDfuns EraseAbs.
+
+(** * TEST : une sémantique Kahnienne pour Lustre *)
+Module Type LKAHN
+       (Import Ids   : IDS)
+       (Import Op    : OPERATORS)
+       (Import OpAux : OPERATORS_AUX Ids Op)
+       (Import Cks   : CLOCKS        Ids Op OpAux)
+       (Import Senv  : STATICENV     Ids Op OpAux Cks)
+       (Import Syn   : LSYNTAX       Ids Op OpAux Cks Senv)
+       (Import Lord  : LORDERED      Ids Op OpAux Cks Senv Syn)
+       (Import Sd    : SD            Ids Op OpAux Cks Senv Syn Lord).
+
+
+Section KDenot_node.
+
+Context {PSyn : list decl -> block -> Prop}.
+Context {Prefs : PS.t}.
+Variable (G : @global PSyn Prefs).
+
+Section KDenot_exps.
+
+  Hypothesis kdenot_exp_ :
+    forall e : exp,
+      Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
+      @nprod (DS (sampl value)) (numstreams e).
+
+  Definition kdenot_exps_ (es : list exp) :
+    Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
+    @nprod (DS (sampl value)) (list_sum (List.map numstreams es)).
+    induction es as [|a].
+    + exact 0.
+    + exact ((nprod_app @2_ (kdenot_exp_ a)) IHes).
+  Defined.
+
+  Definition kdenot_expss_ {A} (ess : list (A * list exp)) (n : nat) :
+    Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
+    @nprod (@nprod (DS (sampl value)) n) (length ess).
+    induction ess as [|[? es]].
+    + exact 0.
+    + destruct (Nat.eq_dec (list_sum (List.map numstreams es)) n) as [<-|].
+      * exact ((nprod_cons @2_ (kdenot_exps_ es)) IHess).
+      * exact 0.
+  Defined.
+
+End KDenot_exps.
+
+
+
+Inductive error' :=
+| error_Ty'
+| error_Op'
+.
+
+(* valeur de Kahn: potentiellement erronée *)
+Inductive errv (A : Type) : Type :=
+| val (a: A)
+| err' (e : error').
+
+Arguments val {A} a.
+Arguments err' {A} e.
+
+(* un ea qui change le type *)
+Section EA.
+
+Lemma is_abs_or_not : forall A (x : sampl A), {x <> abs} + {~ x <> abs}.
+Proof.
+  intros ? []; auto; now left.
+Qed.
+
+(* efface les absences *)
+Definition ea {A : Type} : DS (sampl A) -C-> DS (errv A).
+  refine (MAP (fun (x:sampl A) => match x with
+                     | pres v => val v
+                     | err error_Ty => err' error_Ty'
+                     | err error_Op => err' error_Op'
+                     | abs => err' error_Ty'
+                     | err error_Cl => err' error_Ty'
+                               end)
+            @_ FILTER (fun v => v <> abs) (is_abs_or_not _)).
+Defined.
+
+End EA.
+
+
+Section KWHEN.
+
+  Context {A B D : Type}.
+
+  Variable enumtag : Type.
+  Variable tag_of_val : B -> option enumtag.
+  Variable tag_eqb : enumtag -> enumtag -> bool.
+
+  Hypothesis tag_eqb_eq : forall t1 t2, tag_eqb t1 t2 = true <-> t1 = t2.
+
+  Lemma tag_eqb_refl : forall t, tag_eqb t t = true.
+  Proof. intro; now apply tag_eqb_eq. Qed.
+
+  Lemma tag_eqb_neq : forall t1 t2, tag_eqb t1 t2 = false <-> t1 <> t2.
+  Proof.
+    intros.
+    destruct (tag_eqb _ _) eqn:HH.
+    - firstorder; congruence.
+    - firstorder; intros HHH%tag_eqb_eq; congruence.
+  Qed.
+
+  (* le when Kahnien *)
+  Definition kwhen (k : enumtag) : DS (errv A) -C-> DS (errv B) -C-> DS (errv A).
+    refine (curry (MAP (fun '(x,c) =>
+                          match x,c with
+                          | val x, val c => val x
+                          | err' e,_ | _,err' e => err' e
+                          end)
+                     @_
+                     FILTER (fun '(x,c) =>
+                               match x,c with
+                               | val x, val c =>
+                                   match tag_of_val c with
+                                   | None => True
+                                   | Some t =>
+                                       if tag_eqb k t
+                                       then True
+                                       else False
+                                   end
+                               | _, _ => True
+                               end
+                     ) _ @_ uncurry (ZIP pair))).
+ Defined.
+
+
+End KWHEN.
+
+
+
+Definition kdenot_exp_ (ins : list ident)
+  (e : exp) :
+  (* (nodes * inputs * env) -> streams *)
+  Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
+  @nprod (DS (sampl value)) (numstreams e).
+
+  set (ctx := Dprod _ _).
+  epose (denot_var :=
+       fun x => if mem_ident x ins
+             then PROJ (DS_fam SI) x @_ SND _ _ @_ FST _ _
+             else PROJ (DS_fam SI) x @_ SND _ _).
+  revert e.
+  fix denot_exp_ 1.
+  intro e.
+  destruct e eqn:He; simpl (nprod _).
+  - (* Econst *)
+    (* véritable const, pas d'horloge dans le modèle de Kahn *)
+    exact (CTE _ _ (DS_const (pres (Vscalar (sem_cconst c))))).
+  - (* Eenum *)
+    exact (CTE _ _ (DS_const (pres (Venum e0)))).
+  - (* Evar *)
+    exact (denot_var i).
+  - (* Elast *)
+    apply CTE, 0.
+  - (* Eunop *)
+
+TODO.
+
+
+
+    eapply fcont_comp. 2: apply (denot_exp_ e0).
+    destruct (numstreams e0) as [|[]].
+    (* pas le bon nombre de flots: *)
+    1,3: apply CTE, errTy.
+    destruct (typeof e0) as [|ty []].
+    1,3: apply CTE, errTy.
+    exact (sunop (fun v => sem_unop u v ty)).
+  - (* Ebinop *)
+    eapply fcont_comp2.
+    3: apply (denot_exp_ e0_2).
+    2: apply (denot_exp_ e0_1).
+    destruct (numstreams e0_1) as [|[]], (numstreams e0_2) as [|[]].
+    (* pas le bon nombre de flots: *)
+    1-4,6-9: apply curry, CTE, errTy.
+    destruct (typeof e0_1) as [|ty1 []], (typeof e0_2) as [|ty2 []].
+    1-4,6-9: apply curry, CTE, errTy.
+    exact (sbinop (fun v1 v2 => sem_binop b v1 ty1 v2 ty2)).
+  - (* Eextcall *)
+    apply CTE, 0.
+  - (* Efby *)
+    rename l into e0s, l0 into es, l1 into anns.
+    clear He.
+    pose (s0s := denot_exps_ denot_exp_ e0s).
+    pose (ss := denot_exps_ denot_exp_ es).
+    (* vérifier le typage *)
+    destruct (Nat.eq_dec
+                (list_sum (List.map numstreams es))
+                (list_sum (List.map numstreams e0s))
+             ) as [Heq1|].
+    destruct (Nat.eq_dec
+                (list_sum (List.map numstreams e0s))
+                (length anns)
+             ) as [Heq2|].
+    (* si les tailles ne correspondent pas : *)
+    2,3: apply CTE, (nprod_const _ errTy).
+    rewrite Heq1 in ss.
+    rewrite <- Heq2.
+    exact ((lift2 (SDfuns.fby) @2_ s0s) ss).
+  - (* Earrow *)
+    apply CTE, 0.
+  - (* Ewhen *)
+    rename l into es.
+    destruct l0 as (tys,ck).
+    destruct p as (i,ty). clear He.
+    destruct (Nat.eq_dec
+                (list_sum (List.map numstreams es))
+                (length tys)
+             ) as [<-|].
+    2: apply CTE, (nprod_const _ errTy).
+    pose (ss := denot_exps_ denot_exp_ es).
+    exact ((llift (swhenv e0) @2_ ss) (denot_var i)).
+  - (* Emerge *)
+    rename l into ies.
+    destruct l0 as (tys,ck).
+    destruct p as [i ty].
+    (* on calcule (length tys) flots pour chaque liste de sous-expressions *)
+    pose (ses := denot_expss_ denot_exp_ ies (length tys)).
+    rewrite <- (map_length fst) in ses.
+    exact ((lift_nprod @_ (smergev (List.map fst ies)) @2_ denot_var i) ses).
+  - (* Ecase *)
+    rename l into ies.
+    destruct l0 as (tys,ck).
+    (* on calcule (length tys) flots pour chaque liste de sous-expressions *)
+    pose (ses := denot_expss_ denot_exp_ ies (length tys)).
+    rewrite <- (map_length fst) in ses.
+    destruct o as [d_es|].
+    + (* avec une branche par défaut *)
+      revert ses.
+      destruct (Nat.eq_dec
+                  (list_sum (List.map numstreams d_es))
+                  (length tys)
+               ) as [<-|].
+      2: apply CTE, CTE, (nprod_const _ errTy).
+      intro ses.
+      refine ((_ @2_ (denot_exp_ e0)) ((nprod_cons @2_ denot_exps_ denot_exp_ d_es) ses)).
+      destruct (numstreams e0) as [|[]].
+      1,3: apply CTE, CTE, (nprod_const _ errTy).
+      exact (lift_nprod @_ scase_defv (List.map fst ies)).
+    + (* case total *)
+      (* condition, branches *)
+      refine ((_ @2_ (denot_exp_ e0)) ses).
+      destruct (numstreams e0) as [|[]].
+      1,3: apply CTE, CTE, (nprod_const _ errTy).
+      exact (lift_nprod @_ (scasev (List.map fst ies))).
+  - (* Eapp *)
+    rename l into es, l0 into er, l1 into anns.
+    clear He.
+    destruct (find_node i G) as [n|].
+    destruct (Nat.eq_dec (length (List.map fst n.(n_out))) (length anns)) as [<-|].
+    2,3: apply CTE, (nprod_const _ errTy).
+    (* dénotation du nœud *)
+    pose (f := PROJ _ i @_ FST _ _ @_ FST _ _ : ctx -C-> FI i).
+    pose (ss := denot_exps_ denot_exp_ es).
+    pose (rs := denot_exps_ denot_exp_ er).
+    (* chaînage *)
+    refine
+      (np_of_env (List.map fst (n_out n)) @_
+         (sreset @3_ f) (sbools_of @_ rs) (env_of_np (idents (n_in n)) @_ ss)).
+Defined.
+
+Definition denot_exp (ins : list ident) (e : exp) :
+  (* (nodes * inputs * env) -> streams *)
+  Dprodi FI -C-> DS_prod SI -C-> DS_prod SI -C-> nprod (numstreams e) :=
+  curry (curry (denot_exp_ ins e)).
+
+Definition denot_exps (ins : list ident) (es : list exp) :
+  Dprodi FI -C-> DS_prod SI -C-> DS_prod SI -C-> nprod (list_sum (List.map numstreams es)) :=
+  curry (curry (denot_exps_ (denot_exp_ ins) es)).
+
+Lemma denot_exps_eq :
+  forall ins e es envG envI env,
+    denot_exps ins (e :: es) envG envI env
+    = nprod_app (denot_exp ins e envG envI env) (denot_exps ins es envG envI env).
+Proof.
+  reflexivity.
+Qed.
