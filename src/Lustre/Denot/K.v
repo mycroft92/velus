@@ -91,6 +91,35 @@ Defined.
 
 End EA.
 
+(* filter booléen, plus pratique ? *)
+Section FilterB.
+
+  Context {D : Type}.
+  Variable P : D -> bool.
+
+  Definition filterb : DS D -C-> DS D.
+    refine (@FILTER D (fun x => eq_true (P x)) _).
+    intros x; destruct (P x); trivial.
+    left. constructor.
+    right. intro H. inversion H.
+  Defined.
+
+  Lemma filterb_bot : filterb 0 == 0.
+  Proof.
+    apply filter_bot.
+  Qed.
+
+  Lemma filterb_eq_cons : forall a s,
+      filterb (cons a s) == if P a then cons a (filterb s) else filterb s.
+  Proof.
+    intros.
+    unfold filterb.
+    rewrite FILTER_filter.
+    rewrite filter_eq_cons.
+    destruct (P a); auto.
+  Qed.
+
+End FilterB.
 
 Section KWHEN.
 
@@ -113,68 +142,37 @@ Section KWHEN.
     - firstorder; intros HHH%tag_eqb_eq; congruence.
   Qed.
 
-  Lemma pppp :
-    forall k,
-    forall x : errv A * errv B,
-  {match x with
-   | (val _, val c0) =>
-       match tag_of_val c0 with
-       | Some t => if tag_eqb k t then True else False
-       | None => True
-       end
-   | _ => True
-   end} +
-  {~
-   match x with
-   | (val _, val c0) =>
-       match tag_of_val c0 with
-       | Some t => if tag_eqb k t then True else False
-       | None => True
-       end
-   | _ => True
-   end}.
-    intros ? [].
-    cases.
-  Qed.
-
-  (* le when Kahnien *)
-  Definition kwhen (k : enumtag) : DS (errv A) -C-> DS (errv B) -C-> DS (errv A).
-    refine (curry (MAP (fun '(x,c) =>
-                          match x,c with
-                          | val x, val c => val x
-                          | err' e,_ | _,err' e => err' e
-                          end)
-                     @_
-                     FILTER (fun '(x,c) =>
-                               match x,c with
-                               | val x, val c =>
-                                   match tag_of_val c with
-                                   | None => True
-                                   | Some t =>
-                                       if tag_eqb k t
-                                       then True
-                                       else False
-                                   end
-                               | _, _ => True
-                               end
-                     ) (pppp _) @_ uncurry (ZIP pair))).
+  Definition kwhenf (k : enumtag) :
+    (DS (errv A) -C-> DS (errv B) -C-> DS (errv A)) -C-> DS (errv A) -C-> DS (errv B) -C-> DS (errv A).
+    apply curry, curry.
+    eapply (fcont_comp2 (DSCASE _ _ )).
+    2:exact (SND _ _ @_ (FST _ _)).
+    apply ford_fcont_shift.
+    intro x.
+    apply curry.
+    eapply (fcont_comp2 (DSCASE _ _)).
+    2:exact (SND _ _ @_ (FST _ _)).
+    apply ford_fcont_shift.
+    intro c.
+    apply curry.
+    refine
+      (match x, c with
+         | val x, val c =>
+             match tag_of_val c with
+             | None =>
+                 CTE _ _ (cons (err' error_Ty') 0)
+             | Some t =>
+                 if tag_eqb k t
+                 then
+                   (CONS (val x) @_ ((AP _ _ @3_ FST _ _ @_ FST _ _ @_ FST _ _ @_ FST _ _) (SND _ _ @_ FST _ _) (SND _ _)))
+                 else
+                   ((AP _ _ @3_ FST _ _ @_ FST _ _ @_ FST _ _ @_ FST _ _) (SND _ _ @_ FST _ _) (SND _ _))
+             end
+       | err' e, _ | _, err' e => (CTE _ _ (cons (err' e) 0))
+       end).
   Defined.
-
-  (* Lemma swhen_eq : forall k c C x X, *)
-  (*     swhen k (cons x X) (cons c C) *)
-  (*     == cons match x, c with *)
-  (*          | abs, abs => abs *)
-  (*          | pres x, pres c => *)
-  (*              match tag_of_val c with *)
-  (*              | None => err error_Ty *)
-  (*              | Some t => *)
-  (*                  if tag_eqb k t *)
-  (*                  then pres x *)
-  (*                  else abs *)
-  (*              end *)
-  (*          | err e, _ | _, err e => err e *)
-  (*          | _, _ => err error_Cl *)
-  (*          end (swhen k X C). *)
+  Definition kwhen (k : enumtag) : DS (errv A) -C-> DS (errv B) -C-> DS (errv A) :=
+    FIXP _ (kwhenf k).
 
   Lemma kwhen_eq : forall k c C x X,
       kwhen k (cons x X) (cons c C)
@@ -192,12 +190,28 @@ Section KWHEN.
   Proof.
     intros.
     unfold kwhen at 1.
-    autorewrite with cpodb.
+    rewrite FIXP_eq.
+    fold (kwhen k).
+    unfold kwhenf.
+    repeat (rewrite curry_Curry, Curry_simpl).
+    setoid_rewrite fcont_comp_simpl.
+    change (fcontit ?a ?b) with (a b).
+    repeat rewrite ?fcont_comp_simpl, ?fcont_comp2_simpl.
+    setoid_rewrite ford_fcont_shift_simpl.
+    rewrite SND_simpl, FST_simpl.
     simpl.
-    rewrite zip_cons, filter_eq_cons.
-    (* TODO: faire un filter booléen, c'est vachement plus simple? *)
-  Qed.
-
+    rewrite DSCASE_simpl, DScase_cons.
+    change (fcontit ?a ?b) with (a b).
+    repeat (rewrite curry_Curry, Curry_simpl).
+    setoid_rewrite fcont_comp_simpl.
+    change (fcontit ?a ?b) with (a b).
+    repeat rewrite ?fcont_comp_simpl, ?fcont_comp2_simpl.
+    setoid_rewrite ford_fcont_shift_simpl.
+    rewrite SND_simpl, FST_simpl.
+    cases_eqn HH; subst; try congruence.
+    all: simpl; rewrite DSCASE_simpl, DScase_cons.
+    all: cases_eqn HH; congruence.
+    Qed.
 
 End KWHEN.
 
