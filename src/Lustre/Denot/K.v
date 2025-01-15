@@ -3,6 +3,7 @@ From Coq Require Import BinPos List.
 From Velus Require Import Common Ident Operators Clocks CoindStreams.
 From Velus Require Import Lustre.StaticEnv Lustre.LSyntax Lustre.LSemantics Lustre.LOrdered.
 From Velus Require Import Lustre.Denot.Cpo Lustre.Denot.SD.
+From Velus.Lustre.Denot.Cpo Require Import Cpo_streams_type.
 
 Close Scope equiv_scope. (* conflicting notation "==" *)
 Import ListNotations.
@@ -364,7 +365,102 @@ Section KWHEN.
 
 End KWHEN.
 
+Section KUNOP.
 
+  Context {A B D : Type}.
+
+  Definition kunop (uop : A -> option B) : DS (errv A) -C-> DS (errv B) :=
+    MAP (fun x => match x with
+               | val v =>
+                   match uop v with
+                   | Some y => val y
+                   | None => err' error_Op'
+                   end
+               | err' e => err' e
+               end).
+
+  Lemma kunop_eq : forall uop u U,
+      kunop uop (cons u U)
+      == cons match u with
+           | val u => match uop u with
+                      | Some v => val v
+                      | None => err' error_Op'
+                      end
+           | err' e => err' e
+           end (kunop uop U).
+  Proof.
+    intros.
+    unfold kunop.
+    rewrite MAP_map, map_eq_cons.
+    destruct u; auto.
+  Qed.
+
+  Theorem erase_unop :
+    forall (op:A->option B) (xs : DS (sampl A)),
+      ea (sunop op xs) == kunop op (ea xs).
+  Proof.
+    intros.
+    apply DS_bisimulation_allin1 with
+      (R := fun U V =>
+              exists xs,
+                U == ea (sunop op xs)
+                /\ V == kunop op (ea xs)
+      ).
+    3: eauto.
+  intros * ? Eq1 Eq2; setoid_rewrite <- Eq1; setoid_rewrite <- Eq2; eauto.
+  clear; intros U V Hc (xs & Hu & Hv).
+  rewrite Hu, Hv in *.
+  destruct Hc as [Hc|Hc].
+  {
+  apply ea_is_cons in Hc as Hcp.
+  remember_ds (sunop op xs) as rs.
+  revert dependent xs.
+  revert dependent U.
+  revert dependent V.
+  induction Hcp; intros.
+  { rewrite <- eqEps in *; eauto 2. }
+  - assert (a = abs); subst.
+    { destruct a; auto; contradict H; congruence. }
+    destruct (@is_cons_elim _ xs) as (x & xs' & Hxs).
+    { apply symmetry, cons_is_cons in Hrs.
+      unfold sunop in Hrs.
+      now apply map_is_cons in Hrs. }
+    rewrite Hxs, 2 ea_cons in *.
+    rewrite sunop_eq in Hrs.
+    apply Con_eq_simpl in Hrs as [].
+    cases; congruence.
+  - destruct (@is_cons_elim _ xs) as (x & xs' & Hxs).
+    { apply symmetry, cons_is_cons in Hrs.
+      unfold sunop in Hrs.
+      now apply map_is_cons in Hrs. }
+    rewrite Hxs, 2 ea_cons in *.
+    rewrite sunop_eq in *.
+    apply Con_eq_simpl in Hrs as [? Hrs].
+    cases_eqn HH; subst; try congruence; inv H0.
+    all:rewrite kunop_eq in *; cases_eqn HH; try congruence; try inv HH0.
+    all: rewrite 2 first_cons; split; auto.
+    all: esplit; rewrite Hu, Hv, 2 rem_cons, Hrs; auto.
+  }
+  {
+  unfold kunop in Hc.
+  apply map_is_cons, ea_is_cons in Hc as Hcp.
+  revert dependent U.
+  revert dependent V.
+  induction Hcp; intros.
+  { rewrite <- eqEps in *; eauto 2. }
+  - assert (a = abs); subst.
+    { destruct a; auto; contradict H; congruence. }
+    rewrite sunop_eq, 2 ea_cons in * .
+    apply IHHcp; auto.
+  - rewrite sunop_eq, 2 ea_cons in * .
+    cases_eqn HH; subst; try congruence; inv HH.
+    all:rewrite kunop_eq in *; cases_eqn HH; try congruence; try inv HH1.
+    all: rewrite 2 first_cons; split; auto.
+    all: esplit; rewrite Hu, Hv, 2 rem_cons; auto.
+  }
+  Qed.
+
+End KUNOP.
 
 Section KDenot_node.
 
@@ -399,10 +495,6 @@ Section KDenot_exps.
 
 End KDenot_exps.
 
-
-
-
-
 Definition kdenot_exp_ (ins : list ident)
   (e : exp) :
   (* (nodes * inputs * env) -> streams *)
@@ -428,9 +520,6 @@ Definition kdenot_exp_ (ins : list ident)
   - (* Elast *)
     apply CTE, 0.
   - (* Eunop *)
-
-TODO.
- 
 
 
     eapply fcont_comp. 2: apply (denot_exp_ e0).
