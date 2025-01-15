@@ -21,76 +21,6 @@ Module Type LKAHN
        (Import Sd    : SD            Ids Op OpAux Cks Senv Syn Lord).
 
 
-Section KDenot_node.
-
-Context {PSyn : list decl -> block -> Prop}.
-Context {Prefs : PS.t}.
-Variable (G : @global PSyn Prefs).
-
-Section KDenot_exps.
-
-  Hypothesis kdenot_exp_ :
-    forall e : exp,
-      Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
-      @nprod (DS (sampl value)) (numstreams e).
-
-  Definition kdenot_exps_ (es : list exp) :
-    Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
-    @nprod (DS (sampl value)) (list_sum (List.map numstreams es)).
-    induction es as [|a].
-    + exact 0.
-    + exact ((nprod_app @2_ (kdenot_exp_ a)) IHes).
-  Defined.
-
-  Definition kdenot_expss_ {A} (ess : list (A * list exp)) (n : nat) :
-    Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
-    @nprod (@nprod (DS (sampl value)) n) (length ess).
-    induction ess as [|[? es]].
-    + exact 0.
-    + destruct (Nat.eq_dec (list_sum (List.map numstreams es)) n) as [<-|].
-      * exact ((nprod_cons @2_ (kdenot_exps_ es)) IHess).
-      * exact 0.
-  Defined.
-
-End KDenot_exps.
-
-
-
-Inductive error' :=
-| error_Ty'
-| error_Op'
-.
-
-(* valeur de Kahn: potentiellement erronée *)
-Inductive errv (A : Type) : Type :=
-| val (a: A)
-| err' (e : error').
-
-Arguments val {A} a.
-Arguments err' {A} e.
-
-(* un ea qui change le type *)
-Section EA.
-
-Lemma is_abs_or_not : forall A (x : sampl A), {x <> abs} + {~ x <> abs}.
-Proof.
-  intros ? []; auto; now left.
-Qed.
-
-(* efface les absences *)
-Definition ea {A : Type} : DS (sampl A) -C-> DS (errv A).
-  refine (MAP (fun (x:sampl A) => match x with
-                     | pres v => val v
-                     | err error_Ty => err' error_Ty'
-                     | err error_Op => err' error_Op'
-                     | abs => err' error_Ty'
-                     | err error_Cl => err' error_Ty'
-                               end)
-            @_ FILTER (fun v => v <> abs) (is_abs_or_not _)).
-Defined.
-
-End EA.
-
 (* filter booléen, plus pratique ? *)
 Section FilterB.
 
@@ -121,9 +51,58 @@ Section FilterB.
 
 End FilterB.
 
+
+
+Inductive error' :=
+| error_Ty'
+| error_Op'
+.
+
+(* valeur de Kahn: potentiellement erronée *)
+Inductive errv (A : Type) : Type :=
+| val (a: A)
+| err' (e : error').
+
+Arguments val {A} a.
+Arguments err' {A} e.
+
+(* un ea qui change le type *)
+Section EA.
+
+(* efface les absences *)
+Definition ea {A : Type} : DS (sampl A) -C-> DS (errv A).
+  refine (MAP (fun (x:sampl A) => match x with
+                     | pres v => val v
+                     | err error_Ty => err' error_Ty'
+                     | err error_Op => err' error_Op'
+                     | abs | err error_Cl => err' error_Ty'
+                     end)
+            @_ filterb (fun v => match v with abs => false | _ => true end)).
+Defined.
+
+Lemma ea_cons :
+  forall A (x : sampl A) xs,
+    ea (cons x xs)
+    == match x with
+       | abs => ea xs
+       | pres v => cons (val v) (ea xs)
+       | err error_Ty => cons (err' error_Ty') (ea xs)
+       | err error_Op => cons (err' error_Op') (ea xs)
+       | err error_Cl => cons (err' error_Ty') (ea xs)
+       end.
+Proof.
+  intros.
+  unfold ea at 1.
+  rewrite fcont_comp_simpl, MAP_map, filterb_eq_cons.
+  destruct x; auto; rewrite map_eq_cons; auto.
+  destruct e; auto.
+Qed.
+
+End EA.
+
 Section KWHEN.
 
-  Context {A B D : Type}.
+  Context {A B : Type}.
 
   Variable enumtag : Type.
   Variable tag_of_val : B -> option enumtag.
@@ -213,7 +192,133 @@ Section KWHEN.
     all: cases_eqn HH; congruence.
     Qed.
 
+  Lemma ea_is_cons :
+  forall A (xs : DS (sampl A)),
+    is_cons (ea xs) ->
+    isConP (fun v => v <> abs) xs.
+Proof.
+  unfold ea, filterb.
+  intros * Hc.
+  apply map_is_cons in Hc.
+  apply filter_is_cons in Hc.
+  induction Hc; auto.
+  - apply isConPnP; auto.
+    intro; subst; cases; now apply H.
+  - apply isConPP.
+    cases; congruence.
+Qed.
+
+  Definition swhen := @swhen A B enumtag tag_of_val tag_eqb.
+  Lemma erase_swhen :
+    forall k xs cs,
+      safe_DS (swhen k xs cs) ->
+      ea (swhen k xs cs) == kwhen k (ea xs) (ea cs).
+  Proof.
+    intros.
+    eapply DS_bisimulation_allin1 with
+      (R := fun U V => exists xs cs,
+                safe_DS (swhen k xs cs)
+                /\ U == ea (swhen k xs cs)
+                /\ V == kwhen k (ea xs) (ea cs)).
+    3:eauto.
+    intros * ? Eq1 Eq2; setoid_rewrite <- Eq1; setoid_rewrite <- Eq2; eauto.
+    clear.
+    intros U V Hc (xs & cs & Hs & Hu & Hv).
+    destruct Hc as [Hc | Hc].
+    {
+      rewrite Hu in Hc.
+      apply ea_is_cons in Hc as Hcp.
+      remember_ds (swhen k xs cs) as rs.
+      revert dependent xs.
+      revert dependent cs.
+      revert dependent U.
+      revert dependent V.
+      induction Hcp; intros.
+      { rewrite <- eqEps in *; eauto 2. }
+      - assert (a = abs); subst.
+        { inv Hs. cases. contradict H. congruence. }
+        destruct (@is_cons_elim _ xs) as (x & xs' & Hxs).
+        { eapply proj1, zip_is_cons.
+          unfold swhen, SDfuns.swhen in Hrs.
+          rewrite <- Hrs; auto. }
+        destruct (@is_cons_elim _ cs) as (c & cs' & Hcs).
+        { eapply proj2, zip_is_cons.
+          unfold swhen, SDfuns.swhen in Hrs.
+          rewrite <- Hrs; auto. }
+        rewrite Hxs, Hcs, 2 ea_cons in *.
+        unfold swhen in *.
+        rewrite swhen_eq in Hrs.
+        apply Con_eq_simpl in Hrs as [].
+        inv Hs; cases_eqn HH; subst; try congruence.
+        eapply IHHcp; eauto.
+        eapply IHHcp; auto. eauto.
+  - destruct (@is_cons_elim _ xs) as (x & xs' & Hxs).
+    { eapply proj1, sbinop_is_cons; rewrite <- Hrs; auto. }
+    destruct (@is_cons_elim _ ys) as (y & ys' & Hys).
+    { eapply proj2, sbinop_is_cons; rewrite <- Hrs; auto. }
+    rewrite Hxs, Hys, 3 ea_cons in *.
+    rewrite sbinop_eq in *.
+    apply Con_eq_simpl in Hrs as [? Hrs].
+    inv Hs.
+    destruct x, y; try tauto.
+    rewrite sbinop_eq, Hrs in *.
+    cases_eqn HH; inv HH.
+    rewrite 2 first_cons; split; auto.
+    setoid_rewrite Hv.
+    setoid_rewrite Hu.
+    setoid_rewrite Hrs.
+    rewrite 2 rem_cons; eauto.
+
+
+
+
+  Qed.
+
 End KWHEN.
+
+Lemma erase_swhen :
+  forall A B C (op:A->B->option C) xs ys,
+    safe_DS (swhen op xs ys) ->
+    ea (sbinop op xs ys) <= sbinop op (ea xs) (ea ys).
+Proof.
+
+
+
+
+Section KDenot_node.
+
+Context {PSyn : list decl -> block -> Prop}.
+Context {Prefs : PS.t}.
+Variable (G : @global PSyn Prefs).
+
+Section KDenot_exps.
+
+  Hypothesis kdenot_exp_ :
+    forall e : exp,
+      Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
+      @nprod (DS (sampl value)) (numstreams e).
+
+  Definition kdenot_exps_ (es : list exp) :
+    Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
+    @nprod (DS (sampl value)) (list_sum (List.map numstreams es)).
+    induction es as [|a].
+    + exact 0.
+    + exact ((nprod_app @2_ (kdenot_exp_ a)) IHes).
+  Defined.
+
+  Definition kdenot_expss_ {A} (ess : list (A * list exp)) (n : nat) :
+    Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
+    @nprod (@nprod (DS (sampl value)) n) (length ess).
+    induction ess as [|[? es]].
+    + exact 0.
+    + destruct (Nat.eq_dec (list_sum (List.map numstreams es)) n) as [<-|].
+      * exact ((nprod_cons @2_ (kdenot_exps_ es)) IHess).
+      * exact 0.
+  Defined.
+
+End KDenot_exps.
+
+
 
 
 
