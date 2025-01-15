@@ -98,6 +98,22 @@ Proof.
   destruct e; auto.
 Qed.
 
+Lemma ea_is_cons :
+  forall A (xs : DS (sampl A)),
+    is_cons (ea xs) ->
+    isConP (fun v => v <> abs) xs.
+Proof.
+  unfold ea, filterb.
+  intros * Hc.
+  apply map_is_cons in Hc.
+  apply filter_is_cons in Hc.
+  induction Hc; auto.
+  - apply isConPnP; auto.
+    intro; subst; cases; now apply H.
+  - apply isConPP.
+    cases; congruence.
+Qed.
+
 End EA.
 
 Section KWHEN.
@@ -150,7 +166,61 @@ Section KWHEN.
        | err' e, _ | _, err' e => (CTE _ _ (cons (err' e) 0))
        end).
   Defined.
-  Definition kwhen (k : enumtag) : DS (errv A) -C-> DS (errv B) -C-> DS (errv A) :=
+
+  Lemma kwhenf_eq : forall F k c C x X,
+      kwhenf k F (cons x X) (cons c C)
+      == match x, c with
+         | val x, val c =>
+             match tag_of_val c with
+             | None => cons (err' error_Ty') 0
+             | Some t =>
+                 if tag_eqb k t
+                 then cons (val x) (F X C)
+                 else F X C
+             end
+         | err' e, _ | _, err' e => cons (err' e) 0
+         end.
+  Proof.
+    intros.
+    unfold kwhenf.
+    repeat (rewrite curry_Curry, Curry_simpl).
+    setoid_rewrite fcont_comp_simpl.
+    change (fcontit ?a ?b) with (a b).
+    repeat rewrite ?fcont_comp_simpl, ?fcont_comp2_simpl.
+    setoid_rewrite ford_fcont_shift_simpl.
+    rewrite SND_simpl, FST_simpl.
+    simpl.
+    rewrite DSCASE_simpl, DScase_cons.
+    change (fcontit ?a ?b) with (a b).
+    repeat (rewrite curry_Curry, Curry_simpl).
+    setoid_rewrite fcont_comp_simpl.
+    change (fcontit ?a ?b) with (a b).
+    repeat rewrite ?fcont_comp_simpl, ?fcont_comp2_simpl.
+    setoid_rewrite ford_fcont_shift_simpl.
+    rewrite SND_simpl, FST_simpl.
+    cases_eqn HH; subst; try congruence.
+    all: simpl; rewrite DSCASE_simpl, DScase_cons.
+    all: cases_eqn HH; congruence.
+  Qed.
+
+  Lemma kwhenf_is_cons :
+    forall k F xs cs, is_cons (kwhenf k F xs cs) -> is_cons xs /\ is_cons cs.
+  Proof.
+    intros * Hc.
+    assert (Hcx : is_cons xs).
+    { apply DScase_is_cons in Hc.
+      assumption. }
+    split; auto.
+    apply is_cons_elim in Hcx as (?&?&Hx).
+    revert Hc.
+    rewrite Hx.
+    unfold kwhenf.
+    setoid_rewrite DSCASE_simpl.
+    rewrite DScase_eq_cons; eauto.
+    intros Hc%DScase_is_cons; auto.
+  Qed.
+
+  Definition  kwhen (k : enumtag) : DS (errv A) -C-> DS (errv B) -C-> DS (errv A) :=
     FIXP _ (kwhenf k).
 
   Lemma kwhen_eq : forall k c C x X,
@@ -171,51 +241,65 @@ Section KWHEN.
     unfold kwhen at 1.
     rewrite FIXP_eq.
     fold (kwhen k).
-    unfold kwhenf.
-    repeat (rewrite curry_Curry, Curry_simpl).
-    setoid_rewrite fcont_comp_simpl.
-    change (fcontit ?a ?b) with (a b).
-    repeat rewrite ?fcont_comp_simpl, ?fcont_comp2_simpl.
-    setoid_rewrite ford_fcont_shift_simpl.
-    rewrite SND_simpl, FST_simpl.
-    simpl.
-    rewrite DSCASE_simpl, DScase_cons.
-    change (fcontit ?a ?b) with (a b).
-    repeat (rewrite curry_Curry, Curry_simpl).
-    setoid_rewrite fcont_comp_simpl.
-    change (fcontit ?a ?b) with (a b).
-    repeat rewrite ?fcont_comp_simpl, ?fcont_comp2_simpl.
-    setoid_rewrite ford_fcont_shift_simpl.
-    rewrite SND_simpl, FST_simpl.
-    cases_eqn HH; subst; try congruence.
-    all: simpl; rewrite DSCASE_simpl, DScase_cons.
-    all: cases_eqn HH; congruence.
-    Qed.
+    now rewrite kwhenf_eq.
+  Qed.
 
-  Lemma ea_is_cons :
-  forall A (xs : DS (sampl A)),
-    is_cons (ea xs) ->
-    isConP (fun v => v <> abs) xs.
-Proof.
-  unfold ea, filterb.
-  intros * Hc.
-  apply map_is_cons in Hc.
-  apply filter_is_cons in Hc.
-  induction Hc; auto.
-  - apply isConPnP; auto.
-    intro; subst; cases; now apply H.
-  - apply isConPP.
-    cases; congruence.
-Qed.
+  Lemma kwhen_is_cons :
+    forall k xs cs, is_cons (kwhen k xs cs) -> is_cons xs /\ is_cons cs.
+  Proof.
+    intros *.
+    unfold kwhen.
+    rewrite FIXP_eq.
+    apply kwhenf_is_cons.
+  Qed.
+
+  (* pas vrai, il faut supposer (safe_DS (kwhen k xs cs)) *)
+  Lemma kwhen_is_cons_cond :
+    forall k xs cs,
+      is_cons (kwhen k xs cs) ->
+      isConP (fun c => match c with
+                    | val c =>
+                        match tag_of_val c with
+                        | Some t => tag_eqb k t = true
+                        | _ => True
+                        end
+                    | _ => True
+                    end
+        ) cs.
+  Proof.
+    (* intros *. *)
+    unfold kwhen.
+    setoid_rewrite FIXP_fixp.
+    intro k.
+    apply fixp_ind; auto.
+    admit.
+    admit.
+    change (fcontit ?a ?b) with (a b).
+    intros F HF xs cs Hic.
+    apply kwhenf_is_cons in Hic as HH.
+    destruct HH as [Hcx Hcc].
+    apply is_cons_elim in Hcx as (?&?&Hx).
+    apply is_cons_elim in Hcc as (?&?&Hc).
+    rewrite Hx, Hc, kwhenf_eq in *.
+    cases_eqn HH; subst.
+    - apply isConPP; rewrite HH1; auto.
+    - apply isConPnP; eauto; rewrite HH1, HH2; auto.
+    - apply isConPP; rewrite HH1; auto.
+  Abort.
 
   Definition swhen := @swhen A B enumtag tag_of_val tag_eqb.
-  Lemma erase_swhen :
+
+  (* ce côté-là est ok.
+     L'autre sens est pénible car nécessite de raisonner
+     avec [isConP] sur kwhen etc.
+   *)
+  Lemma erase_swhen_le1 :
     forall k xs cs,
       safe_DS (swhen k xs cs) ->
-      ea (swhen k xs cs) == kwhen k (ea xs) (ea cs).
+      ea (swhen k xs cs) <= kwhen k (ea xs) (ea cs).
   Proof.
     intros.
-    eapply DS_bisimulation_allin1 with
+    apply DSle_rec_eq2 with
       (R := fun U V => exists xs cs,
                 safe_DS (swhen k xs cs)
                 /\ U == ea (swhen k xs cs)
@@ -224,64 +308,61 @@ Qed.
     intros * ? Eq1 Eq2; setoid_rewrite <- Eq1; setoid_rewrite <- Eq2; eauto.
     clear.
     intros U V Hc (xs & cs & Hs & Hu & Hv).
-    destruct Hc as [Hc | Hc].
-    {
-      rewrite Hu in Hc.
-      apply ea_is_cons in Hc as Hcp.
-      remember_ds (swhen k xs cs) as rs.
-      revert dependent xs.
-      revert dependent cs.
-      revert dependent U.
-      revert dependent V.
-      induction Hcp; intros.
-      { rewrite <- eqEps in *; eauto 2. }
-      - assert (a = abs); subst.
-        { inv Hs. cases. contradict H. congruence. }
-        destruct (@is_cons_elim _ xs) as (x & xs' & Hxs).
-        { eapply proj1, zip_is_cons.
-          unfold swhen, SDfuns.swhen in Hrs.
-          rewrite <- Hrs; auto. }
-        destruct (@is_cons_elim _ cs) as (c & cs' & Hcs).
-        { eapply proj2, zip_is_cons.
-          unfold swhen, SDfuns.swhen in Hrs.
-          rewrite <- Hrs; auto. }
-        rewrite Hxs, Hcs, 2 ea_cons in *.
-        unfold swhen in *.
-        rewrite swhen_eq in Hrs.
-        apply Con_eq_simpl in Hrs as [].
-        inv Hs; cases_eqn HH; subst; try congruence.
+    rewrite Hu in Hc.
+    apply ea_is_cons in Hc as Hcp.
+    remember_ds (swhen k xs cs) as rs.
+    revert dependent xs.
+    revert dependent cs.
+    revert dependent U.
+    revert dependent V.
+    induction Hcp; intros.
+    - rewrite <- eqEps in *; eauto 2.
+    - (* absent *)
+      assert (a = abs); subst.
+      { inv Hs. cases. contradict H. congruence. }
+      destruct (@is_cons_elim _ xs) as (x & xs' & Hxs).
+      { eapply proj1, zip_is_cons.
+        unfold swhen, SDfuns.swhen in Hrs.
+        rewrite <- Hrs; auto. }
+      destruct (@is_cons_elim _ cs) as (c & cs' & Hcs).
+      { eapply proj2, zip_is_cons.
+        unfold swhen, SDfuns.swhen in Hrs.
+        rewrite <- Hrs; auto. }
+      rewrite Hxs, Hcs, 2 ea_cons in *.
+      unfold swhen in *.
+      rewrite swhen_eq in Hrs.
+      apply Con_eq_simpl in Hrs as [].
+      inv Hs.
+      destruct x,c; try congruence.
+      + eapply IHHcp; eauto.
+      + rewrite kwhen_eq in Hv.
+        cases; try congruence.
         eapply IHHcp; eauto.
-        eapply IHHcp; auto. eauto.
-  - destruct (@is_cons_elim _ xs) as (x & xs' & Hxs).
-    { eapply proj1, sbinop_is_cons; rewrite <- Hrs; auto. }
-    destruct (@is_cons_elim _ ys) as (y & ys' & Hys).
-    { eapply proj2, sbinop_is_cons; rewrite <- Hrs; auto. }
-    rewrite Hxs, Hys, 3 ea_cons in *.
-    rewrite sbinop_eq in *.
-    apply Con_eq_simpl in Hrs as [? Hrs].
-    inv Hs.
-    destruct x, y; try tauto.
-    rewrite sbinop_eq, Hrs in *.
-    cases_eqn HH; inv HH.
-    rewrite 2 first_cons; split; auto.
-    setoid_rewrite Hv.
-    setoid_rewrite Hu.
-    setoid_rewrite Hrs.
-    rewrite 2 rem_cons; eauto.
-
-
-
-
+    - (* non absent *)
+      destruct (@is_cons_elim _ xs) as (x & xs' & Hxs).
+      { eapply proj1, zip_is_cons.
+        unfold swhen, SDfuns.swhen in Hrs.
+        rewrite <- Hrs; auto. }
+      destruct (@is_cons_elim _ cs) as (c & cs' & Hcs).
+      { eapply proj2, zip_is_cons.
+        unfold swhen, SDfuns.swhen in Hrs.
+        rewrite <- Hrs; auto. }
+      rewrite Hxs, Hcs, 2 ea_cons in *.
+      unfold swhen in *.
+      rewrite swhen_eq in Hrs.
+      apply Con_eq_simpl in Hrs as [].
+      inv Hs.
+      cases_eqn HH; subst; try congruence.
+      inv HH.
+      rewrite kwhen_eq in Hv.
+      rewrite HH2, HH3, H1 in *.
+      rewrite Hu, Hv, 2 first_cons.
+      split; auto.
+      exists xs', cs'.
+      rewrite Hu, Hv, 2 rem_cons; auto.
   Qed.
 
 End KWHEN.
-
-Lemma erase_swhen :
-  forall A B C (op:A->B->option C) xs ys,
-    safe_DS (swhen op xs ys) ->
-    ea (sbinop op xs ys) <= sbinop op (ea xs) (ea ys).
-Proof.
-
 
 
 
