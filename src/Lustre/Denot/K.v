@@ -462,6 +462,173 @@ Section KUNOP.
 
 End KUNOP.
 
+Section KBINOP.
+
+  Context {A B D : Type}.
+
+  Definition kbinop (bop : A -> B -> option D) :
+    DS (errv A) -C-> DS (errv B) -C-> DS (errv D) :=
+    ZIP (fun va vb =>
+           match va, vb with
+           | val a, val b =>
+               match bop a b with
+               | Some v => val v
+               | None => err' error_Op'
+               end
+           | err' e, _ => err' e
+           | _, err' e => err' e
+           end).
+
+  Lemma kbinop_eq : forall bop u U v V,
+      kbinop bop (cons u U) (cons v V)
+      == cons match u, v with
+           | val a, val b =>
+               match bop a b with
+               | Some v => val v
+               | None => err' error_Op'
+               end
+           | err' e, _ => err' e
+           | _, err' e => err' e
+        end (kbinop bop U V).
+  Proof.
+    intros.
+    unfold kbinop.
+    now rewrite zip_cons.
+  Qed.
+
+  Lemma kbinop_is_cons : forall bop U V,
+      is_cons (kbinop bop U V) ->
+      is_cons U /\ is_cons V.
+  Proof.
+    unfold kbinop; intros *.
+    now apply zip_is_cons.
+  Qed.
+
+  Lemma erase_sbinop_1 :
+    forall(op:A->B->option D) xs ys,
+      safe_DS (sbinop op xs ys) ->
+      ea (sbinop op xs ys) <= kbinop op (ea xs) (ea ys).
+  Proof.
+    intros * Hs.
+    apply DSle_rec_eq2 with
+      (R := fun U V =>
+              (exists xs ys,
+                  safe_DS (sbinop op xs ys)
+                  /\ U == ea (sbinop op xs ys)
+                  /\ V == kbinop op (ea xs) (ea ys))
+      ).
+  3: eauto.
+  intros * ? Eq1 Eq2; setoid_rewrite <- Eq1; setoid_rewrite <- Eq2; eauto.
+  clear; intros U V Hc (xs & ys & Hs & Hu & Hv).
+  rewrite Hu, Hv in *.
+  apply ea_is_cons in Hc as Hcp.
+  remember_ds (sbinop op xs ys) as rs.
+  revert dependent xs.
+  revert dependent ys.
+  revert dependent U.
+  revert dependent V.
+  induction Hcp; intros.
+  { rewrite <- eqEps in *; eauto 2. }
+  - assert (a = abs); subst.
+    { inv Hs. cases. contradict H. congruence. }
+    destruct (@is_cons_elim _ xs) as (x & xs' & Hxs).
+    { eapply proj1, sbinop_is_cons; rewrite <- Hrs; auto. }
+    destruct (@is_cons_elim _ ys) as (y & ys' & Hys).
+    { eapply proj2, sbinop_is_cons; rewrite <- Hrs; auto. }
+    rewrite Hxs, Hys, 3 ea_cons in *.
+    rewrite sbinop_eq in Hrs.
+    apply Con_eq_simpl in Hrs as [].
+    inv Hs; cases; congruence.
+  - destruct (@is_cons_elim _ xs) as (x & xs' & Hxs).
+    { eapply proj1, sbinop_is_cons; rewrite <- Hrs; auto. }
+    destruct (@is_cons_elim _ ys) as (y & ys' & Hys).
+    { eapply proj2, sbinop_is_cons; rewrite <- Hrs; auto. }
+    rewrite Hxs, Hys, 3 ea_cons in *.
+    rewrite sbinop_eq in *.
+    apply Con_eq_simpl in Hrs as [? Hrs].
+    inv Hs.
+    destruct x, y; try tauto.
+    rewrite kbinop_eq, Hrs in *.
+    cases_eqn HH; inv HH.
+    rewrite 2 first_cons; split; auto.
+    setoid_rewrite Hv.
+    setoid_rewrite Hu.
+    setoid_rewrite Hrs.
+    rewrite 2 rem_cons; eauto.
+Qed.
+
+Lemma erase_sbinop_2 :
+  forall (op:A->B->option D) xs ys,
+    safe_DS (sbinop op xs ys) ->
+    kbinop op (ea xs) (ea ys) <= ea (sbinop op xs ys).
+Proof.
+  intros * Hs.
+  apply DSle_rec_eq2 with
+    (R := fun U V =>
+            (exists xs ys,
+                safe_DS (sbinop op xs ys)
+                /\ U == kbinop op (ea xs) (ea ys)
+                /\ V == ea (sbinop op xs ys))
+    ).
+  3: eauto.
+  intros * ? Eq1 Eq2; setoid_rewrite <- Eq1; setoid_rewrite <- Eq2; eauto.
+  clear; intros U V Hc (xs & ys & Hs & Hu & Hv).
+  rewrite Hu, Hv in *.
+  apply kbinop_is_cons in Hc as [Hc1 Hc2].
+  apply ea_is_cons in Hc1.
+  revert dependent ys.
+  revert U V.
+  induction Hc1; intros.
+  - rewrite <- eqEps in *; apply IHHc1; auto.
+  - apply ea_is_cons in Hc2 as Hc2'.
+    induction Hc2'.
+    + rewrite <- eqEps in *; apply IHHc2'; auto.
+    + rewrite sbinop_eq in *.
+      inv Hs.
+      cases_eqn HH; subst.
+      2: contradict H0; congruence.
+      repeat rewrite ea_cons in *.
+      eapply IHHc1; auto.
+    + repeat rewrite ea_cons in *.
+      repeat rewrite sbinop_eq in *.
+      inv Hs.
+      cases_eqn HH; subst; try congruence.
+      repeat rewrite ea_cons in *.
+      rewrite kbinop_eq in *.
+      cases_eqn HH; subst; try congruence.
+      inv HH2; inv HH.
+      rewrite 2 first_cons; split; auto.
+      do 2 esplit; rewrite Hu, Hv, 2 rem_cons; eauto.
+  - apply ea_is_cons in Hc2 as Hc2'.
+    induction Hc2'.
+    + rewrite <- eqEps in *; apply IHHc2'; auto.
+    + rewrite sbinop_eq in *.
+      inv Hs.
+      cases_eqn HH; subst.
+      all: contradict H0; congruence.
+    + repeat rewrite ea_cons in *.
+      repeat rewrite sbinop_eq in *.
+      inv Hs.
+      cases_eqn HH; subst; try congruence.
+      repeat rewrite ea_cons in *.
+      rewrite kbinop_eq in *.
+      cases_eqn HH; subst; try congruence.
+      inv HH2; inv HH.
+      rewrite 2 first_cons; split; auto.
+      do 2 esplit; rewrite Hu, Hv, 2 rem_cons; eauto.
+Qed.
+
+Theorem erase_sbinop :
+  forall (op:A->B->option D) xs ys,
+    safe_DS (sbinop op xs ys) ->
+    ea (sbinop op xs ys) == kbinop op (ea xs) (ea ys).
+Proof.
+  split; auto using erase_sbinop_1, erase_sbinop_2.
+Qed.
+
+End KBINOP.
+
+
 Section KDenot_node.
 
 Context {PSyn : list decl -> block -> Prop}.
