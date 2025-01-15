@@ -365,6 +365,199 @@ Section KWHEN.
 
 End KWHEN.
 
+Section KFBY.
+
+  Lemma erase_fby1 :
+  forall A v (xs ys : DS (sampl A)),
+    safe_DS (fby1 (Some v) xs ys) ->
+    ea (fby1 (Some v) xs ys) <= cons (val v) (ea ys).
+Proof.
+  intros * Hs.
+
+  apply DSle_rec_eq2 with
+    (R := fun U V =>
+            (exists v xs ys,
+              safe_DS (fby1 (Some v) xs ys)
+              /\ U == ea (fby1 (Some v) xs ys)
+              /\ V == cons (val v) (ea ys))
+            \/
+            (exists xs ys,
+              safe_DS (fby1AP None xs ys)
+              /\ U == ea (fby1AP None xs ys)
+              /\ V == ea ys)
+    ).
+  3: eauto 12.
+  intros * ? Eq1 Eq2; setoid_rewrite <- Eq1; setoid_rewrite <- Eq2; eauto 12.
+  clear; intros U V Hc [(v & xs & ys & Sf & Hu & Hv) | (xs & ys & Sf & Hu & Hv)].
+  - rewrite Hu, Hv in *.
+  apply ea_is_cons in Hc as Hcp.
+  remember_ds (fby1 (Some v) xs ys) as rs.
+  revert dependent xs.
+  revert dependent ys.
+  revert dependent U.
+  revert dependent V.
+  revert dependent v.
+  induction Hcp; intros.
+  { rewrite <- eqEps in *; eauto 2. }
+  all: destruct (@is_cons_elim _ xs) as (x & xs' & Hxs);
+    [eapply fby1_cons; rewrite <- Hrs; eauto | rewrite Hxs in *].
+  + assert (a = abs); subst.
+    { apply Decidable.not_not in H; auto.
+      unfold Decidable.decidable.
+      destruct a; auto; right; congruence. }
+    rewrite fby1_eq in Hrs.
+    destruct x; apply Con_eq_simpl in Hrs as [? Hrs]; try congruence.
+    rewrite ea_cons in *.
+    all: destruct (@is_cons_elim _ ys) as (y & ys' & Hys);
+      [eapply fby1AP_cons, isConP_is_cons; rewrite <- Hrs; eauto | rewrite Hys in *].
+    inversion_clear Sf as [|??? Sf'].
+    rewrite fby1AP_eq in Hrs.
+    destruct y; rewrite ea_cons in *; eauto 2.
+    all: exfalso; clear IHHcp.
+    all: destruct (@is_cons_elim _ s) as (vs & s' & Hs);
+      [eapply isConP_is_cons; eauto | rewrite Hs in *].
+    all: apply symmetry, map_eq_cons_elim in Hrs as (?&?&?&?&?); subst;
+      now inversion Sf'.
+  + inversion_clear Sf as [|??? Sf'].
+    rewrite fby1_eq in Hrs.
+    destruct a, x; apply Con_eq_simpl in Hrs as [HH Ht];
+      inversion_clear HH; try (tauto || congruence).
+     rewrite ea_cons in *.
+    rewrite 2 first_cons; split; auto.
+    setoid_rewrite Hu.
+    setoid_rewrite Hv.
+    setoid_rewrite rem_cons.
+    setoid_rewrite Ht.
+    rewrite Ht in Sf'.
+    right.
+    exists xs', ys. split; auto.
+  -
+    rewrite Hu, Hv in *.
+    destruct (@is_cons_elim _ ys) as (y & ys' & Hys);
+      [eapply  fby1AP_cons, isConP_is_cons, ea_is_cons; eauto
+      | rewrite Hys in *].
+    rewrite fby1AP_eq in *.
+    destruct y; rewrite ea_cons in *.
+    1,3: destruct (@is_cons_elim _ xs) as (x & xs' & Hxs);
+    [eapply map_is_cons, isConP_is_cons, ea_is_cons, Hc
+    | rewrite Hxs, map_eq_cons in *]; now inversion_clear Sf.
+
+    (* on se retrouve dans le même cas qu'avant !! *)
+    { clear Hys ys.
+      rename a into v.
+      rename ys' into ys.
+  apply ea_is_cons in Hc as Hcp.
+  remember_ds (fby1 (Some v) xs ys) as rs.
+  revert dependent xs.
+  revert dependent ys.
+  revert dependent U.
+  revert dependent V.
+  revert dependent v.
+  induction Hcp; intros.
+  { rewrite <- eqEps in *; eauto 2. }
+  all: destruct (@is_cons_elim _ xs) as (x & xs' & Hxs);
+    [eapply fby1_cons; rewrite <- Hrs; eauto | rewrite Hxs in *].
+  + assert (a = abs); subst.
+    { apply Decidable.not_not in H; auto.
+      unfold Decidable.decidable.
+      destruct a; auto; right; congruence. }
+    rewrite fby1_eq in Hrs.
+    destruct x; apply Con_eq_simpl in Hrs as [? Hrs]; try congruence.
+    rewrite ea_cons in *.
+    all: destruct (@is_cons_elim _ ys) as (y & ys' & Hys);
+      [eapply fby1AP_cons, isConP_is_cons; rewrite <- Hrs; eauto | rewrite Hys in *].
+    inversion_clear Sf as [|??? Sf'].
+    rewrite fby1AP_eq in Hrs.
+    destruct y; rewrite ea_cons in *; eauto 2.
+    all: exfalso; clear IHHcp.
+    all: destruct (@is_cons_elim _ s) as (vs & s' & Hs);
+      [eapply isConP_is_cons; eauto | rewrite Hs in *].
+    all: apply symmetry, map_eq_cons_elim in Hrs as (?&?&?&?&?); subst;
+      now inversion Sf'.
+  + inversion_clear Sf as [|??? Sf'].
+    rewrite fby1_eq in Hrs.
+    destruct a, x; apply Con_eq_simpl in Hrs as [HH Ht];
+      inversion_clear HH; try (tauto || congruence).
+     rewrite ea_cons in *.
+    rewrite 2 first_cons; split; auto.
+    setoid_rewrite Hu.
+    setoid_rewrite Hv.
+    setoid_rewrite rem_cons.
+    setoid_rewrite Ht.
+    rewrite Ht in Sf'.
+    right.
+    exists xs', ys. split; auto.
+    }
+Qed.
+
+Theorem erase_fby :
+  forall A (xs ys : DS (sampl A)),
+    safe_DS (fby xs ys) ->
+    ea (fby xs ys) <= app (ea xs) (ea ys).
+Proof.
+  intros * Hs.
+  remember_ds (ea (fby xs ys)) as U.
+  remember_ds (app (ea xs) (ea ys)) as V.
+  revert_all; cofix Cof; intros.
+  destruct U as [|u U]; [|clear Cof].
+  { constructor; rewrite <- eqEps in *; eapply Cof; eauto. }
+  (* on a une valeur sur U, donc un élément non absent dans xs *)
+  remember_ds (fby xs ys) as t.
+  apply symmetry in HU as HU2.
+  apply cons_is_cons, ea_is_cons in HU2.
+  rewrite HU, HV.
+  clear HU HV U V u.
+  revert dependent xs.
+  revert dependent ys.
+  induction HU2; intros.
+  { rewrite <- eqEps in *; auto. }
+  all: destruct (@is_cons_elim _ xs) as (x & xs' & Hxs);
+    [eapply fby_cons; rewrite <- Ht; eauto | rewrite Hxs in *].
+  - assert (a = abs); subst.
+    { apply Decidable.not_not in H; auto.
+      unfold Decidable.decidable.
+      destruct a; auto; right; congruence. }
+    rewrite fby_eq in Ht.
+    destruct x; apply Con_eq_simpl in Ht as [? Ht]; try congruence.
+    all: destruct (@is_cons_elim _ ys) as (y & ys' & Hys);
+      [eapply fbyA_cons, isConP_is_cons; rewrite <- Ht; eauto | rewrite Hys in *].
+    inversion_clear Hs as [|??? Hs'].
+    rewrite fbyA_eq in Ht.
+    destruct y; rewrite 3 ea_cons; auto.
+    all: destruct (@is_cons_elim _ s) as (vs & s' & Hs);
+      [eapply isConP_is_cons; eauto | rewrite Hs in *].
+    all: apply symmetry, map_eq_cons_elim in Ht as (?&?&?&?&?); subst;
+      now inversion Hs'.
+  - inversion_clear Hs as [|??? Hs'].
+    rewrite fby_eq in Ht.
+    destruct a, x; try (tauto || congruence).
+    all: apply Con_eq_simpl in Ht as [HH Ht]; try congruence.
+    inversion_clear HH.
+    rewrite 2 ea_cons, app_cons.
+    apply cons_le_compat; auto.
+
+    clear - Ht Hs'.
+
+    remember_ds (ea s) as U.
+    remember_ds (ea ys) as V.
+    revert_all; cofix Cof; intros.
+    destruct U as [|u U]; [|clear Cof].
+    { constructor; rewrite <- eqEps in *; eapply Cof; eauto. }
+    destruct (@is_cons_elim _ ys) as (y & ys' & Hys);
+      [eapply fby1AP_cons, isConP_is_cons, ea_is_cons; rewrite <- Ht, <- HU; eauto
+      | rewrite Hys in *].
+    rewrite fby1AP_eq in Ht.
+    destruct y; rewrite Ht in *.
+    2: (* cas intéressant *)
+      rewrite HU, HV, ea_cons, erase_fby1; now auto.
+    all:
+    destruct (@is_cons_elim _ xs') as (x & xs & Hxs);
+      [eapply map_is_cons, isConP_is_cons, ea_is_cons; rewrite <- HU; eauto
+      | rewrite Hxs, map_eq_cons in *; now inversion Hs'].
+Qed.
+
+End KFBY.
+
 Section KUNOP.
 
   Context {A B D : Type}.
@@ -635,24 +828,33 @@ Context {PSyn : list decl -> block -> Prop}.
 Context {Prefs : PS.t}.
 Variable (G : @global PSyn Prefs).
 
+Definition SI' := fun _ : ident => errv value.
+Definition FI' := fun _ : ident => (DS_prod SI' -C-> DS_prod SI').
+Definition errTy' : DS (errv value) := DS_const (err' error_Ty').
+
+(* l'opérateur swhen spécialisé aux Velus.Op.value *)
+Definition kwhenv :=
+  let get_tag := fun v => match v with Venum t => Some t | _ => None end in
+  @kwhen value value enumtag get_tag Nat.eqb.
+
 Section KDenot_exps.
 
   Hypothesis kdenot_exp_ :
     forall e : exp,
-      Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
-      @nprod (DS (sampl value)) (numstreams e).
+      Dprod (Dprod (Dprodi FI') (DS_prod SI')) (DS_prod SI') -C->
+      @nprod (DS (errv value)) (numstreams e).
 
   Definition kdenot_exps_ (es : list exp) :
-    Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
-    @nprod (DS (sampl value)) (list_sum (List.map numstreams es)).
+    Dprod (Dprod (Dprodi FI') (DS_prod SI')) (DS_prod SI') -C->
+    @nprod (DS (errv value)) (list_sum (List.map numstreams es)).
     induction es as [|a].
     + exact 0.
     + exact ((nprod_app @2_ (kdenot_exp_ a)) IHes).
   Defined.
 
   Definition kdenot_expss_ {A} (ess : list (A * list exp)) (n : nat) :
-    Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
-    @nprod (@nprod (DS (sampl value)) n) (length ess).
+    Dprod (Dprod (Dprodi FI') (DS_prod SI')) (DS_prod SI') -C->
+    @nprod (@nprod (DS (errv value)) n) (length ess).
     induction ess as [|[? es]].
     + exact 0.
     + destruct (Nat.eq_dec (list_sum (List.map numstreams es)) n) as [<-|].
@@ -665,54 +867,52 @@ End KDenot_exps.
 Definition kdenot_exp_ (ins : list ident)
   (e : exp) :
   (* (nodes * inputs * env) -> streams *)
-  Dprod (Dprod (Dprodi FI) (DS_prod SI)) (DS_prod SI) -C->
-  @nprod (DS (sampl value)) (numstreams e).
+  Dprod (Dprod (Dprodi FI') (DS_prod SI')) (DS_prod SI') -C->
+  @nprod (DS (errv value)) (numstreams e).
 
   set (ctx := Dprod _ _).
-  epose (denot_var :=
+  epose (kdenot_var :=
        fun x => if mem_ident x ins
-             then PROJ (DS_fam SI) x @_ SND _ _ @_ FST _ _
-             else PROJ (DS_fam SI) x @_ SND _ _).
+             then PROJ (DS_fam SI') x @_ SND _ _ @_ FST _ _
+             else PROJ (DS_fam SI') x @_ SND _ _).
   revert e.
-  fix denot_exp_ 1.
+  fix kdenot_exp_ 1.
   intro e.
   destruct e eqn:He; simpl (nprod _).
   - (* Econst *)
     (* véritable const, pas d'horloge dans le modèle de Kahn *)
-    exact (CTE _ _ (DS_const (pres (Vscalar (sem_cconst c))))).
+    exact (CTE _ _ (DS_const (val (Vscalar (sem_cconst c))))).
   - (* Eenum *)
-    exact (CTE _ _ (DS_const (pres (Venum e0)))).
+    exact (CTE _ _ (DS_const (val (Venum e0)))).
   - (* Evar *)
-    exact (denot_var i).
+    exact (kdenot_var i).
   - (* Elast *)
     apply CTE, 0.
   - (* Eunop *)
-
-
-    eapply fcont_comp. 2: apply (denot_exp_ e0).
+    eapply fcont_comp. 2: apply (kdenot_exp_ e0).
     destruct (numstreams e0) as [|[]].
     (* pas le bon nombre de flots: *)
-    1,3: apply CTE, errTy.
+    1,3: apply CTE, errTy'.
     destruct (typeof e0) as [|ty []].
-    1,3: apply CTE, errTy.
-    exact (sunop (fun v => sem_unop u v ty)).
+    1,3: apply CTE, errTy'.
+    exact (kunop (fun v => sem_unop u v ty)).
   - (* Ebinop *)
     eapply fcont_comp2.
-    3: apply (denot_exp_ e0_2).
-    2: apply (denot_exp_ e0_1).
+    3: apply (kdenot_exp_ e0_2).
+    2: apply (kdenot_exp_ e0_1).
     destruct (numstreams e0_1) as [|[]], (numstreams e0_2) as [|[]].
     (* pas le bon nombre de flots: *)
-    1-4,6-9: apply curry, CTE, errTy.
+    1-4,6-9: apply curry, CTE, errTy'.
     destruct (typeof e0_1) as [|ty1 []], (typeof e0_2) as [|ty2 []].
-    1-4,6-9: apply curry, CTE, errTy.
-    exact (sbinop (fun v1 v2 => sem_binop b v1 ty1 v2 ty2)).
+    1-4,6-9: apply curry, CTE, errTy'.
+    exact (kbinop (fun v1 v2 => sem_binop b v1 ty1 v2 ty2)).
   - (* Eextcall *)
     apply CTE, 0.
   - (* Efby *)
     rename l into e0s, l0 into es, l1 into anns.
     clear He.
-    pose (s0s := denot_exps_ denot_exp_ e0s).
-    pose (ss := denot_exps_ denot_exp_ es).
+    pose (s0s := kdenot_exps_ kdenot_exp_ e0s).
+    pose (ss := kdenot_exps_ kdenot_exp_ es).
     (* vérifier le typage *)
     destruct (Nat.eq_dec
                 (list_sum (List.map numstreams es))
@@ -723,10 +923,11 @@ Definition kdenot_exp_ (ins : list ident)
                 (length anns)
              ) as [Heq2|].
     (* si les tailles ne correspondent pas : *)
-    2,3: apply CTE, (nprod_const _ errTy).
+    2,3: apply CTE, (nprod_const _ errTy').
     rewrite Heq1 in ss.
     rewrite <- Heq2.
-    exact ((lift2 (SDfuns.fby) @2_ s0s) ss).
+    (* le véritable fby des réseaux de Kahn ! *)
+    exact ((lift2 (APP _) @2_ s0s) ss).
   - (* Earrow *)
     apply CTE, 0.
   - (* Ewhen *)
@@ -737,10 +938,11 @@ Definition kdenot_exp_ (ins : list ident)
                 (list_sum (List.map numstreams es))
                 (length tys)
              ) as [<-|].
-    2: apply CTE, (nprod_const _ errTy).
-    pose (ss := denot_exps_ denot_exp_ es).
-    exact ((llift (swhenv e0) @2_ ss) (denot_var i)).
+    2: apply CTE, (nprod_const _ errTy').
+    pose (ss := kdenot_exps_ kdenot_exp_ es).
+    exact ((llift (kwhenv e0) @2_ ss) (kdenot_var i)).
   - (* Emerge *)
+    TODO
     rename l into ies.
     destruct l0 as (tys,ck).
     destruct p as [i ty].
@@ -780,7 +982,7 @@ Definition kdenot_exp_ (ins : list ident)
     destruct (Nat.eq_dec (length (List.map fst n.(n_out))) (length anns)) as [<-|].
     2,3: apply CTE, (nprod_const _ errTy).
     (* dénotation du nœud *)
-    pose (f := PROJ _ i @_ FST _ _ @_ FST _ _ : ctx -C-> FI i).
+    pose (f := PROJ _ i @_ FST _ _ @_ FST _ _ : ctx -C-> FI' i).
     pose (ss := denot_exps_ denot_exp_ es).
     pose (rs := denot_exps_ denot_exp_ er).
     (* chaînage *)
@@ -791,11 +993,11 @@ Defined.
 
 Definition denot_exp (ins : list ident) (e : exp) :
   (* (nodes * inputs * env) -> streams *)
-  Dprodi FI -C-> DS_prod SI -C-> DS_prod SI -C-> nprod (numstreams e) :=
+  Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' -C-> nprod (numstreams e) :=
   curry (curry (denot_exp_ ins e)).
 
 Definition denot_exps (ins : list ident) (es : list exp) :
-  Dprodi FI -C-> DS_prod SI -C-> DS_prod SI -C-> nprod (list_sum (List.map numstreams es)) :=
+  Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' -C-> nprod (list_sum (List.map numstreams es)) :=
   curry (curry (denot_exps_ (denot_exp_ ins) es)).
 
 Lemma denot_exps_eq :
