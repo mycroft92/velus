@@ -363,6 +363,163 @@ Section KWHEN.
       rewrite Hu, Hv, 2 rem_cons; auto.
   Qed.
 
+  (** ** le Merge *)
+
+  (* le merge de kahn sélectionne la branche dans laquelle lire *)
+  Definition kmerge (l : list enumtag) :
+    DS (errv B) -C-> @nprod (DS (errv A)) (length l) -C-> DS (errv A).
+  Admitted.
+
+(* let env := env_of_np l np in *)
+(* app (env t) (kmerge l C (np_of_env l (DMAPi (fun i => if tag_eqb i t then REM _ else ID _) env))) *)
+
+  (* @smerge value value enumtag get_tag Nat.eqb. *)
+  Variable mem_nth : list enumtag -> enumtag -> option nat.
+
+  (* mettre à jour la n-ème valeur d'un vecteur *)
+
+  Definition nprod_update {D} {n} (k:nat) : D -C-> @nprod D n -C-> @nprod D n.
+    induction k.
+    TODO
+  Defined.
+
+
+
+    Lemma kmerge_eq :
+    forall l c C np,
+      let errty' := cons (err' error_Ty') 0 in
+      kmerge l (cons c C) np ==
+        match c with
+        | val c =>
+            match tag_of_val c with
+            | Some t =>
+                match mem_nth l t with
+                | Some n => app (get_nth n errty' np) (kmerge l C (nprod_Foldi ))
+                | None => errty'
+                end
+            | None => errty'
+            end
+        | err' e => cons (err' e) 0
+        end.
+  Proof.
+
+  Qed.
+
+  (* test: ça semble plus simple avec des environnements ? *)
+  Definition _kmerge (l : list enumtag) :
+    DS (errv B) -C-> DS_prod (fun _ : enumtag => errv A) -C-> DS (errv A).
+  Admitted.
+
+  Lemma _kmerge_eq :
+    forall l c C env,
+      _kmerge l (cons c C) env ==
+        match c with
+        | val c =>
+            match tag_of_val c with
+            | Some t => app (env t) (_kmerge l C ((DMAPi (fun _ => @REM (sampl A)) env)))
+            | None => cons (err' error_Ty') 0
+            end
+        | err' e => cons (err' e) 0
+        end.
+  Proof.
+
+  Qed.
+
+  Definition is_tag (i : enumtag) (x : sampl B) : sampl bool :=
+    match x with
+    | pres v => or_default (err error_Ty)
+                 (option_map (fun j => pres (tag_eqb i j)) (tag_of_val v))
+    | abs => abs
+    | err e => err e
+    end.
+
+  (* Selon le statut de la condition, on initialise l'accumulateur du
+     fold_right avec [abs] ou [error_Ty]. *)
+  Definition defcon (c : sampl B) : sampl A :=
+    match c with
+    | abs => abs
+    | pres _ => err error_Ty
+    | err e => err e
+    end.
+
+  (* La fonction qu'on va passer à fold_right pour calculer le merge :
+     - si la condition est [pres i], on part de [error_Ty] et on
+       espère que le flot de tag i soit présent et les autre absents;
+     - si la condition est [abs], on part de [abs] et on vérifie que
+       tous les flots sont absents. *)
+  (* j/x : tag/flot examinés dans la liste, c : condition, a : accumulateur *)
+  Definition fmerge (j : enumtag) (c : sampl B) (x a : sampl A) :=
+    match is_tag j c, a, x with
+    | abs, abs, abs => abs
+    | pres true, err error_Ty, pres v => pres v
+    | pres false, a, abs => a
+    | _,_,_ => err error_Cl
+    end.
+
+  Definition smerge (l : list enumtag) :
+    DS (sampl B) -C-> @nprod (DS (sampl A)) (length l) -C-> DS (sampl A).
+    eapply fcont_comp2.
+    apply nprod_Foldi.
+    2: apply (MAP defcon).
+    apply ford_fcont_shift; intro j.
+    apply (ZIP3 (fmerge j)).
+  Defined.
+
+  Lemma smerge_eq :
+    forall l C np,
+      smerge l C np = nprod_Foldi l (fun j => ZIP3 (fmerge j) C) (map defcon C) np.
+  Proof.
+    trivial.
+  Qed.
+
+  (* Une définition alternative du merge est la suivante, avec
+     accumulateur initial [abs]. Elle est plus simple mais ne permet pas
+     d'exclure le cas où une branche est manquante (c = pres j mais j∉l).
+
+   Definition fmerge (c : sampl B) :=
+    fun '(j, x) (a : sampl A) =>
+      match is_tag j c, a, x with
+      | abs, abs, abs => abs
+      | pres true, abs, pres v => pres v
+      | pres false, a, abs => a
+      | _,_,_ => err error_Cl
+      end.
+   *)
+
+  Lemma smerge_is_cons :
+    forall l C np,
+      l <> [] ->
+      is_cons (smerge l C np) ->
+      is_cons C /\ forall_nprod (@is_cons _) np.
+  Proof.
+    induction l as [|? []].
+    - congruence.
+    - intros * _.
+      rewrite smerge_eq, Foldi_cons.
+      intros (?& Hc &?) % zip3_is_cons.
+      split; auto.
+    - intros * _.
+      rewrite smerge_eq, Foldi_cons.
+      intros (?&? & Hc) % zip3_is_cons.
+      apply (IHl C (nprod_tl np)) in Hc as []; try congruence.
+      do 2 (split; auto).
+  Qed.
+
+  Lemma is_cons_smerge :
+    forall l cs xs,
+      is_cons cs ->
+      forall_nprod (@is_cons _) xs ->
+      is_cons (smerge l cs xs).
+  Proof.
+    intros * Hc Hx.
+    rewrite smerge_eq.
+    eapply forall_nprod_Foldi in Hx; eauto using is_cons_DS_const.
+    simpl; intros.
+    now apply is_cons_zip3.
+  Qed.
+
+
+
 End KWHEN.
 
 Section KFBY.
@@ -832,10 +989,16 @@ Definition SI' := fun _ : ident => errv value.
 Definition FI' := fun _ : ident => (DS_prod SI' -C-> DS_prod SI').
 Definition errTy' : DS (errv value) := DS_const (err' error_Ty').
 
-(* l'opérateur swhen spécialisé aux Velus.Op.value *)
+(* l'opérateur kwhen spécialisé aux Velus.Op.value *)
 Definition kwhenv :=
   let get_tag := fun v => match v with Venum t => Some t | _ => None end in
   @kwhen value value enumtag get_tag Nat.eqb.
+
+(* l'opérateur kmerge spécialisé aux Velus.Op.value *)
+Definition kmergev :=
+  let get_tag := fun v => match v with Venum t => Some t | _ => None end in
+  @kmerge value value enumtag get_tag Nat.eqb.
+
 
 Section KDenot_exps.
 
@@ -942,14 +1105,13 @@ Definition kdenot_exp_ (ins : list ident)
     pose (ss := kdenot_exps_ kdenot_exp_ es).
     exact ((llift (kwhenv e0) @2_ ss) (kdenot_var i)).
   - (* Emerge *)
-    TODO
     rename l into ies.
     destruct l0 as (tys,ck).
     destruct p as [i ty].
     (* on calcule (length tys) flots pour chaque liste de sous-expressions *)
-    pose (ses := denot_expss_ denot_exp_ ies (length tys)).
+    pose (ses := kdenot_expss_ kdenot_exp_ ies (length tys)).
     rewrite <- (map_length fst) in ses.
-    exact ((lift_nprod @_ (smergev (List.map fst ies)) @2_ denot_var i) ses).
+    exact ((lift_nprod @_ (kmergev (List.map fst ies)) @2_ kdenot_var i) ses).
   - (* Ecase *)
     rename l into ies.
     destruct l0 as (tys,ck).
