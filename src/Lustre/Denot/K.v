@@ -365,16 +365,6 @@ Section KWHEN.
 
   (** ** le Merge *)
 
-  (* le merge de kahn sélectionne la branche dans laquelle lire *)
-  Definition kmerge (l : list enumtag) :
-    DS (errv B) -C-> @nprod (DS (errv A)) (length l) -C-> DS (errv A).
-  Admitted.
-
-(* let env := env_of_np l np in *)
-(* app (env t) (kmerge l C (np_of_env l (DMAPi (fun i => if tag_eqb i t then REM _ else ID _) env))) *)
-
-  (* @smerge value value enumtag get_tag Nat.eqb. *)
-  Variable mem_nth : list enumtag -> enumtag -> option nat.
 
   (* mettre à jour la k-ième valeur d'un vecteur *)
   Fixpoint lift_at {D} (F : D-C->D) (k:nat) {n} : @nprod D n -C-> @nprod D n :=
@@ -420,7 +410,72 @@ Section KWHEN.
           destruct n,m; auto.
   Qed.
 
-    Lemma kmerge_eq :
+  (* @smerge value value enumtag get_tag Nat.eqb. *)
+  Variable mem_nth : list enumtag -> enumtag -> option nat.
+
+  (* le merge de kahn sélectionne la branche dans laquelle lire *)
+  Definition kmergef (l : list enumtag) :
+    (DS (errv B) -C-> @nprod (DS (errv A)) (length l) -C-> DS (errv A))
+    -C->
+    DS (errv B) -C-> @nprod (DS (errv A)) (length l) -C-> DS (errv A).
+    apply curry, curry.
+    eapply (fcont_comp2 (DSCASE _ _ )).
+    2:exact (SND _ _ @_ (FST _ _)).
+    apply ford_fcont_shift.
+    intro c.
+    apply curry.
+    pose (errty' := cons (@err' A error_Ty') 0).
+    refine
+      match c with
+        | val c =>
+            match tag_of_val c with
+            | Some t =>
+                match mem_nth l t with
+                | Some n => (APP _ @2_ get_nth n errty' @_ SND _ _ @_ FST _ _) _
+                (* | Some n => app (get_nth n errty' np) (kmerge l C (lift_at (REM _) n np)) *)
+                | None => CTE _ _ errty'
+                end
+            | None => CTE _ _ errty'
+            end
+        | err' e => CTE _ _ (cons (err' e) 0)
+      end.
+    refine ((AP _ _ @3_ FST _ _ @_ FST _ _ @_ FST _ _) (SND _ _) _).
+    refine (lift_at (REM _) n @_ SND _ _ @_ FST _ _).
+  Defined.
+
+  Lemma kmergef_eq :
+    forall l F c C np,
+      let errty' := cons (err' error_Ty') 0 in
+      kmergef l F (cons c C) np ==
+        match c with
+        | val c =>
+            match tag_of_val c with
+            | Some t =>
+                match mem_nth l t with
+                | Some n => app (get_nth n errty' np) (F C (lift_at (REM _) n np))
+                | None => errty'
+                end
+            | None => errty'
+            end
+        | err' e => cons (err' e) 0
+        end.
+  Proof.
+    intros.
+    unfold kmergef at 1.
+    setoid_rewrite DSCASE_simpl.
+    setoid_rewrite DScase_cons.
+    destruct c as [c|]; auto.
+    repeat change (fcontit ?a ?b) with (a b).
+    rewrite ford_fcont_shift_simpl.
+    autorewrite with cpodb.
+    cases.
+  Qed.
+
+  Definition kmerge (l : list enumtag) :
+    DS (errv B) -C-> @nprod (DS (errv A)) (length l) -C-> DS (errv A) :=
+    FIXP _ (kmergef l).
+
+  Lemma kmerge_eq :
     forall l c C np,
       let errty' := cons (err' error_Ty') 0 in
       kmerge l (cons c C) np ==
@@ -429,7 +484,7 @@ Section KWHEN.
             match tag_of_val c with
             | Some t =>
                 match mem_nth l t with
-                | Some n => app (get_nth n errty' np) (kmerge l C (lift_at n (REM _) np))
+                | Some n => app (get_nth n errty' np) (kmerge l C (lift_at (REM _) n np))
                 | None => errty'
                 end
             | None => errty'
@@ -437,123 +492,10 @@ Section KWHEN.
         | err' e => cons (err' e) 0
         end.
   Proof.
-
+    intros.
+    unfold kmerge at 1.
+    rewrite FIXP_eq, kmergef_eq; auto.
   Qed.
-
-  (* test: ça semble plus simple avec des environnements ? *)
-  Definition _kmerge (l : list enumtag) :
-    DS (errv B) -C-> DS_prod (fun _ : enumtag => errv A) -C-> DS (errv A).
-  Admitted.
-
-  Lemma _kmerge_eq :
-    forall l c C env,
-      _kmerge l (cons c C) env ==
-        match c with
-        | val c =>
-            match tag_of_val c with
-            | Some t => app (env t) (_kmerge l C ((DMAPi (fun _ => @REM (sampl A)) env)))
-            | None => cons (err' error_Ty') 0
-            end
-        | err' e => cons (err' e) 0
-        end.
-  Proof.
-
-  Qed.
-
-  Definition is_tag (i : enumtag) (x : sampl B) : sampl bool :=
-    match x with
-    | pres v => or_default (err error_Ty)
-                 (option_map (fun j => pres (tag_eqb i j)) (tag_of_val v))
-    | abs => abs
-    | err e => err e
-    end.
-
-  (* Selon le statut de la condition, on initialise l'accumulateur du
-     fold_right avec [abs] ou [error_Ty]. *)
-  Definition defcon (c : sampl B) : sampl A :=
-    match c with
-    | abs => abs
-    | pres _ => err error_Ty
-    | err e => err e
-    end.
-
-  (* La fonction qu'on va passer à fold_right pour calculer le merge :
-     - si la condition est [pres i], on part de [error_Ty] et on
-       espère que le flot de tag i soit présent et les autre absents;
-     - si la condition est [abs], on part de [abs] et on vérifie que
-       tous les flots sont absents. *)
-  (* j/x : tag/flot examinés dans la liste, c : condition, a : accumulateur *)
-  Definition fmerge (j : enumtag) (c : sampl B) (x a : sampl A) :=
-    match is_tag j c, a, x with
-    | abs, abs, abs => abs
-    | pres true, err error_Ty, pres v => pres v
-    | pres false, a, abs => a
-    | _,_,_ => err error_Cl
-    end.
-
-  Definition smerge (l : list enumtag) :
-    DS (sampl B) -C-> @nprod (DS (sampl A)) (length l) -C-> DS (sampl A).
-    eapply fcont_comp2.
-    apply nprod_Foldi.
-    2: apply (MAP defcon).
-    apply ford_fcont_shift; intro j.
-    apply (ZIP3 (fmerge j)).
-  Defined.
-
-  Lemma smerge_eq :
-    forall l C np,
-      smerge l C np = nprod_Foldi l (fun j => ZIP3 (fmerge j) C) (map defcon C) np.
-  Proof.
-    trivial.
-  Qed.
-
-  (* Une définition alternative du merge est la suivante, avec
-     accumulateur initial [abs]. Elle est plus simple mais ne permet pas
-     d'exclure le cas où une branche est manquante (c = pres j mais j∉l).
-
-   Definition fmerge (c : sampl B) :=
-    fun '(j, x) (a : sampl A) =>
-      match is_tag j c, a, x with
-      | abs, abs, abs => abs
-      | pres true, abs, pres v => pres v
-      | pres false, a, abs => a
-      | _,_,_ => err error_Cl
-      end.
-   *)
-
-  Lemma smerge_is_cons :
-    forall l C np,
-      l <> [] ->
-      is_cons (smerge l C np) ->
-      is_cons C /\ forall_nprod (@is_cons _) np.
-  Proof.
-    induction l as [|? []].
-    - congruence.
-    - intros * _.
-      rewrite smerge_eq, Foldi_cons.
-      intros (?& Hc &?) % zip3_is_cons.
-      split; auto.
-    - intros * _.
-      rewrite smerge_eq, Foldi_cons.
-      intros (?&? & Hc) % zip3_is_cons.
-      apply (IHl C (nprod_tl np)) in Hc as []; try congruence.
-      do 2 (split; auto).
-  Qed.
-
-  Lemma is_cons_smerge :
-    forall l cs xs,
-      is_cons cs ->
-      forall_nprod (@is_cons _) xs ->
-      is_cons (smerge l cs xs).
-  Proof.
-    intros * Hc Hx.
-    rewrite smerge_eq.
-    eapply forall_nprod_Foldi in Hx; eauto using is_cons_DS_const.
-    simpl; intros.
-    now apply is_cons_zip3.
-  Qed.
-
-
 
 End KWHEN.
 
