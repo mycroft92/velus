@@ -377,12 +377,17 @@ Section KWHEN.
   Variable mem_nth : list enumtag -> enumtag -> option nat.
 
   (* mettre à jour la n-ème valeur d'un vecteur *)
-
   Definition nprod_update {D} {n} (k:nat) : D -C-> @nprod D n -C-> @nprod D n.
+  Abort.
+  (* mieux : map_k seulement ? *)
+  Definition lift_k {D} {n} (k:nat) : (D-C->D) -C-> @nprod D n -C-> @nprod D n.
     induction k.
-    TODO
+    - destruct n.
+      apply 0.
+      refine (curry ((nprod_cons @2_ _) (nprod_tl @_ SND _ _))).
+      refine ((AP _ _ @2_ FST _ _) (nprod_hd @_ SND _ _)).
+    - 
   Defined.
-
 
 
     Lemma kmerge_eq :
