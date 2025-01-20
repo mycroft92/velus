@@ -376,19 +376,49 @@ Section KWHEN.
   (* @smerge value value enumtag get_tag Nat.eqb. *)
   Variable mem_nth : list enumtag -> enumtag -> option nat.
 
-  (* mettre à jour la n-ème valeur d'un vecteur *)
-  Definition nprod_update {D} {n} (k:nat) : D -C-> @nprod D n -C-> @nprod D n.
-  Abort.
-  (* mieux : map_k seulement ? *)
-  Definition lift_k {D} {n} (k:nat) : (D-C->D) -C-> @nprod D n -C-> @nprod D n.
-    induction k.
-    - destruct n.
-      apply 0.
-      refine (curry ((nprod_cons @2_ _) (nprod_tl @_ SND _ _))).
-      refine ((AP _ _ @2_ FST _ _) (nprod_hd @_ SND _ _)).
-    - 
-  Defined.
+  (* mettre à jour la k-ième valeur d'un vecteur *)
+  Fixpoint lift_at {D} (F : D-C->D) (k:nat) {n} : @nprod D n -C-> @nprod D n :=
+    match n with
+    | O => ID _
+    | S n => match k with
+          | O => (* on y est *)
+              ((nprod_cons @2_ F @_ nprod_hd) nprod_tl)
+          | S k => ((nprod_cons @2_ nprod_hd) (lift_at F k @_ nprod_tl))
+          end
+    end.
 
+  Lemma nth_lift_at_upd :
+    forall D n k f np d,
+      k < n ->
+      get_nth k d (@lift_at D f k n np) == f (get_nth k d np).
+  Proof.
+    induction n; intros * Hk.
+    - inv Hk.
+    - destruct k; simpl.
+      + autorewrite with cpodb.
+        now setoid_rewrite nprod_hd_cons.
+      + setoid_rewrite <- IHn; auto with arith.
+        destruct n; auto; lia.
+  Qed.
+
+  Lemma nth_lift_at :
+    forall D n k f np d m,
+      k <> m ->
+      get_nth m d (@lift_at D f k n np) == get_nth m d np.
+  Proof.
+    induction n; intros * Hkm.
+    - apply fcont_stable.
+      destruct k; auto.
+    - destruct k; simpl.
+      + destruct m; try lia.
+        setoid_rewrite get_nth_tl.
+        destruct n,m; auto.
+      + destruct m; simpl; auto.
+        * now setoid_rewrite nprod_hd_cons.
+        * autorewrite with cpodb.
+          rewrite <- (IHn k f (nprod_tl np) d m); auto.
+          destruct n,m; auto.
+  Qed.
 
     Lemma kmerge_eq :
     forall l c C np,
@@ -399,7 +429,7 @@ Section KWHEN.
             match tag_of_val c with
             | Some t =>
                 match mem_nth l t with
-                | Some n => app (get_nth n errty' np) (kmerge l C (nprod_Foldi ))
+                | Some n => app (get_nth n errty' np) (kmerge l C (lift_at n (REM _) np))
                 | None => errty'
                 end
             | None => errty'
