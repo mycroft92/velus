@@ -138,6 +138,14 @@ Section KWHEN.
     - firstorder; intros HHH%tag_eqb_eq; congruence.
   Qed.
 
+  Lemma tag_eq_dec : forall x y : enumtag, { x = y } + { x <> y }.
+  Proof.
+    intros x y.
+    destruct (tag_eqb x y) eqn:Heq.
+    - apply tag_eqb_eq in Heq; auto.
+    - apply tag_eqb_neq in Heq; auto.
+  Qed.
+
   Definition kwhenf (k : enumtag) :
     (DS (errv A) -C-> DS (errv B) -C-> DS (errv A)) -C-> DS (errv A) -C-> DS (errv B) -C-> DS (errv A).
     apply curry, curry.
@@ -410,8 +418,8 @@ Section KWHEN.
           destruct n,m; auto.
   Qed.
 
-  (* @smerge value value enumtag get_tag Nat.eqb. *)
-  Variable mem_nth : list enumtag -> enumtag -> option nat.
+  (* (* @smerge value value enumtag get_tag Nat.eqb. *) *)
+  (* Variable mem_nth : list enumtag -> enumtag -> option nat. *)
 
   (* le merge de kahn sélectionne la branche dans laquelle lire *)
   Definition kmergef (l : list enumtag) :
@@ -430,7 +438,7 @@ Section KWHEN.
         | val c =>
             match tag_of_val c with
             | Some t =>
-                match mem_nth l t with
+                match CommonList2.mem_nth _ tag_eq_dec l t with
                 | Some n => (APP _ @2_ get_nth n errty' @_ SND _ _ @_ FST _ _) _
                 (* | Some n => app (get_nth n errty' np) (kmerge l C (lift_at (REM _) n np)) *)
                 | None => CTE _ _ errty'
@@ -451,7 +459,7 @@ Section KWHEN.
         | val c =>
             match tag_of_val c with
             | Some t =>
-                match mem_nth l t with
+                match CommonList2.mem_nth _ tag_eq_dec l t with
                 | Some n => app (get_nth n errty' np) (F C (lift_at (REM _) n np))
                 | None => errty'
                 end
@@ -483,7 +491,7 @@ Section KWHEN.
         | val c =>
             match tag_of_val c with
             | Some t =>
-                match mem_nth l t with
+                match CommonList2.mem_nth _ tag_eq_dec l t with
                 | Some n => app (get_nth n errty' np) (kmerge l C (lift_at (REM _) n np))
                 | None => errty'
                 end
@@ -496,6 +504,158 @@ Section KWHEN.
     unfold kmerge at 1.
     rewrite FIXP_eq, kmergef_eq; auto.
   Qed.
+
+  Definition smerge := @smerge A B enumtag tag_of_val tag_eqb.
+
+  (* TODO: move *)
+  Lemma lift_ea_abs :
+        forall I A (l:list I) (np : nprod (length l)) Hnp,
+          l <> [] ->
+          Forall (fun '(_, x) => x = abs) (combine l (nprod_hds np Hnp)) ->
+          lift ea np == lift (@ea A @_ REM _) np.
+      Proof.
+        induction l as [|i l]; intros * Hl Hf; try congruence.
+        inv Hf.
+        unfold projT1 in H1.
+        cases; subst.
+        destruct s as (xx & Hxx%decomp_eqCon).
+        rewrite 2 (nprod_hd_tl np).
+        setoid_rewrite lift_cons.
+        rewrite Hxx.
+              autorewrite with cpodb.
+      rewrite nprod_hd_cons, rem_cons, ea_cons.
+      apply nprod_cons_Oeq_compat; auto.
+      destruct l as [|j l].
+      + simpl.
+        autorewrite with cpodb.
+        rewrite ea_cons; auto.
+      + assert (j :: l <> []) as Hll by congruence.
+        eauto.
+      Qed.
+
+  (* TODO: move *)
+      Lemma hds_nth :
+        forall A n np Hc k d d' v,
+          k < n ->
+          nth k (@nprod_hds A n np Hc) d = v ->
+          get_nth k d' np == cons v (rem (get_nth k d' np)).
+      Proof.
+        induction n; intros * Hk Hnth; try lia.
+        destruct k; subst.
+        + simpl. 
+          unfold projT1.
+          destruct (uncons _) as (?&?& HH%decomp_eqCon).
+          rewrite HH, rem_cons; auto.
+        + eapply IHn; simpl; auto with arith.
+      Qed.
+  (* TODO: move *)
+      Lemma NoDup_nth_neq :
+          forall A (l:list A) i j d,
+            NoDup l ->
+            i < length l ->
+            j < length l ->
+            i <> j ->
+            nth i l d <> nth j l d.
+        Proof.
+          clear.
+          induction l; simpl; intros; cases_eqn HH; subst; try congruence; try intro; try lia.
+          all: subst; inv H; eauto.
+          - apply H5, nth_In ;auto with arith.
+          - apply H5, nth_In ;auto with arith.
+          - eapply IHl in H3; auto with arith.
+        Qed.
+
+
+  Lemma erase_smerge_le1 :
+    forall l cs np,
+      l <> [] ->
+      NoDup l ->
+      safe_DS (smerge l cs np) ->
+      ea (smerge l cs np) <= kmerge l (ea cs) (lift ea np).
+  Proof.
+    intros * Hl Nd Hs.
+    apply DSle_rec_eq2 with
+      (R := fun U V => exists cs np,
+                safe_DS (smerge l cs np)
+                /\ U == ea (smerge l cs np)
+                /\ V == kmerge l (ea cs) (lift ea np)).
+    3:eauto.
+    intros * ? Eq1 Eq2; setoid_rewrite <- Eq1; setoid_rewrite <- Eq2; eauto.
+    clear Hs np cs.
+    intros U V Hc (cs & np & Hs & Hu & Hv).
+    rewrite Hu in Hc.
+    apply ea_is_cons in Hc as Hcp.
+    remember_ds (smerge l cs np) as rs.
+    revert dependent cs.
+    revert dependent np.
+    revert dependent U.
+    revert dependent V.
+    induction Hcp; intros.
+    - rewrite <- eqEps in *; eauto 2.
+    - (* absent *)
+      assert (a = abs); subst.
+      { inv Hs. cases. contradict H. congruence. }
+      apply symmetry in Hrs as Hcc.
+      apply cons_is_cons, smerge_is_cons in Hcc as [Hcc Hcnp]; auto.
+      apply is_cons_elim in Hcc as (c & cs' & Hcs).
+      rewrite Hcs, ea_cons in *.
+      unfold smerge in *.
+      unshelve rewrite smerge_cons in Hrs.
+      assumption.
+      apply Con_eq_simpl in Hrs as [ Habs].
+      inv Hs.
+      apply symmetry, fmerge_abs in Habs as [? Habs]; subst.
+      eapply IHHcp; eauto 2.
+      rewrite Hv, lift_lift.
+      eapply fcont_stable, lift_ea_abs; eauto.
+    - (* non absent *)
+      apply symmetry in Hrs as Hcc.
+      apply cons_is_cons, smerge_is_cons in Hcc as [Hcc Hcnp]; auto.
+      apply is_cons_elim in Hcc as (c & cs' & Hcs).
+      rewrite Hcs, ea_cons in *.
+      unfold smerge in *.
+      unshelve rewrite smerge_cons in Hrs.
+      assumption.
+      apply Con_eq_simpl in Hrs as [ Habs].
+      inv Hs.
+      destruct (fold_right (fun '(j, x) => fmerge enumtag tag_of_val tag_eqb j c x) (defcon c)
+                  (combine l (nprod_hds np Hcnp))) eqn:Hf; try tauto || congruence.
+      apply fmerge_pres in Hf as (b & t &?& Ht & Hex & Hf); subst; auto.
+
+      (* TEST *)
+      clear H Hc H3.
+      rewrite kmerge_eq, Ht in *.
+      rewrite Hu, first_cons.
+      apply Exists_nth in Hex as (k & (d & x) &  Hk & HH).
+      rewrite combine_nth in HH; auto using hds_length.
+      rewrite combine_length, hds_length, Nat.min_id in *.
+      destruct HH; subst.
+      rewrite (nth_mem_nth _ _ _ _ k) in Hv; auto using  nth_error_nth'.
+      erewrite nth_lift in Hv; auto.
+      eapply hds_nth in H1; auto.
+      rewrite H1, ea_cons, app_cons in Hv.
+      rewrite Hv, first_cons.
+      split; auto.
+      exists cs',((lift (REM (sampl A)) np)).
+      rewrite H0, Hu, Hv, 2 rem_cons in *.
+      do 2 (split; auto).
+      (* test *)
+      apply fcont_stable.
+      destruct l; try congruence.
+      apply nprod_eq; intros i d' Hi.
+      destruct (Nat.eq_dec k i); subst.
+      + erewrite nth_lift_at_upd, 3 nth_lift, H1, ea_cons, 2 REM_simpl, 2 rem_cons; auto.
+      + eapply Forall_nth with (i := i) in Hf.
+        erewrite nth_lift_at, 3 nth_lift; auto.
+        2:rewrite combine_length, hds_length, Nat.min_id; auto.
+        erewrite combine_nth in Hf; auto using hds_length.
+        erewrite hds_nth; auto.
+        rewrite Hf, ea_cons, REM_simpl, rem_cons; auto.
+        eapply NoDup_nth_neq; eauto.
+    Unshelve.
+    all: eauto.
+  Qed.
+
 
 End KWHEN.
 
