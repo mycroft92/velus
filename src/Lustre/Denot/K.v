@@ -657,7 +657,32 @@ Section KWHEN.
   Qed.
 
 
-End KWHEN.
+  (** ** Le case  *)
+  Definition kcasef (l : list enumtag) :
+    (DS (errv B) -C-> @nprod (DS (errv A)) (length l) -C-> DS (errv A))
+    -C->
+    DS (errv B) -C-> @nprod (DS (errv A)) (length l) -C-> DS (errv A).
+  Admitted.
+
+  Lemma kcasef_eq :
+    forall l F c C np,
+      let errty' := cons (err' error_Ty') 0 in
+      kmergef l F (cons c C) np ==
+        match c with
+        | val c =>
+            match tag_of_val c with
+            | Some t =>
+                (* match CommonList2.mem_nth _ tag_eq_dec l t with *)
+                (* | Some n => app (get_nth n errty' np) (F C (lift_at (REM _) n np)) *)
+                (* | None => errty' *)
+                end
+            | None => errty'
+            end
+        | err' e => cons (err' e) 0
+        end.
+  Proof.
+
+End KFUNS.
 
 Section KFBY.
 
