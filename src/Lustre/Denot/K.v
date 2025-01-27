@@ -117,7 +117,7 @@ Qed.
 
 End EA.
 
-Section KWHEN.
+Section KWHENMERGECASE.
 
   Context {A B : Type}.
 
@@ -830,7 +830,7 @@ Section KWHEN.
     all: eauto.
   Qed.
 
-End KFUNS.
+End KWHENMERGECASE.
 
 Section KFBY.
 
