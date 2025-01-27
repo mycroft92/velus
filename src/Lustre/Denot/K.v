@@ -662,25 +662,173 @@ Section KWHEN.
     (DS (errv B) -C-> @nprod (DS (errv A)) (length l) -C-> DS (errv A))
     -C->
     DS (errv B) -C-> @nprod (DS (errv A)) (length l) -C-> DS (errv A).
-  Admitted.
+    apply curry, curry.
+    eapply (fcont_comp2 (DSCASE _ _ )).
+    2:exact (SND _ _ @_ (FST _ _)).
+    apply ford_fcont_shift.
+    intro c.
+    apply curry.
+    pose (errty' := cons (@err' A error_Ty') 0).
+    refine
+      match c with
+        | val c =>
+            match tag_of_val c with
+            | Some t =>
+                match CommonList2.mem_nth _ tag_eq_dec l t with
+                | Some n => (APP _ @2_ get_nth n errty' @_ SND _ _ @_ FST _ _)
+                             ((AP _ _ @3_ FST _ _ @_ FST _ _ @_ FST _ _) (SND _ _)
+                                (lift (REM _) @_ SND _ _ @_ FST _ _))
+                (* | Some n => app (get_nth n errty' np) (F C (lift (REM _) np)) *)
+                | None => CTE _ _ errty'
+                end
+            | None => CTE _ _ errty'
+            end
+        | err' e => CTE _ _ (cons (err' e) 0)
+      end.
+  Defined.
 
   Lemma kcasef_eq :
     forall l F c C np,
       let errty' := cons (err' error_Ty') 0 in
-      kmergef l F (cons c C) np ==
+      kcasef l F (cons c C) np ==
         match c with
         | val c =>
             match tag_of_val c with
             | Some t =>
-                (* match CommonList2.mem_nth _ tag_eq_dec l t with *)
-                (* | Some n => app (get_nth n errty' np) (F C (lift_at (REM _) n np)) *)
-                (* | None => errty' *)
+                match CommonList2.mem_nth _ tag_eq_dec l t with
+                | Some n => app (get_nth n errty' np) (F C (lift (REM _) np))
+                | None => errty'
                 end
             | None => errty'
             end
         | err' e => cons (err' e) 0
         end.
   Proof.
+    intros.
+    unfold kcasef at 1.
+    setoid_rewrite DSCASE_simpl.
+    setoid_rewrite DScase_cons.
+    destruct c as [c|]; auto.
+    repeat change (fcontit ?a ?b) with (a b).
+    rewrite ford_fcont_shift_simpl.
+    autorewrite with cpodb.
+    cases.
+  Qed.
+
+  Definition kcase (l : list enumtag) :
+    DS (errv B) -C-> @nprod (DS (errv A)) (length l) -C-> DS (errv A) :=
+    FIXP _ (kcasef l).
+
+  Lemma kcase_eq :
+    forall l c C np,
+      let errty' := cons (err' error_Ty') 0 in
+      kcase l (cons c C) np ==
+        match c with
+        | val c =>
+            match tag_of_val c with
+            | Some t =>
+                match CommonList2.mem_nth _ tag_eq_dec l t with
+                | Some n => app (get_nth n errty' np) (kcase l C (lift (REM _) np))
+                | None => errty'
+                end
+            | None => errty'
+            end
+        | err' e => cons (err' e) 0
+        end.
+  Proof.
+    intros.
+    unfold kcase at 1.
+    rewrite FIXP_eq, kcasef_eq; auto.
+  Qed.
+
+  Definition scase := @scase A B enumtag tag_of_val tag_eqb.
+
+  Lemma erase_scase_le1 :
+    forall l cs np,
+      l <> [] ->
+      NoDup l ->
+      safe_DS (scase l cs np) ->
+      ea (scase l cs np) <= kcase l (ea cs) (lift ea np).
+  Proof.
+    intros * Hl Nd Hs.
+    apply DSle_rec_eq2 with
+      (R := fun U V => exists cs np,
+                safe_DS (scase l cs np)
+                /\ U == ea (scase l cs np)
+                /\ V == kcase l (ea cs) (lift ea np)).
+    3:eauto.
+    intros * ? Eq1 Eq2; setoid_rewrite <- Eq1; setoid_rewrite <- Eq2; eauto.
+    clear Hs np cs.
+    intros U V Hc (cs & np & Hs & Hu & Hv).
+    rewrite Hu in Hc.
+    apply ea_is_cons in Hc as Hcp.
+    remember_ds (scase l cs np) as rs.
+    revert dependent cs.
+    revert dependent np.
+    revert dependent U.
+    revert dependent V.
+    induction Hcp; intros.
+    - rewrite <- eqEps in *; eauto 2.
+    - (* absent *)
+      assert (a = abs); subst.
+      { inv Hs. cases. contradict H. congruence. }
+      apply symmetry in Hrs as Hcc.
+      apply cons_is_cons, scase_is_cons in Hcc as [Hcc Hcnp]; auto.
+      apply is_cons_elim in Hcc as (c & cs' & Hcs).
+      rewrite Hcs, ea_cons in *.
+      unfold scase in *.
+      unshelve rewrite scase_cons in Hrs.
+      assumption.
+      apply Con_eq_simpl in Hrs as [ Habs].
+      inv Hs.
+      apply symmetry, fcase_abs in Habs as [? [Habs]]; subst.
+      2: destruct l; simpl in *; congruence.
+      eapply IHHcp; eauto 2.
+      rewrite Hv, lift_lift.
+      eapply fcont_stable, lift_ea_abs; eauto.
+    - (* non absent *)
+      apply symmetry in Hrs as Hcc.
+      apply cons_is_cons, scase_is_cons in Hcc as [Hcc Hcnp]; auto.
+      apply is_cons_elim in Hcc as (c & cs' & Hcs).
+      rewrite Hcs, ea_cons in *.
+      unfold scase in *.
+      unshelve rewrite scase_cons in Hrs.
+      assumption.
+      apply Con_eq_simpl in Hrs as [ Habs].
+      inv Hs.
+      destruct (fold_right (fun '(j, x) => fcase enumtag tag_of_val tag_eqb j c x)
+                  (defcon c) (combine l (nprod_hds np Hcnp))) eqn:Hf; try tauto || congruence.
+      apply fcase_pres in Hf as (b & t &?& Ht & Hex & Hf); subst; auto.
+      clear H Hc H3.
+      rewrite kcase_eq, Ht in *.
+      rewrite Hu, first_cons.
+      apply Exists_nth in Hex as (k & (d & x) &  Hk & HH).
+      rewrite combine_nth in HH; auto using hds_length.
+      rewrite combine_length, hds_length, Nat.min_id in *.
+      destruct HH; subst.
+      rewrite (nth_mem_nth _ _ _ _ k) in Hv; auto using  nth_error_nth'.
+      erewrite nth_lift in Hv; auto.
+      eapply hds_nth in H1; auto.
+      rewrite H1, ea_cons, app_cons in Hv.
+      rewrite Hv, first_cons.
+      split; auto.
+      exists cs',((lift (REM (sampl A)) np)).
+      rewrite H0, Hu, Hv, 2 rem_cons in *.
+      do 2 (split; auto).
+      (* test *)
+      apply fcont_stable.
+      destruct l; try congruence.
+      apply nprod_eq; intros i d' Hi.
+      eapply Forall_nth with (i := i) in Hf.
+      2:rewrite combine_length, hds_length, Nat.min_id; auto.
+      erewrite 4 nth_lift; auto.
+      erewrite combine_nth in Hf; auto using hds_length.
+      destruct Hf as (?&Hf).
+      erewrite hds_nth; auto.
+      rewrite Hf, ea_cons, 2 REM_simpl, 2 rem_cons; auto.
+    Unshelve.
+    all: eauto.
+  Qed.
 
 End KFUNS.
 
