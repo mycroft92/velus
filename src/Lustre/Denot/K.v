@@ -534,37 +534,6 @@ Section KWHENMERGECASE.
       Qed.
 
   (* TODO: move *)
-      Lemma hds_nth :
-        forall A n np Hc k d d' v,
-          k < n ->
-          nth k (@nprod_hds A n np Hc) d = v ->
-          get_nth k d' np == cons v (rem (get_nth k d' np)).
-      Proof.
-        induction n; intros * Hk Hnth; try lia.
-        destruct k; subst.
-        + simpl. 
-          unfold projT1.
-          destruct (uncons _) as (?&?& HH%decomp_eqCon).
-          rewrite HH, rem_cons; auto.
-        + eapply IHn; simpl; auto with arith.
-      Qed.
-  (* TODO: move *)
-      Lemma NoDup_nth_neq :
-          forall A (l:list A) i j d,
-            NoDup l ->
-            i < length l ->
-            j < length l ->
-            i <> j ->
-            nth i l d <> nth j l d.
-        Proof.
-          clear.
-          induction l; simpl; intros; cases_eqn HH; subst; try congruence; try intro; try lia.
-          all: subst; inv H; eauto.
-          - apply H5, nth_In ;auto with arith.
-          - apply H5, nth_In ;auto with arith.
-          - eapply IHl in H3; auto with arith.
-        Qed.
-
 
   Lemma erase_smerge_le1 :
     forall l cs np,
