@@ -599,3 +599,5 @@ Section Kwhen_merge_case.
   Qed.
 
 End Kwhen_merge_case.
+
+End Kfunctions.
