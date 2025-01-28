@@ -186,7 +186,7 @@ Section Kwhen_merge_case.
   Qed.
 
 
-    Definition kwhenf (k : enumtag) :
+  Definition kwhenf (k : enumtag) :
     (DS (errv A) -C-> DS (errv B) -C-> DS (errv A)) -C-> DS (errv A) -C-> DS (errv B) -C-> DS (errv A).
     apply curry, curry.
     eapply (fcont_comp2 (DSCASE _ _ )).
@@ -571,22 +571,22 @@ Section Kwhen_merge_case.
     cases.
   Qed.
 
-  Definition kcase_def (l : list enumtag) :
+  Definition kcase_def_ (l : list enumtag) :
     (* condition -> default -> branches -> result *)
     DS (errv B) -C-> DS (errv A) -C-> @nprod (DS (errv A)) (length l) -C-> DS (errv A) :=
     FIXP _ (kcase_deff l).
 
-  Lemma kcase_def_eq :
+  Lemma kcase_def__eq :
     forall l c C D np,
       let errty' := cons (err' error_Ty') 0 in
-      kcase_def l (cons c C) D np ==
+      kcase_def_ l (cons c C) D np ==
         match c with
         | val c =>
             match tag_of_val c with
             | Some t =>
                 match CommonList2.mem_nth _ tag_eq_dec l t with
-                | Some n => app (get_nth n errty' np) (kcase_def l C (rem D) (lift (REM _) np))
-                | None => app D (kcase_def l C (rem D) (lift (REM _) np))
+                | Some n => app (get_nth n errty' np) (kcase_def_ l C (rem D) (lift (REM _) np))
+                | None => app D (kcase_def_ l C (rem D) (lift (REM _) np))
                 end
             | None => errty'
             end
@@ -594,8 +594,30 @@ Section Kwhen_merge_case.
         end.
   Proof.
     intros.
-    unfold kcase_def at 1.
+    unfold kcase_def_ at 1.
     rewrite FIXP_eq, kcase_deff_eq; auto.
+  Qed.
+
+  (* wrapper for [kcase_def_] that permits its usage with functions
+     like [lift_nprod] (we load the 2nd argument) *)
+  Definition kcase_def (l : list enumtag) :
+    DS (errv B) -C-> @nprod (DS (errv A)) (S (length l)) -C-> DS (errv A).
+    apply curry.
+    refine ((kcase_def_ l @3_ FST _ _) _ _).
+    - exact (nprod_hd @_ SND _ _).
+    - exact (nprod_tl @_ SND _ _).
+  Defined.
+
+  Lemma kcase_def_eq :
+    forall l cs ds np,
+      l <> [] ->
+      kcase_def l cs (nprod_cons ds np) = kcase_def_ l cs ds np.
+  Proof.
+    intros.
+    unfold kcase_def.
+    autorewrite with localdb.
+    simpl.
+    destruct l; auto; congruence.
   Qed.
 
 End Kwhen_merge_case.
