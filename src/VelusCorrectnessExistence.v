@@ -536,6 +536,8 @@ Section Theorems.
   (** We introduce a local notion of streams unicity *)
   Definition unique_sts {A} (P : list (Stream A)->Prop) (x:list (Stream A)) : Prop :=
     P x /\ forall (x':list (Stream A)), P x' -> EqSts x x'.
+
+  Local Disable Notation "'exists' ! x .. y , p".
   Local Notation "'exists' ! x .. y , p" :=
     (ex (unique_sts (fun x => .. (ex (unique_sts (fun y => p))) ..)))
       (at level 200, x binder, right associativity).
