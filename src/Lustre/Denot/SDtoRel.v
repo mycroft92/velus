@@ -3317,7 +3317,7 @@ Qed.
 
 Definition wf_inputs
   (* on laisse {m} arbitraire pour simplifier l'appel dans
-     src/VelusCorrectnessNew *)
+     src/VelusCorrectnessExistence *)
   {PSyn Prefs} (n : @node PSyn Prefs) {m} (ss : nprod m) :=
   let ins := idents (n_in n) in
   let envI := env_of_np ins ss in

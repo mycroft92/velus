@@ -536,9 +536,14 @@ Section Theorems.
   (** We introduce a local notion of streams unicity *)
   Definition unique_sts {A} (P : list (Stream A)->Prop) (x:list (Stream A)) : Prop :=
     P x /\ forall (x':list (Stream A)), P x' -> EqSts x x'.
-  Local Notation "'exists' ! x , p" := (ex (unique_sts (fun x => p))) (at level 200).
 
-  Corollary behavior_asm_new_uniq :
+  Local Disable Notation "'exists' ! x .. y , p".
+  Local Notation "'exists' ! x .. y , p" :=
+    (ex (unique_sts (fun x => .. (ex (unique_sts (fun y => p))) ..)))
+      (at level 200, x binder, right associativity).
+
+
+  Corollary behavior_asm_exists_uniq :
     no_rte_global_main G main (env_of_np (List.map fst (n_in n)) (nprod_of_Ss (pStr ins))) ->
     exists ! outs,
       Sem.sem_node (G) main (pStr ins) (pStr outs)
@@ -567,7 +572,7 @@ Section Theorems.
 
 
   (** Correction with no-run-time-errors check *)
-  Corollary behavior_asm_new_check :
+  Corollary behavior_asm_exists_check :
     CheckOp.check_global G = true -> (** check for run-time errors *)
     exists outs,
       Sem.sem_node (G) main (pStr ins) (pStr outs)
