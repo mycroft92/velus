@@ -150,9 +150,9 @@ Proof.
   {
     apply ea_is_cons in Hc as Hcp.
     remember_ds (sunop op xs) as rs.
-    revert dependent xs.
-    revert dependent U.
-    revert dependent V.
+    generalize dependent xs.
+    generalize dependent U.
+    generalize dependent V.
     induction Hcp; intros.
     { rewrite <- eqEps in *; eauto 2. }
     - assert (a = abs); subst.
@@ -180,8 +180,8 @@ Proof.
   {
     unfold kunop in Hc.
     apply map_is_cons, ea_is_cons in Hc as Hcp.
-    revert dependent U.
-    revert dependent V.
+    generalize dependent U.
+    generalize dependent V.
     induction Hcp; intros.
     { rewrite <- eqEps in *; eauto 2. }
     - assert (a = abs); subst.
@@ -560,10 +560,10 @@ Section Ea_when_merge_case.
     rewrite Hu in Hc.
     apply ea_is_cons in Hc as Hcp.
     remember_ds (swhen k xs cs) as rs.
-    revert dependent xs.
-    revert dependent cs.
-    revert dependent U.
-    revert dependent V.
+    generalize dependent xs.
+    generalize dependent cs.
+    generalize dependent U.
+    generalize dependent V.
     induction Hcp; intros.
     - rewrite <- eqEps in *; eauto 2.
     - (* absent *)
@@ -679,10 +679,10 @@ Section Ea_when_merge_case.
     rewrite Hu in Hc.
     apply ea_is_cons in Hc as Hcp.
     remember_ds (smerge l cs np) as rs.
-    revert dependent cs.
-    revert dependent np.
-    revert dependent U.
-    revert dependent V.
+    generalize dependent cs.
+    generalize dependent np.
+    generalize dependent U.
+    generalize dependent V.
     induction Hcp; intros.
     - rewrite <- eqEps in *; eauto 2.
     - (* absent *)
@@ -718,7 +718,7 @@ Section Ea_when_merge_case.
       rewrite Hu, first_cons.
       apply Exists_nth in Hex as (k & (d & x) &  Hk & HH).
       rewrite combine_nth in HH; auto using hds_length.
-      rewrite combine_length, hds_length, Nat.min_id in *.
+      rewrite length_combine, hds_length, Nat.min_id in *.
       destruct HH; subst.
       rewrite (nth_mem_nth _ _ _ _ k) in Hv; auto using  nth_error_nth'.
       erewrite nth_lift in Hv; auto.
@@ -737,7 +737,7 @@ Section Ea_when_merge_case.
       + erewrite nth_lift_at_upd, 3 nth_lift, H1, ea_cons, 2 REM_simpl, 2 rem_cons; auto.
       + eapply Forall_nth with (i := i) in Hf.
         erewrite nth_lift_at, 3 nth_lift; auto.
-        2:rewrite combine_length, hds_length, Nat.min_id; auto.
+        2:rewrite length_combine, hds_length, Nat.min_id; auto.
         erewrite combine_nth in Hf; auto using hds_length.
         erewrite hds_nth; auto.
         rewrite Hf, ea_cons, REM_simpl, rem_cons; auto.
@@ -766,10 +766,10 @@ Section Ea_when_merge_case.
     rewrite Hu in Hc.
     apply ea_is_cons in Hc as Hcp.
     remember_ds (scase l cs np) as rs.
-    revert dependent cs.
-    revert dependent np.
-    revert dependent U.
-    revert dependent V.
+    generalize dependent cs.
+    generalize dependent np.
+    generalize dependent U.
+    generalize dependent V.
     induction Hcp; intros.
     - rewrite <- eqEps in *; eauto 2.
     - (* absent *)
@@ -805,7 +805,7 @@ Section Ea_when_merge_case.
       rewrite Hu, first_cons.
       apply Exists_nth in Hex as (k & (d & x) &  Hk & HH).
       rewrite combine_nth in HH; auto using hds_length.
-      rewrite combine_length, hds_length, Nat.min_id in *.
+      rewrite length_combine, hds_length, Nat.min_id in *.
       destruct HH; subst.
       rewrite (nth_mem_nth _ _ _ _ k) in Hv; auto using  nth_error_nth'.
       erewrite nth_lift in Hv; auto.
@@ -821,7 +821,7 @@ Section Ea_when_merge_case.
       destruct l; try congruence.
       apply nprod_eq; intros i d' Hi.
       eapply Forall_nth with (i := i) in Hf.
-      2:rewrite combine_length, hds_length, Nat.min_id; auto.
+      2:rewrite length_combine, hds_length, Nat.min_id; auto.
       erewrite 4 nth_lift; auto.
       erewrite combine_nth in Hf; auto using hds_length.
       destruct Hf as (?&Hf).
@@ -836,14 +836,14 @@ Section Ea_when_merge_case.
       l <> [] ->
       NoDup l ->
       safe_DS (scase_def_ l cs ds np) ->
-      ea (scase_def_ l cs ds np) <= kcase_def l (ea cs) (ea ds) (lift ea np).
+      ea (scase_def_ l cs ds np) <= kcase_def l (ea cs) (nprod_cons (ea ds) (lift ea np)).
   Proof.
     intros * Hl Nd Hs.
     apply DSle_rec_eq2 with
       (R := fun U V => exists cs ds np,
                 safe_DS (scase_def_ l cs ds np)
                 /\ U == ea (scase_def_ l cs ds np)
-                /\ V == kcase_def l (ea cs) (ea ds) (lift ea np)).
+                /\ V == kcase_def l (ea cs) (nprod_cons (ea ds) (lift ea np))).
     3:eauto 6.
     intros * ? Eq1 Eq2; setoid_rewrite <- Eq1; setoid_rewrite <- Eq2; eauto.
     clear Hs np cs ds.
@@ -851,11 +851,11 @@ Section Ea_when_merge_case.
     rewrite Hu in Hc.
     apply ea_is_cons in Hc as Hcp.
     remember_ds (scase_def_ l cs ds np) as rs.
-    revert dependent cs.
-    revert dependent ds.
-    revert dependent np.
-    revert dependent U.
-    revert dependent V.
+    generalize dependent cs.
+    generalize dependent ds.
+    generalize dependent np.
+    generalize dependent U.
+    generalize dependent V.
     induction Hcp; intros.
     - rewrite <- eqEps in *; eauto 2.
     - (* absent *)
@@ -891,12 +891,12 @@ Section Ea_when_merge_case.
       apply fcase_pres2 in Hf as (b &?& t &?& Ht & ? & Hf & Hor ); subst; auto.
       2: destruct l; simpl in *; congruence.
       clear H Hc H3.
-      rewrite kcase_def_eq, Ht in *.
+      rewrite kcase_def_eq, kcase_def__eq, Ht in *; auto.
       rewrite Hu, first_cons.
       destruct Hor as [Hex | [Hff]]; subst.
       + apply Exists_nth in Hex as (k & (d & y) &  Hk & HH).
         rewrite combine_nth in HH; auto using hds_length.
-        rewrite combine_length, hds_length, Nat.min_id in *.
+        rewrite length_combine, hds_length, Nat.min_id in *.
         destruct HH; subst.
         rewrite (nth_mem_nth _ _ _ _ k) in Hv; auto using  nth_error_nth'.
         erewrite nth_lift in Hv; auto.
@@ -908,11 +908,12 @@ Section Ea_when_merge_case.
         rewrite Hds, H0, Hu, Hv, ea_cons, 4 rem_cons in *.
         do 2 (split; auto).
         (* test *)
+        rewrite kcase_def_eq; auto.
         apply fcont_stable.
         destruct l; try congruence.
         apply nprod_eq; intros i d' Hi.
         eapply Forall_nth with (i := i) in Hf.
-        2:rewrite combine_length, hds_length, Nat.min_id; auto.
+        2:rewrite length_combine, hds_length, Nat.min_id; auto.
         erewrite 4 nth_lift; auto.
         erewrite combine_nth in Hf; auto using hds_length.
         destruct Hf as (?&Hf).
@@ -931,7 +932,7 @@ Section Ea_when_merge_case.
         exists cs',(rem ds),((lift (REM (sampl A)) np)).
         rewrite H0, Hds, Hu, Hv, 4 rem_cons in *.
         do 2 (split; auto).
-        rewrite 2 lift_lift, lift_ea_pres; eauto.
+        rewrite kcase_def_eq, 2 lift_lift, lift_ea_pres; eauto.
         Unshelve.
     all: eauto.
   Qed.
