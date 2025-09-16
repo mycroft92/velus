@@ -88,7 +88,6 @@ Section KDenot_exps.
     + exact 0.
     + exact ((nprod_app @2_ (kdenot_exp_ a)) IHes).
   Defined.
-
   Definition kdenot_expss_ {A} (ess : list (A * list exp)) (n : nat) :
     Dprod (Dprodi FI') (DS_prod SI') -C->
     @nprod (@nprod (DS (errv value)) n) (length ess).
@@ -100,6 +99,15 @@ Section KDenot_exps.
   Defined.
 
 End KDenot_exps.
+
+
+(** Casts a [nprod] into a single stream *)
+(* TODO: move *)
+Definition cast_1 {n} : @nprod (DS (errv value)) n -C-> DS (errv value) :=
+  match n as m return nprod m -C-> @nprod (DS (errv value)) 1 with
+  | 1 => ID _
+  | _ => CTE _ _ errTy'
+  end.
 
 
 Definition kdenot_exp_
@@ -123,23 +131,15 @@ Definition kdenot_exp_
   - (* Elast *)
     refine (PROJ _ (Last i) @_ (SND _ _)).
   - (* Eunop *)
-    eapply fcont_comp. 2: apply (kdenot_exp_ e0).
-    destruct (numstreams e0) as [|[]].
-    (* pas le bon nombre de flots: *)
-    1,3: apply CTE, errTy'.
     destruct (typeof e0) as [|ty []].
     1,3: apply CTE, errTy'.
-    exact (kunop (fun v => sem_unop u v ty)).
+    refine (kunop (fun v => sem_unop u v ty) @_ cast_1 @_ kdenot_exp_ e0).
   - (* Ebinop *)
-    eapply fcont_comp2.
-    3: apply (kdenot_exp_ e0_2).
-    2: apply (kdenot_exp_ e0_1).
-    destruct (numstreams e0_1) as [|[]], (numstreams e0_2) as [|[]].
-    (* pas le bon nombre de flots: *)
-    1-4,6-9: apply curry, CTE, errTy'.
     destruct (typeof e0_1) as [|ty1 []], (typeof e0_2) as [|ty2 []].
-    1-4,6-9: apply curry, CTE, errTy'.
-    exact (kbinop (fun v1 v2 => sem_binop b v1 ty1 v2 ty2)).
+    1-4,6-9: apply CTE, errTy'.
+    refine ((kbinop (fun v1 v2 => sem_binop b v1 ty1 v2 ty2) @2_
+               (cast_1 @_ kdenot_exp_ e0_1))
+              (cast_1 @_ kdenot_exp_ e0_2)).
   - (* Eextcall *)
     apply CTE, 0.
   - (* Efby *)
@@ -405,27 +405,18 @@ Lemma kdenot_exp_eq :
       | Evar x _ => env (Var x)
       | Elast x _ => env (Last x)
       | Eunop op e an =>
-          let se := kdenot_exp e envG env in
-          match numstreams e as n return nprod n -> nprod 1 with
-          | 1 => fun se =>
-              match typeof e with
-              | [ty] => kunop (fun v => sem_unop op v ty) se
-              | _ => errTy'
-              end
-          | _ => fun _ => errTy'
-          end se
+          let se := cast_1 (kdenot_exp e envG env) in
+          match typeof e with
+          | [ty] => kunop (fun v => sem_unop op v ty) se
+          | _ => errTy'
+          end
       | Ebinop op e1 e2 an =>
-          let se1 := kdenot_exp e1 envG env in
-          let se2 := kdenot_exp e2 envG env in
-          match numstreams e1 as n1, numstreams e2 as n2
-                return nprod n1 -> nprod n2 -> nprod 1 with
-          | 1,1 => fun se1 se2 =>
-               match typeof e1, typeof e2 with
-               | [ty1],[ty2] => kbinop (fun v1 v2 => sem_binop op v1 ty1 v2 ty2) se1 se2
-               | _,_ => errTy'
-               end
-          | _,_ => fun _ _ => errTy'
-          end se1 se2
+          let se1 := cast_1 (kdenot_exp e1 envG env) in
+          let se2 := cast_1 (kdenot_exp e2 envG env) in
+          match typeof e1, typeof e2 with
+          | [ty1],[ty2] => kbinop (fun v1 v2 => sem_binop op v1 ty1 v2 ty2) se1 se2
+          | _,_ => errTy'
+          end
       | Eextcall _ _ _ => 0
       | Efby e0s es an =>
           let s0s := kdenot_exps e0s envG env in
@@ -444,7 +435,7 @@ Lemma kdenot_exp_eq :
           let m := (list_sum (List.map numstreams es)) in
           match Nat.eq_dec m n, Nat.eq_dec n (length an) with
           | left eqm, left eqan =>
-              eq_rect _ nprod (lift2 (APP _) s0s (eq_rect _ nprod ss _ eqm)) _ eqan
+              eq_rect _ nprod (lift2 (APP _) s0s (eq_rect _ nprod (lift (REM _) ss) _ eqm)) _ eqan
           | _, _ => nprod_const _ errTy'
           end
       | Ewhen es (x,_) k (tys,_) =>
@@ -496,13 +487,13 @@ Proof.
   (* Le système se sent obligé de dérouler deux fois [kdenot_exp_] lors
      d'un appel à [unfold] et c'est très pénible.
      Cette tactique permet de le renrouler. *)
-  Ltac fold_kdenot_exps_ :=
+  Ltac fold_kdenot_exps :=
     repeat
       match goal with
       | |- context [ kdenot_exps_ ?A ] =>
-          change A with (kdenot_exp_ ins)
+          change A with kdenot_exp_
       | |- context [ kdenot_expss_ ?A ] =>
-          change A with (kdenot_exp_ ins)
+          change A with kdenot_exp_
       end.
 
   (* On doit souvent abstraire la définition des sous-flots
@@ -511,8 +502,8 @@ Proof.
   Ltac gen_kdenot_sub_exps :=
     repeat
       match goal with
-      | |- context [ kdenot_exp_ ?A ?B ] =>
-          generalize (kdenot_exp_ A B); intro
+      | |- context [ kdenot_exp_ ?A ] =>
+          generalize (kdenot_exp_ A); intro
       | |- context [ kdenot_exps_ ?A ?B ] =>
           generalize (kdenot_exps_ A B); intro
       | |- context [ kdenot_expss_ ?A ?B ] =>
@@ -520,28 +511,27 @@ Proof.
       end.
 
   destruct e; auto; intros envG env.
-  - (* Evar *)
-    unfold kdenot_exp, kdenot_exp_, kdenot_var at 1.
-    cases.
   - (* Eunop *)
     unfold kdenot_exp, kdenot_exp_ at 1.
     fold (kdenot_exp_ e).
     generalize (kdenot_exp_ e) as ss.
     generalize (numstreams e) as ne.
-    destruct ne as [|[]]; intros; auto.
     destruct (typeof e) as [|? []]; auto.
   - (* Ebinop *)
     unfold kdenot_exp, kdenot_exp_ at 1.
     fold (kdenot_exp_ e1) (kdenot_exp_ e2).
     generalize (kdenot_exp_ e1) as ss1.
     generalize (kdenot_exp_ e2) as ss2.
-    generalize (numstreams e1) as ne1.
-    generalize (numstreams e2) as ne2.
-    destruct ne1 as [|[]], ne2 as [|[]]; intros; auto.
     destruct (typeof e1) as [|?[]], (typeof e2) as [|?[]]; auto.
-  - (* Efby*)
+  - (* Efby *)
     unfold kdenot_exp, kdenot_exps, kdenot_exp_ at 1.
-    fold_kdenot_exps_ ins.
+    fold_kdenot_exps.
+    unfold eq_rect.
+    gen_kdenot_sub_exps.
+    cases; simpl; cases.
+  - (* Earrow *)
+    unfold kdenot_exp, kdenot_exps, kdenot_exp_ at 1.
+    fold_kdenot_exps.
     unfold eq_rect.
     gen_kdenot_sub_exps.
     cases; simpl; cases.
@@ -549,184 +539,284 @@ Proof.
     destruct l0 as (tys,?).
     destruct p as (i,?).
     unfold kdenot_exp, kdenot_exps, kdenot_exp_ at 1.
-    fold_kdenot_exps_ ins.
+    fold_kdenot_exps.
     gen_kdenot_sub_exps.
-    unfold kdenot_var, eq_rect.
+    unfold eq_rect.
     cases; simpl; cases.
   - (* Emerge *)
     destruct l0 as (tys,?).
     destruct p as (i,ty).
     unfold kdenot_exp, kdenot_exp_, kdenot_exps, kdenot_expss at 1.
-    fold_kdenot_exps_ ins.
+    fold_kdenot_exps.
     gen_kdenot_sub_exps.
-    unfold kdenot_var, eq_rect_r, eq_rect, eq_sym.
+    unfold eq_rect_r, eq_rect, eq_sym.
     cases.
   - (* Ecase *)
     destruct l0 as (tys,?).
     destruct o.
     + (* defaut *)
       unfold kdenot_exp, kdenot_exp_, kdenot_exps, kdenot_expss at 1.
-      fold_kdenot_exps_ ins.
+      fold_kdenot_exps.
       gen_kdenot_sub_exps.
       unfold eq_rect_r, eq_rect, eq_sym.
       cases; simpl; cases.
     + (* total *)
       unfold kdenot_exp, kdenot_exp_, kdenot_exps, kdenot_expss at 1.
-      fold_kdenot_exps_ ins.
+      fold_kdenot_exps.
       gen_kdenot_sub_exps.
       unfold eq_rect_r, eq_rect, eq_sym.
       cases.
   - (* Eapp *)
     rename l into es, l0 into er, l1 into anns, i into f.
     unfold kdenot_exp, kdenot_exps, kdenot_exp_ at 1.
-    fold_kdenot_exps_ ins.
+    fold_kdenot_exps.
     gen_kdenot_sub_exps.
     cases.
     generalize (np_of_env' (List.map fst (n_out n))); intro.
     unfold eq_rect.
     simpl; destruct e.
-    rewrite 3 curry_Curry, 3 Curry_simpl, fcont_comp_simpl.
+    rewrite 2 curry_Curry, 2 Curry_simpl, fcont_comp_simpl.
     reflexivity.
 Qed.
 
 Global Opaque kdenot_exp.
 
-(* FIXME: comprendre pourquoi on ne peut pas faire les deux en un ?????? *)
-Global Add Parametric Morphism : (kdenot_var ins)
-    with signature @Oeq (DS_prod SI') ==> @eq (DS_prod SI') ==> @eq ident ==> @Oeq (DS (errv value))
-      as denot_var_morph1.
-Proof.
-  unfold kdenot_var.
-  intros; cases.
-Qed.
-Global Add Parametric Morphism : (kdenot_var ins)
-    with signature @eq (DS_prod SI') ==> @Oeq (DS_prod SI') ==> @eq ident ==> @Oeq (DS (errv value))
-      as kdenot_var_morph2.
-Proof.
-  unfold kdenot_var.
-  intros; cases.
-Qed.
-
-Lemma kdenot_var_inf :
-  forall env x,
-    all_infinite ->
-    all_infinite env ->
-    infinite (kdenot_var env x).
-Proof.
-  unfold kdenot_var.
-  intros; cases; eauto.
-Qed.
-
-Lemma kdenot_var_n:
-  forall env x,
-    ~ In x ->
-    kdenot_var env x = env x.
-Proof.
-  unfold kdenot_var.
-  intros.
-  destruct (mem_ident x ins) eqn:Hmem; auto.
-  now apply mem_ident_spec in Hmem.
-Qed.
-
-
-(** [env_of_np_ext xs ss env] binds xs to ss in env *)
-Definition env_of_np_ext (l : list ident) {n} : nprod n -C-> DS_prod SI' -C-> DS_prod SI' :=
+(** [env_ext_var xs ss env] binds Var(xs) to ss in env *)
+Definition env_ext_var (l : list ident) {n} : nprod n -C-> DS_prod SI' -C-> DS_prod SI' :=
   curry (Dprodi_DISTR _ _ _
-           (fun x => match mem_nth ident ident_eq_dec l x with
+           (fun x =>
+              match x with
+              | Var x =>
+                  match mem_nth ident ident_eq_dec l x with
                   | Some n => get_nth n errTy' @_ FST _ _
-                  | None => PROJ _ x @_ SND _ _
-                  end)).
+                  | None => PROJ _ (Var x) @_ SND _ _
+                  end
+              | Last _ => PROJ _ x @_ SND _ _
+              end)).
 
-Lemma env_of_np_ext_eq :
-  forall l n (np : nprod n) env x,
-    env_of_np_ext l np env x
-    = match mem_nth ident ident_eq_dec l x with
-      | Some n => get_nth n errTy' np
-      | None => env x
+Lemma env_ext_var_eq :
+  forall l n (np : nprod n) env i,
+    env_ext_var l np env i =
+      match i with
+      | Var x => match mem_nth ident ident_eq_dec l x with
+                | Some n => get_nth n errTy' np
+                | None => env (Var x)
+                end
+      | Last x => env (Last x)
       end.
 Proof.
-  unfold env_of_np_ext.
+  unfold env_ext_var.
   intros.
   autorewrite with cpodb.
   cases.
 Qed.
 
-(* signature : envG -> -> env -> env_acc -> env
-    on utilise les 4 premiers arguments pour évaluer les expressions,
-    et on ajoute les nouvelles associations à l'accumulateur *)
-Definition kdenot_block (: list ident) (b : block) :
-  Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' -C-> DS_prod SI' -C-> DS_prod SI' :=
-  curry (curry (curry
-    match b with
-    | Beq (xs,es) => ((env_of_np_ext xs @2_
-                        uncurry (uncurry (kdenot_exps es)) @_ FST _ _)
-                       (SND _ _))
-    | _ =>  SND _ _ (* garder l'accumulateur *)
-    end)).
+(** [env_ext_last xs ss env] binds Last(xs) to ss in env *)
+Definition env_ext_last (l : list ident) {n} : nprod n -C-> DS_prod SI' -C-> DS_prod SI' :=
+  curry (Dprodi_DISTR _ _ _
+           (fun x =>
+              match x with
+              | Last x =>
+                  match mem_nth ident ident_eq_dec l x with
+                  | Some n => get_nth n errTy' @_ FST _ _
+                  | None => PROJ _ (Last x) @_ SND _ _
+                  end
+              | Var _ => PROJ _ x @_ SND _ _
+              end)).
 
-Lemma kdenot_block_eq :
-  forall b envG env env_acc,
-    kdenot_block b envG env env_acc
-    = match b with
-      | Beq (xs,es) => env_of_np_ext xs (kdenot_exps es envG env) env_acc
-      | _ => env_acc
+Lemma env_ext_last_eq :
+  forall l n (np : nprod n) env i,
+    env_ext_last l np env i =
+      match i with
+      | Last x => match mem_nth ident ident_eq_dec l x with
+                | Some n => get_nth n errTy' np
+                | None => env (Last x)
+                end
+      | Var x => env (Var x)
       end.
 Proof.
-  unfold kdenot_block; intros; cases.
-Qed.
-
-(* un genre de (fold kdenot_block) sur blks *)
-Definition kdenot_blocks (: list ident) (blks : list block) :
-  (*  envG -> -> env -> env *)
-  Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' -C-> DS_prod SI'.
-  apply curry, curry.
-  revert blks; fix kdenot_blocks 1.
-  intros [| blk blks].
-  - apply CTE, 0.
-  - refine ((ID _ @2_ uncurry (uncurry (kdenot_block blk))) (kdenot_blocks blks)).
-Defined.
-
-Lemma kdenot_blocks_eq :
-  forall envG env blks,
-    kdenot_blocks blks envG env
-    = fold_right (fun blk => kdenot_block blk envG env) 0 blks.
-Proof.
-  induction blks; simpl; auto.
-  unfold kdenot_blocks at 1.
-  setoid_rewrite <- IHblks.
-  reflexivity.
-Qed.
-
-Corollary kdenot_blocks_eq_cons :
-  forall envG env blk blks,
-    kdenot_blocks (blk :: blks) envG env
-    = kdenot_block blk envG env
-        (kdenot_blocks blks envG env).
-Proof.
-  reflexivity.
-Qed.
-
-Definition kdenot_top_block (: list ident) (b : block) :
-  (* envG -> -> env -> env *)
-  Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' -C-> DS_prod SI' :=
-  match b with
-  | Blocal (Scope _ blks) => kdenot_blocks blks
-  | _ => 0
-  end.
-
-Lemma kdenot_top_block_eq :
-  forall blk envG env,
-    kdenot_top_block blk envG env
-    = match blk with
-      | Blocal (Scope _ blks) => kdenot_blocks blks envG env
-      | _ => 0
-      end.
-Proof.
+  unfold env_ext_last.
   intros.
-  unfold kdenot_top_block.
+  autorewrite with cpodb.
   cases.
 Qed.
 
+(** union par la gauche de deux environnements *)
+Definition union_env (dom : list ident) :
+  DS_prod SI' -C-> DS_prod SI' -C-> DS_prod SI' :=
+  curry (Dprodi_DISTR _ _ _ (
+             fun i => match i with
+                   | Var x => if mem_ident x dom
+                             then PROJ _ i @_ FST _ _
+                             else PROJ _ i @_ SND _ _
+                   | Last x => if mem_ident x dom
+                              then PROJ _ i @_ FST _ _
+                              else PROJ _ i @_ SND _ _
+                   end)).
+
+Lemma union_env_simpl :
+  forall dom e1 e2 i,
+    union_env dom e1 e2 i =
+      match i with
+      | Var i => if mem_ident i dom then e1 (Var i) else e2 (Var i)
+      | Last i => if mem_ident i dom then e1 (Last i) else e2 (Last i)
+      end.
+Proof.
+  unfold union_env; intros.
+  autorewrite with cpodb.
+  cases.
+Qed.
+
+(** PRIS DANS Auto.v *******************************************  *)
+
+Parameter when_id_env : enumtag -> DS enumtag -C-> DS_prod SI' -C-> DS_prod SI'.
+Parameter merge_all_env : DS enumtag -C-> (Dprodi (fun _:enumtag => DS_prod SI')) -C-> DS_prod SI'.
+
+(** Switch *)
+Definition kswitch : DS enumtag -C-> (Dprodi (fun _:enumtag => DS_prod SI' -C-> DS_prod SI')) -C-> DS_prod SI' -C-> DS_prod SI'.
+  apply curry, curry.
+  refine ((merge_all_env @2_ FST _ _ @_ FST _ _) _).
+  apply Dprodi_DISTR; intro i.
+  refine ((AP _ _ @2_ PROJ _ i @_ SND _ _ @_ FST _ _) _).
+  refine ((when_id_env i @2_ FST _ _ @_ FST _ _) (SND _ _)).
+Defined.
+
+Lemma kswitch_simpl :
+  forall c f e,
+    kswitch c f e = merge_all_env c (fun i => f i (when_id_env i c e)).
+Proof.
+  trivial.
+Qed.
+(** ************************************************************  *)
+
+(* TODO: move *)
+Definition tag_of_val (default:enumtag) : errv value -> enumtag :=
+  fun v => match v with
+        | val (Venum t) => t
+        | _ => default
+        end.
+
+
+Section KDenot_blocks.
+
+  Hypothesis kdenot_block_ :
+    forall b : block, Dprod (Dprodi FI') (DS_prod SI') -C-> DS_prod SI'.
+
+  (** accumule le résultat des blocs dans la sortie *)
+  (* contrairement à dans ma thèse, ce calcul dépend de l'ordre des blocs *)
+  Definition kdenot_blocks_ (blks : list block) :
+    Dprod (Dprodi FI') (DS_prod SI') -C-> DS_prod SI'.
+    induction blks as [|b].
+    + exact (SND _ _).
+    + refine ((curry IHblks @2_ FST _ _) (kdenot_block_ b)).
+  Defined.
+
+  Lemma kdenot_blocks__simpl :
+  forall envG blks env,
+    kdenot_blocks_ blks (envG,env) == List.fold_left (fun env b => kdenot_block_ b (envG,env)) blks env.
+  Proof.
+    induction blks; intros; auto.
+    simpl (fold_left _ _).
+    rewrite <- IHblks; auto.
+  Qed.
+
+End KDenot_blocks.
+
+(* TODO: move *)
+Definition assoc_enumtag {A} (x: enumtag) (xs: list (enumtag * A)): option A :=
+  match find (fun y => fst y ==b x) xs with
+  | Some (_, a) => Some a
+  | None => None
+  end.
+
+Definition kdenot_block_ (b : block) :
+  Dprod (Dprodi FI') (DS_prod SI') -C-> DS_prod SI'.
+  revert b.
+  fix kdenot_block_ 1.
+  intro b.
+  refine
+    match b with
+    (* met à jour les Var associées aux xs *)
+    | Beq (xs,es) => (env_ext_var xs @2_ uncurry (kdenot_exps es)) (SND _ _)
+    (* met à jour (Last x) dans l'environnement *)
+    | Blast x e =>  (@env_ext_last [x] 1 @2_
+                      ((APP _ @2_ (cast_1 @_ uncurry (kdenot_exp e)))
+                         (PROJ _ (Var x) @_ SND _ _))) (SND _ _)
+
+    | Bswitch ec branches =>
+        (* le flot de condition *)
+        let cs := MAP (tag_of_val true_tag) @_ cast_1 @_ uncurry (kdenot_exp ec) in
+        (* chaque branche définit une fonction *)
+        let fs := List.map (fun '(t, Branch _ l) =>
+                              (* on ignore les étiquettes de causalité *)
+                              (t, kdenot_blocks_ kdenot_block_ l)) branches in
+        (kswitch @3_ cs) (Dprodi_DISTR _ _ _
+                            (fun i => match assoc_enumtag i fs with
+                                   | Some fi => (curry ((curry fi @2_ FST _ _ @_ FST _ _) (SND _ _)))
+                                   | None => CTE _ _ 0 (* TODO: plutôt ID ? ou CTE _ error_env ? *)
+                                   end))  (SND _ _)
+    (* (* version plus jolie mais qui ne passe pas le critère de terminaison... *) *)
+    (* | Bswitch ec branches => *)
+    (*     let cs := MAP (tag_of_val true_tag) @_ cast_1 @_ uncurry (kdenot_exp ec) in *)
+    (*     let f := fun i => match assoc_enumtag i branches with *)
+    (*                    | Some (Branch _ l) => (curry ((curry (kdenot_blocks_ kdenot_block_ l) @2_ FST _ _ @_ FST _ _) (SND _ _))) *)
+    (*                    | None => CTE _ _ 0 (* TODO: plutôt ID ? ou CTE _ error_env ? *) *)
+    (*                    end *)
+    (*     in (kswitch @3_ cs) (Dprodi_DISTR _ _ _ f)  (SND _ _) *)
+    (* Dans les autres cas, on garde l'environnement tel quel *)
+    | _ =>  SND _ _
+    end.
+Defined.
+
+Definition kdenot_block (b : block) : Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' :=
+  curry (kdenot_block_ b).
+
+Definition kdenot_blocks (blks : list block) : Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' :=
+  curry (kdenot_blocks_ kdenot_block_ blks).
+
+Lemma kdenot_block_eq :
+  forall b envG env,
+    kdenot_block b envG env
+    == match b with
+      | Beq (xs,es) => env_ext_var xs (kdenot_exps es envG env) env
+      | Blast x e => @env_ext_last [x] 1 (app (cast_1 (kdenot_exp e envG env)) (env (Var x))) env
+      | Bswitch ec branches =>
+          let cs := map (tag_of_val true_tag) (cast_1 (kdenot_exp ec envG env)) in
+          kswitch cs (fun i => match assoc_enumtag i branches with
+                            (* ignore causality annotations *)
+                            | Some (Branch _ l) => kdenot_blocks l envG
+                            | None => 0 (* TODO: plutôt ID ? ou CTE _ error_env ? *)
+                            end) env
+      | _ => env
+      end.
+Proof.
+  unfold kdenot_block; intros; cases.
+  - (* Bswitch *)
+    simpl.
+    autorewrite with cpodb.
+    simpl.
+    apply fcont_eq_elim with (f := kswitch _ _).
+    apply fcont_stable with (f := kswitch _).
+    apply Oprodi_eq_intro; intro i.
+    rewrite Dprodi_DISTR_simpl.
+    induction l as [|[t [? blks]]]; auto.
+    unfold assoc_enumtag. simpl.
+    destruct (t ==b i); auto; clear.
+    apply Oprodi_eq_intro; auto.
+Qed.
+
+(* TODO: unifier les notations des lemmes, _eq, _simpl ?? *)
+Lemma kdenot_blocks_simpl :
+  forall envG env blks,
+    kdenot_blocks blks envG env == List.fold_left (fun env b => kdenot_block b envG env) blks env.
+Proof.
+  unfold kdenot_blocks; intros.
+  now rewrite curry_Curry, Curry_simpl, kdenot_blocks__simpl.
+Qed.
+
+
+
+(****************  *)
 Definition kdenot_node (n : @node PSyn Prefs) :
   (* envG -> -> env -> env *)
   Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' -C-> DS_prod SI'.
