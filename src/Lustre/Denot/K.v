@@ -847,31 +847,21 @@ Qed.
 
 End KDenot_node.
 
-Ltac gen_sub_exps :=
-  repeat match goal with
-  | |- context [ ?f1 (?f2 (?f3 (kdenot_expss ?e1 ?e2 ?e3 ?e4) ?e5) ?e6) ?e7 ] =>
-      generalize (f1 (f2 (f3 (kdenot_expss e1 e2 e3 e4) e5) e6) e7)
-  | |- context [ ?f1 (?f2 (?f3 (kdenot_exps ?e1 ?e2 ?e3) ?e4) ?e5) ?e6 ] =>
-      generalize (f1 (f2 (f3 (kdenot_exps e1 e2 e3) e4) e5) e6)
-  | |- context [ ?f1 (?f2 (?f3 (kdenot_exp ?e1 ?e2 ?e3) ?e4) ?e5) ?e6 ] =>
-      generalize (f1 (f2 (f3 (kdenot_exp e1 e2 e3) e4) e5) e6)
-    end.
-
 Section KGlobal.
 
   Definition kdenot_global_ {PSyn Prefs} (G : @global PSyn Prefs) : Dprodi FI' -C-> Dprodi FI'.
     apply Dprodi_DISTR; intro f.
     destruct (find_node f G).
-    - exact (curry (FIXP _ @_ (kdenot_node G n @2_ FST _ _) (SND _ _))).
-    - apply CTE, CTE, 0.
+    - apply (kdenot_node G n).
+    - apply CTE, 0.
   Defined.
 
   Lemma kdenot_global_eq :
     forall {PSyn Prefs},
-    forall (G : @global PSyn Prefs) envG f envI,
-      kdenot_global_ G envG f =
+    forall (G : @global PSyn Prefs) envG f,
+      kdenot_global_ G envG f ==
         match find_node f G with
-        | Some n => FIXP _ (kdenot_node G n envG envI)
+        | Some n => kdenot_node G n envG
         | None => 0
         end.
   Proof.
