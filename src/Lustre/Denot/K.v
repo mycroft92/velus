@@ -729,43 +729,50 @@ Definition assoc_enumtag {A} (x: enumtag) (xs: list (enumtag * A)): option A :=
   | None => None
   end.
 
-Definition kdenot_block_ (b : block) :
+Fixpoint kdenot_block_ (b : block) :
   Dprod (Dprodi FI') (DS_prod SI') -C-> DS_prod SI'.
-  revert b.
-  fix kdenot_block_ 1.
-  intro b.
+  (* TODO: faire la définition directement, sans tactiques *)
+  (* revert b. *)
+  (* fix kdenot_block_ 1. *)
+  (* intro b. *)
   refine
-    match b with
-    (* met à jour les Var associées aux xs *)
-    | Beq (xs,es) => (env_ext_var xs @2_ uncurry (kdenot_exps es)) (SND _ _)
-    (* met à jour (Last x) dans l'environnement *)
-    | Blast x e =>  (@env_ext_last [x] 1 @2_
-                      ((APP _ @2_ (cast_1 @_ uncurry (kdenot_exp e)))
-                         (PROJ _ (Var x) @_ SND _ _))) (SND _ _)
+  match b with
+  (* met à jour les Var associées aux xs *)
+  | Beq (xs,es) => (env_ext_var xs @2_ uncurry (kdenot_exps es)) (SND _ _)
+  (* met à jour (Last x) dans l'environnement *)
+  | Blast x e =>  (@env_ext_last [x] 1 @2_
+                    ((APP _ @2_ (cast_1 @_ uncurry (kdenot_exp e)))
+                       (PROJ _ (Var x) @_ SND _ _))) (SND _ _)
+  | Bswitch ec branches =>
+      (* le flot de condition *)
+      let cs := MAP (tag_of_val true_tag) @_ cast_1 @_ uncurry (kdenot_exp ec) in
+      (* chaque branche définit une fonction *)
+      let fs := List.map (fun '(t, Branch _ l) =>
+                            (* on ignore les étiquettes de causalité *)
+                            (t, kdenot_blocks_ kdenot_block_ l)) branches in
+      (kswitch @3_ cs) (Dprodi_DISTR _ _ _
+                          (fun i => match assoc_enumtag i fs with
+                                 | Some fi => (curry ((curry fi @2_ FST _ _ @_ FST _ _) (SND _ _)))
+                                 | None => CTE _ _ 0 (* TODO: plutôt ID ? ou CTE _ error_env ? *)
+                                 end))  (SND _ _)
+  (* (* version plus jolie mais qui ne passe pas le critère de terminaison... *) *)
+  (* | Bswitch ec branches => *)
+  (*     let cs := MAP (tag_of_val true_tag) @_ cast_1 @_ uncurry (kdenot_exp ec) in *)
+  (*     let f := fun i => match assoc_enumtag i branches with *)
+  (*                    | Some (Branch _ l) => (curry ((curry (kdenot_blocks_ kdenot_block_ l) @2_ FST _ _ @_ FST _ _) (SND _ _))) *)
+  (*                    | None => CTE _ _ 0 (* TODO: plutôt ID ? ou CTE _ error_env ? *) *)
+  (*                    end *)
+  (*     in (kswitch @3_ cs) (Dprodi_DISTR _ _ _ f)  (SND _ _) *)
 
-    | Bswitch ec branches =>
-        (* le flot de condition *)
-        let cs := MAP (tag_of_val true_tag) @_ cast_1 @_ uncurry (kdenot_exp ec) in
-        (* chaque branche définit une fonction *)
-        let fs := List.map (fun '(t, Branch _ l) =>
-                              (* on ignore les étiquettes de causalité *)
-                              (t, kdenot_blocks_ kdenot_block_ l)) branches in
-        (kswitch @3_ cs) (Dprodi_DISTR _ _ _
-                            (fun i => match assoc_enumtag i fs with
-                                   | Some fi => (curry ((curry fi @2_ FST _ _ @_ FST _ _) (SND _ _)))
-                                   | None => CTE _ _ 0 (* TODO: plutôt ID ? ou CTE _ error_env ? *)
-                                   end))  (SND _ _)
-    (* (* version plus jolie mais qui ne passe pas le critère de terminaison... *) *)
-    (* | Bswitch ec branches => *)
-    (*     let cs := MAP (tag_of_val true_tag) @_ cast_1 @_ uncurry (kdenot_exp ec) in *)
-    (*     let f := fun i => match assoc_enumtag i branches with *)
-    (*                    | Some (Branch _ l) => (curry ((curry (kdenot_blocks_ kdenot_block_ l) @2_ FST _ _ @_ FST _ _) (SND _ _))) *)
-    (*                    | None => CTE _ _ 0 (* TODO: plutôt ID ? ou CTE _ error_env ? *) *)
-    (*                    end *)
-    (*     in (kswitch @3_ cs) (Dprodi_DISTR _ _ _ f)  (SND _ _) *)
-    (* Dans les autres cas, on garde l'environnement tel quel *)
-    | _ =>  SND _ _
-    end.
+  | Blocal (Scope decls blks) =>
+      let vars := List.map fst decls in
+      let F := (curry (kdenot_blocks_ kdenot_block_ blks) @2_ FST _ _ @_ FST _ _)
+                 ((union_env vars @2_ SND _ _) (SND _ _ @_ FST _ _)) in
+      (union_env vars @2_ SND _ _) (FIXP _ @_ curry F)
+  | Breset blks e =>                   SND _ _   (* TODO *)
+  | Bauto Weak ck (ini, oth) states => SND _ _   (* TODO *)
+  | Bauto Strong ck (_, oth) states => SND _ _   (* TODO *)
+  end.
 Defined.
 
 Definition kdenot_block (b : block) : Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' :=
@@ -784,9 +791,13 @@ Lemma kdenot_block_eq :
           let cs := map (tag_of_val true_tag) (cast_1 (kdenot_exp ec envG env)) in
           kswitch cs (fun i => match assoc_enumtag i branches with
                             (* ignore causality annotations *)
-                            | Some (Branch _ l) => kdenot_blocks l envG
+                            | Some (Branch _ blks) => kdenot_blocks blks envG
                             | None => 0 (* TODO: plutôt ID ? ou CTE _ error_env ? *)
                             end) env
+      | Blocal (Scope decls blks) =>
+          let vars := List.map fst decls in
+          let env' := FIXP _ (kdenot_blocks blks envG @_ (union_env vars <___> env)) in
+          union_env vars env env'
       | _ => env
       end.
 Proof.
@@ -803,6 +814,14 @@ Proof.
     unfold assoc_enumtag. simpl.
     destruct (t ==b i); auto; clear.
     apply Oprodi_eq_intro; auto.
+  - (* auto *) simpl. cases.
+  - (* Blocal *)
+    simpl.
+    autorewrite with cpodb.
+    apply fcont_stable with (f := union_env _ _).
+    apply fcont_stable with (f := FIXP _).
+    apply Oprodi_eq_intro; intro i.
+    trivial.
 Qed.
 
 (* TODO: unifier les notations des lemmes, _eq, _simpl ?? *)
@@ -814,34 +833,24 @@ Proof.
   now rewrite curry_Curry, Curry_simpl, kdenot_blocks__simpl.
 Qed.
 
-
-(* fait l'union des environnements envI et env avant d'évaluer b *)
-Definition kdenot_block_ins (b : block) (ins : list ident) :
-  Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' -C-> DS_prod SI'.
-  apply curry, curry.
-  refine ((kdenot_block b @2_ FST _ _ @_ FST _ _)
-            ((union_env ins @2_ SND _ _ @_ FST _ _) (SND _ _))).
-Defined.
-
-Lemma kdenot_block_ins_simpl :
-  forall b ins envG envI env,
-    kdenot_block_ins b ins envG envI env =
-      kdenot_block b envG (union_env ins envI env).
-Proof.
-  trivial.
-Qed.
-
+(* fait l'union des environnements envI et env avant d'évaluer le bloc principal *)
 Definition kdenot_node (n : @node PSyn Prefs) :
   Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI'.
-  refine (_ @_ (kdenot_block_ins (n_block n) (idents (n_in n)))).
   apply curry.
-  refine (FIXP _ @_ ((AP _ _ @2_ (FST _ _))( SND _ _))).
+  refine (FIXP _ @_ _).
+  apply curry.
+  refine ((kdenot_block (n_block n) @2_ FST _ _ @_ FST _ _)
+            ((union_env (idents (n_in n)) @2_ SND _ _ @_ FST _ _) (SND _ _ ))).
 Defined.
 
 Lemma kdenot_node_eq : forall n envG envI,
     kdenot_node n envG envI ==
-      FIXP _ (kdenot_block_ins (n_block n) (idents (n_in n)) envG envI).
+      FIXP _ (kdenot_block (n_block n) envG @_ (union_env (idents (n_in n)) envI)).
 Proof.
+  unfold kdenot_node; intros.
+  autorewrite with cpodb.
+  apply fcont_stable.
+  apply Oprodi_eq_intro; intro env.
   trivial.
 Qed.
 
