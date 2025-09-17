@@ -815,22 +815,34 @@ Proof.
 Qed.
 
 
-
-(****************  *)
-Definition kdenot_node (n : @node PSyn Prefs) :
-  (* envG -> -> env -> env *)
+(* fait l'union des environnements envI et env avant d'évaluer b *)
+Definition kdenot_block_ins (b : block) (ins : list ident) :
   Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' -C-> DS_prod SI'.
+  apply curry, curry.
+  refine ((kdenot_block b @2_ FST _ _ @_ FST _ _)
+            ((union_env ins @2_ SND _ _ @_ FST _ _) (SND _ _))).
+Defined.
+
+Lemma kdenot_block_ins_simpl :
+  forall b ins envG envI env,
+    kdenot_block_ins b ins envG envI env =
+      kdenot_block b envG (union_env ins envI env).
+Proof.
+  trivial.
+Qed.
+
+Definition kdenot_node (n : @node PSyn Prefs) :
+  Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI'.
+  refine (_ @_ (kdenot_block_ins (n_block n) (idents (n_in n)))).
   apply curry.
-  refine ((kdenot_top_block (List.map fst n.(n_in)) n.(n_block) @2_ _) _).
-  - exact (FST _ _). (* envG *)
-  - exact (SND _ _). (* *)
+  refine (FIXP _ @_ ((AP _ _ @2_ (FST _ _))( SND _ _))).
 Defined.
 
 Lemma kdenot_node_eq : forall n envG envI,
-    let := List.map fst n.(n_in) in
-    kdenot_node n envG = kdenot_top_block n.(n_block) envG envI.
+    kdenot_node n envG envI ==
+      FIXP _ (kdenot_block_ins (n_block n) (idents (n_in n)) envG envI).
 Proof.
-  reflexivity.
+  trivial.
 Qed.
 
 End KDenot_node.
