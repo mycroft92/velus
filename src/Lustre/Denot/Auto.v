@@ -1,0 +1,790 @@
+Require Import Cpo.
+
+(** identifiant de variable  *)
+Parameter id : Type.
+Inductive key : Type :=
+| Var : id -> key
+| Last : id -> key.
+
+Definition env (A : Type) : cpo := DS_prod (fun _:key => A).
+
+Definition ext_env {A B : Type} : (DS A -C-> DS B) -C-> (env A -C-> env B).
+  apply curry, Dprodi_DISTR; intro i.
+  refine ((AP _ _ @2_ FST _ _) (PROJ _ i @_ SND _ _)).
+Defined.
+
+Lemma ext_env_simpl : forall A B f env i,
+    @ext_env A B f env i = f (env i).
+Proof.
+  trivial.
+Qed.
+
+(** Identifiant d'état, ou plus généralement d'un type énuméré *)
+Parameter id_st : Type.
+Parameter id_st_dec : forall i j : id_st, { i = j } + {~ i = j}.
+
+Definition id_st_eqb (i j : id_st) : bool :=
+  match id_st_dec i j with left _ => true | _ => false end.
+
+(* réécritures nécessaires dans ce fichier, cpodb est trop lourde... *)
+Local Hint Rewrite
+     ford_fcont_shift_simpl
+     curry_Curry
+     Curry_simpl
+     fcont_comp_simpl
+     fcont_comp2_simpl
+     fcont_comp3_simpl
+     fcont_comp4_simpl
+     SND_simpl Snd_simpl
+     FST_simpl Fst_simpl
+     Dprodi_DISTR_simpl
+  : localdb.
+
+(** fonctions de flots utiles pour les automates *)
+Section OPS.
+
+Context {A B : Type}.
+
+Definition whencf : (DS bool -C-> DS A -C-> DS A) -C-> DS bool -C-> DS A -C-> DS A.
+  apply curry, curry.
+  apply (fcont_comp2 (DSCASE bool A)).
+  2:exact (SND _ _ @_ (FST _ _)).
+  apply ford_fcont_shift; intro c.
+  apply curry.
+  apply (fcont_comp2 (DSCASE A A)).
+  2:exact (SND _ _ @_ (FST _ _)).
+  apply ford_fcont_shift; intro x.
+  apply curry.
+  destruct c.
+  - refine (CONS x @_ _).
+    refine ((_ @3_ ID _) _ _).
+    exact (FST _ _ @_ (FST _ _ @_ (FST _ _ @_ (FST _ _)))).
+    exact (SND _ _ @_ (FST _ _)).
+    exact (SND _ _).
+  - refine ((_ @3_ ID _) _ _).
+    exact (FST _ _ @_ (FST _ _ @_ (FST _ _ @_ (FST _ _)))).
+    exact (SND _ _ @_ (FST _ _)).
+    exact (SND _ _).
+Defined.
+
+Lemma whencf_eq : forall F x xs c cs,
+    whencf F (cons c cs) (cons x xs) ==
+      if c
+      then cons x (F cs xs)
+      else F cs xs.
+Proof.
+    intros.
+    unfold whencf.
+    setoid_rewrite DSCASE_simpl.
+    do 2 setoid_rewrite DScase_cons.
+    destruct c; now simpl.
+Qed.
+
+Definition whenc : DS bool -C-> DS A -C-> DS A := FIXP _ whencf.
+
+Lemma whenc_eq : forall x xs c cs,
+    whenc (cons c cs) (cons x xs) ==
+      if c
+      then cons x (whenc cs xs)
+      else whenc cs xs.
+Proof.
+    intros.
+    unfold whenc.
+    rewrite FIXP_eq at 1.
+    now rewrite whencf_eq.
+Qed.
+
+Definition when_not := whenc @_ MAP negb.
+
+Definition when_env : DS bool -C-> env A -C-> env A.
+  apply curry.
+  refine ((ext_env @2_ _) (SND _ _)).
+  apply curry.
+  refine ((whenc @2_ FST _ _ @_ FST _ _) (SND _ _)).
+Defined.
+
+Lemma when_env_simpl : forall cs env i,
+    when_env cs env i = whenc cs (env i).
+Proof.
+  trivial.
+Qed.
+
+Definition when_not_env : DS bool -C-> env A -C-> env A.
+  apply curry.
+  refine ((ext_env @2_ _) (SND _ _)).
+  apply curry.
+  refine ((when_not @2_ FST _ _ @_ FST _ _) (SND _ _)).
+Defined.
+
+Lemma when_not_env_simpl : forall cs env i,
+    when_not_env cs env i = when_not cs (env i).
+Proof.
+  trivial.
+Qed.
+
+(* let rec merge : bool lazy_stream -> 'a lazy_stream -> *)
+(*                 'a lazy_stream -> 'a lazy_stream = *)
+(*   fun cs xs ys -> *)
+(*     (match Lazy.force cs with *)
+(*      | Cons(true, cs) -> *)
+(*         lazy (match Lazy.force xs with *)
+(*            Cons(x, xs) -> (Cons(x, merge cs xs ys))) *)
+(*      | Cons(false, cs) -> *)
+(*         lazy (match Lazy.force ys with *)
+(*            Cons(y, ys) -> (Cons(y, merge cs xs ys)))) *)
+
+(* let merge_env (c : bool lazy_stream) *)
+(*           (et : 'a env) (ef : 'a env) : 'a env = *)
+(*   fun i -> merge c (et i) (ef i) *)
+
+Definition when_id (i : id_st) : DS id_st -C-> DS A -C-> DS A :=
+  whenc @_ MAP (fun j => id_st_eqb j i).
+
+Definition when_id_env (i : id_st) : DS id_st -C-> env A -C-> env A :=
+  ext_env @_ (when_id i).
+
+(** merge étendu aux [id_st] *)
+Definition merge_allf :
+  (DS id_st -C-> (DS_prod (fun _:id_st => A)) -C-> DS A) -C->
+  DS id_st -C-> (DS_prod (fun _:id_st => A)) -C-> DS A.
+  apply curry, curry.
+  apply (fcont_comp2 (DSCASE id_st A)).
+  2:exact (SND _ _ @_ (FST _ _)).
+  apply ford_fcont_shift; intro i.
+  apply curry.
+  refine ((APP _ @2_ PROJ _ i @_ SND _ _ @_ FST _ _) _).
+  refine ((AP _ _ @3_ FST _ _ @_ FST _ _ @_ FST _ _) (SND _ _) _).
+  refine (_ @_ SND _ _ @_ FST _ _).
+  refine (DMAPi (fun j => if id_st_eqb i j then REM _ else ID _)).
+Defined.
+
+Lemma merge_allf_simpl : forall F i c istr,
+    merge_allf F (cons i c) istr ==
+      app (istr i) (F c (fun j => if id_st_eqb i j then rem (istr j) else istr j)).
+Proof.
+    intros.
+    unfold merge_allf.
+    setoid_rewrite DScase_cons.
+    simpl.
+    eapply (fcont_stable (APP A (istr i))).
+    repeat change (fcontit ?a ?b) with (a b).
+    apply fcont_stable; simpl.
+    apply Oprodi_eq_intro; intro j.
+    destruct (id_st_eqb i j); auto.
+Qed.
+
+Definition merge_all :  DS id_st -C-> (DS_prod (fun _:id_st => A)) -C-> DS A :=
+  FIXP _ merge_allf.
+
+Lemma merge_all_simpl : forall i c istr,
+    merge_all (cons i c) istr ==
+      app (istr i) (merge_all c (fun j => if id_st_eqb i j then rem (istr j) else istr j)).
+Proof.
+  intros.
+  unfold merge_all.
+  rewrite FIXP_eq at 1.
+  now rewrite merge_allf_simpl.
+Qed.
+
+(* le même, avec des environnements *)
+Definition merge_all_envf :
+  (DS id_st -C-> (Dprodi (fun _:id_st => env A)) -C-> env A) -C->
+  DS id_st -C-> (Dprodi (fun _:id_st => env A)) -C-> env A.
+  apply curry, curry.
+  apply Dprodi_DISTR; intro x.
+  apply (fcont_comp2 (DSCASE id_st A)).
+  2:exact (SND _ _ @_ (FST _ _)).
+  apply ford_fcont_shift; intro i.
+  apply curry.
+  refine ((APP _ @2_ PROJ _ x @_ PROJ _ i @_ SND _ _ @_ FST _ _) _).
+  refine (PROJ _ x @_ ((AP _ _ @3_ FST _ _ @_ FST _ _ @_ FST _ _) (SND _ _) _)).
+  refine (_ @_ SND _ _ @_ FST _ _).
+  refine (DMAPi (fun j => if id_st_eqb i j then REM_env else ID _)).
+Defined.
+
+Lemma merge_all_envf_simpl : forall F i c istr,
+    merge_all_envf F (cons i c) istr ==
+      APP_env (istr i) (F c (fun j => if id_st_eqb i j then REM_env (istr j) else istr j)).
+Proof.
+  intros.
+  unfold merge_all_envf.
+  apply Oprodi_eq_intro; intro x.
+  setoid_rewrite DScase_cons.
+  simpl.
+  eapply (fcont_stable (APP A _)).
+  apply Oprodi_eq_elim with (p := (F c _)).
+  apply (fcont_stable (F c)); simpl.
+  apply Oprodi_eq_intro; intro j.
+  destruct (id_st_eqb i j); auto.
+Qed.
+
+Definition merge_all_env : DS id_st -C-> (Dprodi (fun _:id_st => env A)) -C-> env A :=
+  FIXP _ merge_all_envf.
+
+Lemma merge_all_env_simpl : forall i c istr,
+    merge_all_env (cons i c) istr ==
+      APP_env (istr i) (merge_all_env c (fun j => if id_st_eqb i j then REM_env (istr j) else istr j)).
+Proof.
+  intros.
+  unfold merge_all_env.
+  rewrite FIXP_eq at 1.
+  now rewrite merge_all_envf_simpl.
+Qed.
+
+(** Switch *)
+Definition switch : DS id_st -C-> (Dprodi (fun _:id_st => env A -C-> env A)) -C-> env A -C-> env A.
+  apply curry, curry.
+  refine ((merge_all_env @2_ FST _ _ @_ FST _ _) _).
+  apply Dprodi_DISTR; intro i.
+  refine ((AP _ _ @2_ PROJ _ i @_ SND _ _ @_ FST _ _) _).
+  refine ((when_id_env i @2_ FST _ _ @_ FST _ _) (SND _ _)).
+Defined.
+
+Lemma switch_simpl :
+  forall c f e,
+    switch c f e = merge_all_env c (fun i => f i (when_id_env i c e)).
+Proof.
+  trivial.
+Qed.
+
+(** Automates  *)
+
+(** le merge_unless de Marc étendu aux [env]*)
+Definition merge_unlessf :
+  (DS bool -C-> env A -C-> env A -C-> env A) -C->
+  DS bool -C-> env A -C-> env A -C-> env A.
+  apply curry, curry, curry.
+  apply Dprodi_DISTR; intro x.
+  apply (fcont_comp2 (DSCASE bool A)).
+  2:exact (SND _ _ @_ FST _ _ @_ FST _ _).
+  apply ford_fcont_shift; intro c.
+  apply curry.
+    match goal with
+    | |- _ (_ (Dprod ?pl ?pr) _) =>
+        pose (F := FST _ _ @_ FST _ _ @_ FST _ _ @_ FST pl pr);
+        pose (e1 := SND _ _ @_ FST _ _ @_ FST pl pr);
+        pose (e2 := SND _ _ @_ FST pl pr);
+        idtac
+    end.
+    destruct c.
+    - refine (PROJ _ x @_ e2).
+    - refine ((PROJ _ x @_ _)).
+      refine ((APP_env @2_ e1) _).
+      refine ((AP _ _ @4_ F) (SND _ _) (REM_env @_ e1) e2).
+Defined.
+
+Lemma merge_unlessf_simpl : forall F c cs e1 e2,
+    merge_unlessf F (cons c cs) e1 e2
+    == if c then e2 else APP_env e1 (F cs (REM_env e1) e2).
+Proof.
+  intros.
+  unfold merge_unlessf.
+  apply Oprodi_eq_intro; intro x.
+  autorewrite with localdb.
+  setoid_rewrite DScase_cons.
+  destruct c; auto.
+Qed.
+
+Definition merge_unless : DS bool -C-> env A -C-> env A -C-> env A :=
+  FIXP _ merge_unlessf.
+
+Lemma merge_unless_simpl : forall c cs e1 e2,
+    merge_unless (cons c cs) e1 e2
+    == if c then e2 else APP_env e1 (merge_unless cs (REM_env e1) e2).
+Proof.
+  intros.
+  unfold merge_unless.
+  rewrite FIXP_eq at 1.
+  now rewrite merge_unlessf_simpl.
+Qed.
+
+Definition merge_until : DS bool -C-> env A -C-> env A -C-> env A :=
+  merge_unless @_ CONS false.
+
+Lemma merge_until_simpl : forall c e1 e2,
+    merge_until c e1 e2 = merge_unless (cons false c) e1 e2.
+Proof.
+  trivial.
+Qed.
+
+(** le merge_unless de Marc étendu aux indices et aux [env] *)
+Definition merge_unless_envf :
+  (DS (option B) -C-> env A -C-> Dprodi (fun _:B => env A) -C-> env A) -C->
+  DS (option B) -C-> env A -C-> Dprodi (fun _:B => env A) -C-> env A.
+  apply curry, curry, curry.
+  apply Dprodi_DISTR; intro x.
+  apply (fcont_comp2 (DSCASE (option B) A)).
+  2:exact (SND _ _ @_ FST _ _ @_ FST _ _).
+  apply ford_fcont_shift; intro c.
+  apply curry.
+    match goal with
+    | |- _ (_ (Dprod ?pl ?pr) _) =>
+        pose (F := FST _ _ @_ FST _ _ @_ FST _ _ @_ FST pl pr);
+        pose (e := SND _ _ @_ FST _ _ @_ FST pl pr);
+        pose (fe := SND _ _ @_ FST pl pr);
+        idtac
+    end.
+    destruct c as [i|].
+    - refine (PROJ _ x @_ PROJ _ i @_ fe).
+    - refine ((PROJ _ x @_ _)).
+      refine ((APP_env @2_ e) _).
+      refine ((AP _ _ @4_ F) (SND _ _) (REM_env @_ e) fe).
+Defined.
+
+Lemma merge_unless_envf_simpl : forall F c cs e fe,
+    merge_unless_envf F (cons c cs) e fe
+    == match c with
+       | Some i => fe i
+       | None => APP_env e (F cs (REM_env e) fe)
+       end.
+Proof.
+  intros.
+  unfold merge_unless_envf.
+  apply Oprodi_eq_intro; intro x.
+  autorewrite with localdb.
+  setoid_rewrite DScase_cons.
+  destruct c; auto.
+Qed.
+
+Definition merge_unless_env : DS (option B) -C-> env A -C-> Dprodi (fun _:B => env A) -C-> env A :=
+  FIXP _ merge_unless_envf.
+
+Lemma merge_unless_env_simpl : forall c cs e fe,
+    merge_unless_env (cons c cs) e fe
+    == match c with
+       | Some i => fe i
+       | None => APP_env e (merge_unless_env cs (REM_env e) fe)
+       end.
+Proof.
+  intros.
+  unfold merge_unless_env.
+  rewrite FIXP_eq at 1.
+  now rewrite merge_unless_envf_simpl.
+Qed.
+
+Definition merge_until_env : DS (option B) -C-> env A -C-> Dprodi (fun _:B => env A) -C-> env A  :=
+  merge_unless_env @_ CONS None.
+
+Lemma merge_until_env_simpl : forall c e fe,
+    merge_until_env c e fe = merge_unless_env (cons None c) e fe.
+Proof.
+  trivial.
+Qed.
+
+(* le "after_unless" de Marc
+            c = F F F T F T F F ...
+            x = 1 2 3 4 5 6 7 8 ...
+   rem_unless =       4 5 6 7 8 .... *)
+Definition rem_unlessf : (DS bool -C-> DS A -C-> DS A) -C-> DS bool -C-> DS A -C-> DS A.
+  apply curry, curry.
+  apply (fcont_comp2 (DSCASE bool A)).
+  2:exact (SND _ _ @_ (FST _ _)).
+  apply ford_fcont_shift; intro c.
+  apply curry.
+  apply (fcont_comp2 (DSCASE A A)).
+  2:exact (SND _ _ @_ (FST _ _)).
+  apply ford_fcont_shift; intro x.
+  apply curry.
+  destruct c.
+  - refine (CONS x @_ SND _ _).
+  - refine ((_ @3_ ID _) _ _).
+    exact (FST _ _ @_ (FST _ _ @_ (FST _ _ @_ (FST _ _)))).
+    exact (SND _ _ @_ (FST _ _)).
+    exact (SND _ _).
+Defined.
+
+Lemma rem_unlessf_eq : forall F x xs c cs,
+    rem_unlessf F (cons c cs) (cons x xs) ==
+      if c then cons x xs else F cs xs.
+Proof.
+    intros.
+    unfold rem_unlessf.
+    setoid_rewrite DSCASE_simpl.
+    do 2 setoid_rewrite DScase_cons.
+    destruct c; now simpl.
+Qed.
+
+Definition rem_unless : DS bool -C-> DS A -C-> DS A := FIXP _ rem_unlessf.
+
+Lemma rem_unless_eq : forall x xs c cs,
+    rem_unless (cons c cs) (cons x xs) ==
+      if c then cons x xs else rem_unless cs xs.
+Proof.
+    intros.
+    unfold rem_unless.
+    rewrite FIXP_eq at 1.
+    now rewrite rem_unlessf_eq.
+Qed.
+
+Definition rem_unless_env : DS bool -C-> env A -C-> env A := ext_env @_ rem_unless.
+
+Lemma rem_unless_env_simpl : forall c e i,
+    rem_unless_env c e i = rem_unless c (e i).
+Proof.
+  trivial.
+Qed.
+
+(* le "after_until" de Marc
+           c = F F F T F T F F ...
+           x = 1 2 3 4 5 6 7 8 ...
+   rem_until =         5 6 7 8 .... *)
+(* TODO: vérifier, mais je crois que c'est aussi simple que ça *)
+Definition rem_until : DS bool -C-> DS A -C-> DS A :=
+  curry (REM _ @_ (rem_unless @2_ FST _ _) (SND _ _)).
+
+Lemma rem_until_simpl :
+  forall cs xs, rem_until cs xs == rem (rem_unless cs xs).
+Proof.
+  trivial.
+Qed.
+
+Definition rem_until_env : DS bool -C-> env A -C-> env A :=
+  ext_env @_ rem_until.
+
+End OPS.
+
+Section AUTO.
+
+Variable A : Type.
+
+Definition is_some {A} (o : option A) : bool :=
+  match o with Some _ => true | _ => false end.
+
+(** Transitions fortes sans histoire *)
+
+Definition eval_auto_strongf :
+  Dprodi (fun _:id_st => env A -C-> env A) -C->
+  Dprodi (fun _:id_st => env A -C-> DS (option id_st)) -C->
+  (Dprodi (fun _:bool =>  Dprodi (fun _:id_st => env A -C-> env A)) -C->
+   Dprodi (fun _:bool =>  Dprodi (fun _:id_st => env A -C-> env A))).
+  apply curry, curry.
+  apply Dprodi_DISTR; intro init.
+  apply Dprodi_DISTR; intro i.
+  apply curry.
+  match goal with
+  | |- _ (_ (Dprod ?pl ?pr) _) =>
+      pose (fs := FST _ _ @_ FST _ _ @_ FST pl pr);
+      pose (ft := SND _ _ @_ FST _ _ @_ FST pl pr);
+      pose (F := SND _ _ @_ FST pl pr);
+      pose (e := SND pl pr);
+      idtac
+  end.
+  pose (t := if init then (AP _ _ @2_ PROJ _ i @_ ft) e
+             else CONS None @_ (AP _ _ @2_ PROJ _ i @_ ft) (REM_env @_ e)).
+  pose (e' := (AP _ _ @2_ PROJ _ i @_ fs) e).
+  refine ((merge_unless_env @3_ t) e' _).
+  apply Dprodi_DISTR; intro j.
+  pose (re := (rem_unless_env @2_ MAP is_some @_ t) e).
+  pose (fi := (PROJ _ j @_ PROJ _ false @_ F)).
+  refine ((AP _ _ @2_ fi) re).
+Defined.
+
+Lemma eval_auto_strongf_simpl :
+  forall fs ft F init i e,
+    eval_auto_strongf fs ft F init i e ==
+      let t := if init then ft i e else cons None (ft i (REM_env e)) in
+      let e' := fs i e in
+      merge_unless_env t e' (fun j => F false j (rem_unless_env (map is_some t) e)).
+Proof.
+  intros.
+  unfold eval_auto_strongf.
+  autorewrite with localdb.
+  destruct init; auto.
+Qed.
+
+Definition eval_auto_strong (i : id_st) :
+  Dprodi (fun _:id_st => env A -C-> env A) -C->
+  Dprodi (fun _:id_st => env A -C-> DS (option id_st)) -C->
+  env A -C->
+  env A.
+  apply curry, curry.
+  eapply fcont_comp2.
+  2: refine (((FIXP _ @_ (eval_auto_strongf @2_ FST _ _ @_ FST _ _) (SND _ _ @_ FST _ _)))).
+  2: refine (SND _ _).
+  apply curry.
+  refine ((AP _ _ @2_ PROJ _ i @_ PROJ _ true @_ FST _ _) (SND _ _)).
+Defined.
+
+Lemma eval_auto_strong_simpl :
+  forall i fs ft e,
+    eval_auto_strong i fs ft e = FIXP _ (eval_auto_strongf fs ft) true i e.
+Proof.
+  trivial.
+Qed.
+
+(** transitions faibles sans histoire *)
+
+Definition eval_auto_weakf :
+  Dprodi (fun _:id_st => env A -C-> env A) -C->
+  Dprodi (fun _:id_st => env A -C-> DS (option id_st)) -C->
+  (Dprodi (fun _:id_st => env A -C-> env A) -C->
+   Dprodi (fun _:id_st => env A -C-> env A)).
+  apply curry, curry.
+  apply Dprodi_DISTR; intro i.
+  apply curry.
+  match goal with
+  | |- _ (_ (Dprod ?pl ?pr) _) =>
+      pose (fs := FST _ _ @_ FST _ _ @_ FST pl pr);
+      pose (ft := SND _ _ @_ FST _ _ @_ FST pl pr);
+      pose (F := SND _ _ @_ FST pl pr);
+      pose (e := SND pl pr);
+      idtac
+  end.
+  pose (e' := (AP _ _ @2_ PROJ _ i @_ fs) e).
+  pose (t := (AP _ _ @2_ PROJ _ i @_ ft) e').
+  refine ((merge_until_env @3_ t) e' _).
+  apply Dprodi_DISTR; intro j.
+  pose (re := (rem_until_env @2_ MAP is_some @_ t) e).
+  pose (fi := (PROJ _ j @_ F)).
+  refine ((AP _ _ @2_ fi) re).
+Defined.
+
+Lemma eval_auto_weakf_simpl :
+  forall fs ft F i e,
+    eval_auto_weakf fs ft F i e ==
+      let e' := fs i e in
+      (* on évalue les transitions dans le nouvel environnement *)
+      let t := ft i e' in
+      merge_until_env t e' (fun j => F j (rem_until_env (map is_some t) e)).
+Proof.
+  intros.
+  unfold eval_auto_weakf.
+  autorewrite with localdb.
+  reflexivity.
+Qed.
+
+Definition eval_auto_weak (i : id_st) :
+  Dprodi (fun _:id_st => env A -C-> env A) -C->
+  Dprodi (fun _:id_st => env A -C-> DS (option id_st)) -C->
+  env A -C->
+  env A.
+  apply curry, curry.
+  eapply fcont_comp2.
+  2: refine (((FIXP _ @_ (eval_auto_weakf @2_ FST _ _ @_ FST _ _) (SND _ _ @_ FST _ _)))).
+  2: refine (SND _ _).
+  apply curry.
+  refine ((AP _ _ @2_ PROJ _ i @_ FST _ _) (SND _ _)).
+Defined.
+
+Lemma eval_auto_weak_simpl :
+  forall i fs ft e,
+    eval_auto_weak i fs ft e = FIXP _ (eval_auto_weakf fs ft) i e.
+Proof.
+  trivial.
+Qed.
+
+(** transitions fortes avec histoire *)
+
+(* TODO: move, c'est pris dans Common.v *)
+Definition or_default {A} (d: A) (o: option A) : A :=
+  match o with Some a => a | None => d end.
+
+Definition eval_auto_strong_continuef (i : id_st) :
+  Dprodi (fun _:id_st => env A -C-> DS (option id_st)) -C->
+  env A -C->
+  Dprod (Dprodi (fun _:id_st => DS id_st)) (DS id_st) -C->
+  Dprod (Dprodi (fun _:id_st => DS id_st)) (DS id_st).
+  apply curry, curry.
+  match goal with
+  | |- _ (_ (Dprod ?pl ?pr) _) =>
+      pose (ft := FST _ _ @_ FST pl pr);
+      pose (e := SND _ _ @_ FST pl pr);
+      pose (ft' := FST _ _ @_ SND pl pr);
+      pose (ts := SND _ _ @_ SND pl pr);
+      idtac
+  end.
+  pose (_ts := CONS i @_ (merge_all @2_ ts) ft').
+  refine ((PAIR _ _ @2_ _) _ts).
+  apply Dprodi_DISTR; intro j.
+  refine (MAP (or_default j) @_ ((PROJ _ j @2_ ft) _)).
+  refine ((when_id_env j @2_ ts) e).
+Defined.
+
+Lemma eval_auto_strong_continuef_simpl :
+  forall i ft e ft' ts,
+    eval_auto_strong_continuef i ft e (ft',ts) =
+      (fun i => map (or_default i) (ft i (when_id_env i ts e)),
+         cons i (merge_all ts ft')).
+Proof.
+  reflexivity.
+Qed.
+
+Definition eval_auto_strong_continue (i : id_st) :
+  Dprodi (fun _:id_st => env A -C-> env A) -C->
+  Dprodi (fun _:id_st => env A -C-> DS (option id_st)) -C->
+  env A -C-> env A.
+  apply curry, curry.
+  match goal with
+  | |- _ (_ (Dprod ?pl ?pr) _) =>
+      pose (fs := FST _ _ @_ FST pl pr);
+      pose (ft := SND _ _ @_ FST pl pr);
+      pose (e := SND pl pr);
+      idtac
+  end.
+  pose (F := FIXP _ @_ ((eval_auto_strong_continuef i @2_ ft) e)).
+  pose (ts := SND _ _ @_ F).
+  refine ((merge_all_env @2_ REM _ @_ ts) _).
+  apply Dprodi_DISTR; intro j.
+  refine ((PROJ _ j @2_ fs) _).
+  refine ((when_id_env j @2_ REM _ @_ ts) e).
+Defined.
+
+Lemma eval_auto_strong_continue_simpl :
+  forall i fs ft e,
+    eval_auto_strong_continue i fs ft e =
+      let '(_, ts) := FIXP _ (eval_auto_strong_continuef i ft e) in
+      merge_all_env (rem ts) (fun i => fs i (when_id_env i (rem ts) e)).
+Proof.
+  reflexivity.
+Qed.
+
+(** transitions faibles avec histoire *)
+
+Definition eval_auto_weak_continuef (i : id_st) :
+  Dprodi (fun _:id_st => env A -C-> env A) -C->
+  Dprodi (fun _:id_st => env A -C-> DS (option id_st)) -C->
+  env A -C->
+  Dprod (Dprod (Dprodi (fun _:id_st => DS id_st)) (DS id_st)) (env A) -C->
+  Dprod (Dprod (Dprodi (fun _:id_st => DS id_st)) (DS id_st)) (env A).
+  apply curry, curry, curry.
+  match goal with
+  | |- _ (_ (Dprod ?pl ?pr) _) =>
+      pose (fs := FST _ _ @_ FST _ _ @_ FST pl pr);
+      pose (ft := SND _ _ @_ FST _ _ @_ FST pl pr);
+      pose (e := SND _ _ @_ FST pl pr);
+      pose (ft' := FST _ _ @_ FST _ _ @_ SND pl pr);
+      pose (ts := SND _ _ @_ FST _ _ @_ SND pl pr);
+      pose (e' := SND _ _ @_ SND pl pr);
+      idtac
+  end.
+  refine ((PAIR _ _ @2_ (PAIR _ _ @2_ _) _) _).
+  - apply Dprodi_DISTR; intro j.
+    refine (MAP (or_default j) @_ ((PROJ _ j @2_ ft) _)).
+    refine ((when_id_env j @2_ ts) e').
+  - refine (CONS i @_ (merge_all @2_ ts) ft').
+  - refine ((merge_all_env @2_ ts) _).
+    apply Dprodi_DISTR; intro j.
+    refine ((PROJ _ j @2_ fs) _).
+    refine ((when_id_env j @2_ ts) e).
+Defined.
+
+Lemma eval_auto_weak_continuef_simpl :
+  forall i fs ft e ft' ts e',
+    eval_auto_weak_continuef i fs ft e (ft',ts,e') =
+      (fun i => map (or_default i) (ft i (when_id_env i ts e')),
+         cons i (merge_all ts ft'),
+         merge_all_env ts (fun i => fs i (when_id_env i ts e))).
+Proof.
+  reflexivity.
+Qed.
+
+Definition eval_auto_weak_continue (i : id_st) :
+  Dprodi (fun _:id_st => env A -C-> env A) -C->
+  Dprodi (fun _:id_st => env A -C-> DS (option id_st)) -C->
+  env A -C->
+  env A.
+  apply curry, curry.
+  refine (SND _ _ @_ FIXP _ @_ _).
+  refine (uncurry (uncurry (eval_auto_weak_continuef i))).
+Defined.
+
+Lemma eval_auto_weak_continue_simpl :
+  forall i fs ft e,
+    eval_auto_weak_continue i fs ft e =
+      let '(_, _, e') := FIXP _ (eval_auto_weak_continuef i fs ft e) in
+      e'.
+Proof.
+  reflexivity.
+Qed.
+
+(** transitions faibles, avec ou sans histoire *)
+
+Definition eval_auto_weak_bothf :
+  Dprodi (fun _:id_st => env A -C-> env A) -C->
+  Dprodi (fun _:id_st => env A -C-> DS (option (id_st * bool))) -C->
+  Dprodi (fun '((i,reset):(id_st*bool)) =>
+            (* e *)  env A -C->
+            (* ei *) (Dprodi (fun i:id_st => env A -C-> env A)) -C->
+            (* ri *) (Dprodi (fun '((i,A):id_st*Type) => DS A -C-> DS A)) -C->
+            (* (* ri *) (Dprodi (fun (i:id_st) => Dprodi (fun (A:Type) => DS A -C-> DS A))) -C-> *)
+            env A)
+  -C->
+  Dprodi (fun '((i,reset):(id_st*bool)) =>
+            (* e *)  env A -C->
+            (* ei *) (Dprodi (fun i:id_st => env A -C-> env A)) -C->
+            (* ri *) (Dprodi (fun '((i,A):id_st*Type) => DS A -C-> DS A)) -C->
+            (* (* ri *) (Dprodi (fun i:id_st => DS A -C-> DS A)) -C-> *)
+            env A).
+Admitted.
+
+Lemma eval_auto_weak_bothf_simpl :
+  forall fs ft F i reset e ei ri,
+    eval_auto_weak_bothf fs ft F (i,reset) e ei ri =
+      let s := if reset then fs i e else (ext_env (ri (i,_))) (fs i (ei i e)) in
+      let t := if reset then ft i s else ri (i,_) (ft i (ei i e)) in
+      let t' := map is_some t in
+      let ei := fun j =>      if id_st_eqb j i then ei i @_ merge_until t' s else ei j in
+      let ri := fun '(j,A) => if id_st_eqb j i then rem_until t' @_ ri (i,A) else ri (j,A) in
+      merge_until_env t s (fun '(i,r) => F (i,r) (rem_until_env t' e) ei ri).
+Proof.
+Qed.
+
+Definition eval_auto_weak_both (i : id_st) :
+  Dprodi (fun _:id_st => env A -C-> env A) -C->
+  Dprodi (fun _:id_st => env A -C-> DS (option (id_st * bool))) -C->
+  env A -C-> env A.
+  apply curry, curry.
+  match goal with
+  | |- _ (_ (Dprod ?pl ?pr) _) =>
+      pose (fs := FST _ _ @_ FST pl pr);
+      pose (ft := SND _ _ @_ FST pl pr);
+      pose (e := SND pl pr);
+      idtac
+  end.
+  pose (F := PROJ _ (true,i,false) @_ (FIXP _ @_ ((eval_auto_weak_bothf @2_ fs) ft))).
+  cbv beta iota in F.
+  refine ((AP _ _ @4_ F) e _ _).
+  apply CTE; intro; apply ID.
+  apply CTE; intro; apply ID.
+Defined.
+
+Lemma eval_auto_weak_both_simpl :
+  forall i fs ft e,
+    eval_auto_weak_both i fs ft e =
+      (FIXP _ (eval_auto_weak_bothf fs ft)) (true, i, false) e (fun i => ID _ ) (fun i => ID _).
+Proof.
+  reflexivity.
+Qed.
+
+
+(** transitions fortes, avec ou sans histoire *)
+
+Definition eval_auto_strong_bothf :
+  Dprodi (fun _:id_st => env A -C-> env A) -C->
+  Dprodi (fun _:id_st => env A -C-> DS (option (id_st * bool))) -C->
+  Dprodi (fun '((init,i,reset):(bool*id_st*bool)) =>
+            (* e *)  env A -C->
+            (* ei *) (Dprodi (fun i:id_st => env A -C-> env A)) -C->
+            (* ri *) (Dprodi (fun i:id_st => env A -C-> env A)) -C->
+            env A)
+  -C->
+  Dprodi (fun '((init,i,reset):(bool*id_st*bool)) =>
+            (* e *)  env A -C->
+            (* ei *) (Dprodi (fun i:id_st => env A -C-> env A)) -C->
+            (* ri *) (Dprodi (fun i:id_st => env A -C-> env A)) -C->
+            env A).
+Admitted.
+
+Definition eval_auto_strong_both (i : id_st) :
+  Dprodi (fun _:id_st => env A -C-> env A) -C->
+  Dprodi (fun _:id_st => env A -C-> DS (option (id_st * bool))) -C->
+  env A -C-> env A.
+Admitted.
+
+Lemma eval_auto_strong_both_simpl :
+  forall i fs ft e,
+    eval_auto_strong_both i fs ft e =
+      (FIXP _ (eval_auto_strong_bothf fs ft)) (true, i, false) e (fun i => ID _ ) (fun i => ID _).
+Proof.
+  reflexivity.
+Qed.
