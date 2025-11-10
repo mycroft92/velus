@@ -8,9 +8,9 @@ From Velus.Lustre.Denot.Cpo Require Import Cpo_streams_type.
 Close Scope equiv_scope. (* conflicting notation "==" *)
 Import ListNotations.
 
-Require Import CommonList2 Kfuns.
+Require Import CommonList2 Kfuns Kauto.
 
-(** * TEST : une sémantique Kahnienne pour Lustre *)
+(** * Une sémantique Kahnienne pour Vélus *)
 Module Type LKAHN
        (Import Ids   : IDS)
        (Import Op    : OPERATORS)
@@ -19,7 +19,6 @@ Module Type LKAHN
        (Import Senv  : STATICENV     Ids Op OpAux Cks)
        (Import Syn   : LSYNTAX       Ids Op OpAux Cks Senv)
        (Import Lord  : LORDERED      Ids Op OpAux Cks Senv Syn).
-       (* (Import Sd    : SD            Ids Op OpAux Cks Senv Syn Lord). *)
 
 
 Section KDenot_node.
