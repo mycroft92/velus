@@ -269,7 +269,7 @@ Section Kwhen_merge_case.
     intros Hc%DScase_is_cons; auto.
   Qed.
 
-  Definition  kwhen (k : enumtag) : DS (errv A) -C-> DS (errv B) -C-> DS (errv A) :=
+  Definition kwhen (k : enumtag) : DS (errv A) -C-> DS (errv B) -C-> DS (errv A) :=
     FIXP _ (kwhenf k).
 
   Lemma kwhen_eq : forall k c C x X,

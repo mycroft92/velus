@@ -8,7 +8,7 @@ From Velus.Lustre.Denot.Cpo Require Import Cpo_streams_type.
 Close Scope equiv_scope. (* conflicting notation "==" *)
 Import ListNotations.
 
-Require Import CommonList2 Kfuns Kauto.
+Require Import CommonList2 Kfuns Kenv Kauto.
 
 (** * Une sémantique Kahnienne pour Vélus *)
 Module Type LKAHN
@@ -27,19 +27,20 @@ Context {PSyn : list decl -> block -> Prop}.
 Context {Prefs : PS.t}.
 Variable (G : @global PSyn Prefs).
 
-Inductive key := Var : ident -> key | Last : ident -> key.
-Definition SI' := fun _ : key => errv value.
-Definition FI' := fun _ : ident => (DS_prod SI' -C-> DS_prod SI').
+Notation SEnv := (@env ident (errv value)).
+(* Notation id_st_eqb := (@id_st_eqb ident id_st_dec). *)
+Definition FEnv := Dprodi (fun f:ident => (SEnv -C-> SEnv)).
+
 Definition errTy' : DS (errv value) := DS_const (err' error_Ty').
 
-Definition np_of_env' (l : list ident) : DS_prod SI' -C-> @nprod (DS (errv value)) (length l).
+Definition np_of_env' (l : list ident) : SEnv -C-> @nprod (DS (errv value)) (length l).
   induction l as [| x l].
   - apply CTE, 0.
   - exact ((nprod_cons @2_ PROJ _ (Var x)) IHl).
 Defined.
 
 (* FIXME: pour l'instant, on ne met que les Var dedans *)
-Definition env_of_np' (l : list ident) {n} : nprod n -C-> DS_prod SI' :=
+Definition env_of_np' (l : list ident) {n} : nprod n -C-> SEnv :=
   Dprodi_DISTR _ _ _
     (fun x : key =>
        match x with
@@ -51,6 +52,7 @@ Definition env_of_np' (l : list ident) {n} : nprod n -C-> DS_prod SI' :=
        end).
 
 (* l'opérateur kwhen spécialisé aux Velus.Op.value *)
+(* TODO: peut-on utiliser [Kauto.wheni] à la place ? *)
 Definition kwhenv :=
   let get_tag := fun v => match v with Venum t => Some t | _ => None end in
   @kwhen value value enumtag get_tag Nat.eqb.
@@ -77,18 +79,18 @@ Section KDenot_exps.
 
   Hypothesis kdenot_exp_ :
     forall e : exp,
-      Dprod (Dprodi FI') (DS_prod SI') -C->
+      Dprod FEnv SEnv -C->
       @nprod (DS (errv value)) (numstreams e).
 
   Definition kdenot_exps_ (es : list exp) :
-    Dprod (Dprodi FI') (DS_prod SI') -C->
+    Dprod FEnv SEnv -C->
     @nprod (DS (errv value)) (list_sum (List.map numstreams es)).
     induction es as [|a].
     + exact 0.
     + exact ((nprod_app @2_ (kdenot_exp_ a)) IHes).
   Defined.
   Definition kdenot_expss_ {A} (ess : list (A * list exp)) (n : nat) :
-    Dprod (Dprodi FI') (DS_prod SI') -C->
+    Dprod FEnv SEnv -C->
     @nprod (@nprod (DS (errv value)) n) (length ess).
     induction ess as [|[? es]].
     + exact 0.
@@ -112,7 +114,7 @@ Definition cast_1 {n} : @nprod (DS (errv value)) n -C-> DS (errv value) :=
 Definition kdenot_exp_
   (e : exp) :
   (* (nodes * env) -> streams *)
-  Dprod (Dprodi FI') (DS_prod SI') -C->
+  Dprod FEnv SEnv -C->
   @nprod (DS (errv value)) (numstreams e).
 
   set (ctx := Dprod _ _).
@@ -237,7 +239,7 @@ Definition kdenot_exp_
     (* pose (rs := kdenot_exps_ kdenot_exp_ er). *)
     (* FIXME: reset !! *)
     pose (ss := kdenot_exps_ kdenot_exp_ es).
-    pose (f := PROJ _ i @_ FST _ _ : ctx -C-> FI' i).
+    pose (f := PROJ _ i @_ FST _ _ : ctx -C-> _).
     refine
       (np_of_env' (List.map fst (n_out n)) @_
          (f @2_ ID _ ) (env_of_np' (idents (n_in n)) @_ ss)).
@@ -248,11 +250,11 @@ Defined.
 
 Definition kdenot_exp (e : exp) :
   (* (nodes * env) -> streams *)
-  Dprodi FI' -C-> DS_prod SI' -C-> nprod (numstreams e) :=
+  FEnv -C-> SEnv -C-> nprod (numstreams e) :=
   curry (kdenot_exp_ e).
 
 Definition kdenot_exps (es : list exp) :
-  Dprodi FI' -C-> DS_prod SI' -C-> nprod (list_sum (List.map numstreams es)) :=
+  FEnv -C-> SEnv -C-> nprod (list_sum (List.map numstreams es)) :=
   curry (kdenot_exps_ kdenot_exp_ es).
 
 Lemma kdenot_exps_eq :
@@ -280,7 +282,7 @@ Proof.
 Qed.
 
 Definition kdenot_expss {A} (ess : list (A * list exp)) (n : nat) :
-  Dprodi FI' -C-> DS_prod SI' -C->
+  FEnv -C-> SEnv -C->
   @nprod (@nprod (DS (errv value)) n) (length ess) :=
   curry (kdenot_expss_ kdenot_exp_ ess n).
 
@@ -581,7 +583,7 @@ Qed.
 Global Opaque kdenot_exp.
 
 (** [env_ext_var xs ss env] binds Var(xs) to ss in env *)
-Definition env_ext_var (l : list ident) {n} : nprod n -C-> DS_prod SI' -C-> DS_prod SI' :=
+Definition env_ext_var (l : list ident) {n} : nprod n -C-> SEnv -C-> SEnv :=
   curry (Dprodi_DISTR _ _ _
            (fun x =>
               match x with
@@ -611,7 +613,7 @@ Proof.
 Qed.
 
 (** [env_ext_last xs ss env] binds Last(xs) to ss in env *)
-Definition env_ext_last (l : list ident) {n} : nprod n -C-> DS_prod SI' -C-> DS_prod SI' :=
+Definition env_ext_last (l : list ident) {n} : nprod n -C-> SEnv -C-> SEnv :=
   curry (Dprodi_DISTR _ _ _
            (fun x =>
               match x with
@@ -642,7 +644,7 @@ Qed.
 
 (** union par la gauche de deux environnements *)
 Definition union_env (dom : list ident) :
-  DS_prod SI' -C-> DS_prod SI' -C-> DS_prod SI' :=
+  SEnv -C-> SEnv -C-> SEnv :=
   curry (Dprodi_DISTR _ _ _ (
              fun i => match i with
                    | Var x => if mem_ident x dom
@@ -666,28 +668,6 @@ Proof.
   cases.
 Qed.
 
-(** PRIS DANS Auto.v *******************************************  *)
-
-Parameter when_id_env : enumtag -> DS enumtag -C-> DS_prod SI' -C-> DS_prod SI'.
-Parameter merge_all_env : DS enumtag -C-> (Dprodi (fun _:enumtag => DS_prod SI')) -C-> DS_prod SI'.
-
-(** Switch *)
-Definition kswitch : DS enumtag -C-> (Dprodi (fun _:enumtag => DS_prod SI' -C-> DS_prod SI')) -C-> DS_prod SI' -C-> DS_prod SI'.
-  apply curry, curry.
-  refine ((merge_all_env @2_ FST _ _ @_ FST _ _) _).
-  apply Dprodi_DISTR; intro i.
-  refine ((AP _ _ @2_ PROJ _ i @_ SND _ _ @_ FST _ _) _).
-  refine ((when_id_env i @2_ FST _ _ @_ FST _ _) (SND _ _)).
-Defined.
-
-Lemma kswitch_simpl :
-  forall c f e,
-    kswitch c f e = merge_all_env c (fun i => f i (when_id_env i c e)).
-Proof.
-  trivial.
-Qed.
-(** ************************************************************  *)
-
 (* TODO: move *)
 Definition tag_of_val (default:enumtag) : errv value -> enumtag :=
   fun v => match v with
@@ -699,12 +679,12 @@ Definition tag_of_val (default:enumtag) : errv value -> enumtag :=
 Section KDenot_blocks.
 
   Hypothesis kdenot_block_ :
-    forall b : block, Dprod (Dprodi FI') (DS_prod SI') -C-> DS_prod SI'.
+    forall b : block, Dprod FEnv SEnv -C-> SEnv.
 
   (** accumule le résultat des blocs dans la sortie *)
   (* contrairement à dans ma thèse, ce calcul dépend de l'ordre des blocs *)
   Definition kdenot_blocks_ (blks : list block) :
-    Dprod (Dprodi FI') (DS_prod SI') -C-> DS_prod SI'.
+    Dprod FEnv SEnv -C-> SEnv.
     induction blks as [|b].
     + exact (SND _ _).
     + refine ((curry IHblks @2_ FST _ _) (kdenot_block_ b)).
@@ -728,8 +708,10 @@ Definition assoc_enumtag {A} (x: enumtag) (xs: list (enumtag * A)): option A :=
   | None => None
   end.
 
+Definition kswitch {A} := @Kauto.switch ident enumtag Nat.eq_dec A.
+
 Fixpoint kdenot_block_ (b : block) :
-  Dprod (Dprodi FI') (DS_prod SI') -C-> DS_prod SI'.
+  Dprod FEnv SEnv -C-> SEnv.
   (* TODO: faire la définition directement, sans tactiques *)
   (* revert b. *)
   (* fix kdenot_block_ 1. *)
@@ -774,10 +756,10 @@ Fixpoint kdenot_block_ (b : block) :
   end.
 Defined.
 
-Definition kdenot_block (b : block) : Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' :=
+Definition kdenot_block (b : block) : FEnv -C-> SEnv -C-> SEnv :=
   curry (kdenot_block_ b).
 
-Definition kdenot_blocks (blks : list block) : Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI' :=
+Definition kdenot_blocks (blks : list block) : FEnv -C-> SEnv -C-> SEnv :=
   curry (kdenot_blocks_ kdenot_block_ blks).
 
 Lemma kdenot_block_eq :
@@ -834,7 +816,7 @@ Qed.
 
 (* fait l'union des environnements envI et env avant d'évaluer le bloc principal *)
 Definition kdenot_node (n : @node PSyn Prefs) :
-  Dprodi FI' -C-> DS_prod SI' -C-> DS_prod SI'.
+  FEnv -C-> SEnv -C-> SEnv.
   apply curry.
   refine (FIXP _ @_ _).
   apply curry.
@@ -857,7 +839,7 @@ End KDenot_node.
 
 Section KGlobal.
 
-  Definition kdenot_global_ {PSyn Prefs} (G : @global PSyn Prefs) : Dprodi FI' -C-> Dprodi FI'.
+  Definition kdenot_global_ {PSyn Prefs} (G : @global PSyn Prefs) : FEnv -C-> FEnv.
     apply Dprodi_DISTR; intro f.
     destruct (find_node f G).
     - apply (kdenot_node G n).
@@ -875,11 +857,11 @@ Section KGlobal.
   Proof.
     intros.
     unfold kdenot_global_.
-    autorewrite with cpodb.
+    setoid_rewrite Dprodi_DISTR_simpl.
     cases.
   Qed.
 
-  Definition kdenot_global {PSyn Prefs} (G: @global PSyn Prefs) : Dprodi FI' :=
+  Definition kdenot_global {PSyn Prefs} (G: @global PSyn Prefs) : FEnv :=
     FIXP _ (kdenot_global_ G).
 
 End KGlobal.

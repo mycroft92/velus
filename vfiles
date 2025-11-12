@@ -108,9 +108,10 @@ src/Lustre/Denot/SDtoRel.v
 src/Lustre/Denot/ResetLs.v
 src/Lustre/Denot/EraseAbs.v
 src/Lustre/Denot/Denot.v
-src/Lustre/Denot/Kauto.v
-src/Lustre/Denot/Kfuns.v
 src/Lustre/Denot/K.v
+src/Lustre/Denot/Kauto.v
+src/Lustre/Denot/Kenv.v
+src/Lustre/Denot/Kfuns.v
 
 src/CoreExpr/CESyntax.v
 src/CoreExpr/CESemantics.v

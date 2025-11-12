@@ -1,5 +1,6 @@
 Require Import Common.Common.
 Require Import Cpo.
+Require Import Kenv.
 
 (** * Définitions des automates du langage *)
 (** on donne aussi la définition des automates
@@ -7,32 +8,6 @@ Require Import Cpo.
  - à transitions toutes non-[continue]
  cf. soumission aux JFLA 2026
  *)
-
-(** identifiant de variable  *)
-Parameter id : Type.
-Inductive key : Type :=
-| Var : id -> key
-| Last : id -> key.
-
-Definition env (A : Type) : cpo := DS_prod (fun _:key => A).
-
-Definition ext_env {A B : Type} : (DS A -C-> DS B) -C-> (env A -C-> env B).
-  apply curry, Dprodi_DISTR; intro i.
-  refine ((AP _ _ @2_ FST _ _) (PROJ _ i @_ SND _ _)).
-Defined.
-
-Lemma ext_env_simpl : forall A B f env i,
-    @ext_env A B f env i = f (env i).
-Proof.
-  trivial.
-Qed.
-
-(** Identifiant d'état, ou plus généralement d'un type énuméré *)
-Parameter id_st : Type.
-Parameter id_st_dec : forall i j : id_st, { i = j } + {~ i = j}.
-
-Definition id_st_eqb (i j : id_st) : bool :=
-  match id_st_dec i j with left _ => true | _ => false end.
 
 (* réécritures nécessaires dans ce fichier, cpodb est trop lourde... *)
 Local Hint Rewrite
@@ -47,6 +22,14 @@ Local Hint Rewrite
      FST_simpl Fst_simpl
      Dprodi_DISTR_simpl
   : localdb.
+
+Section KAUTO.
+
+(* pour utiliser directement les définitions de Kenv *)
+Context { ident id_st : Type }.
+Context { id_st_dec : forall i j : id_st, { i = j } + { ~ i = j } }.
+Notation env := (@env ident).
+Notation id_st_eqb := (@id_st_eqb id_st id_st_dec).
 
 (** * Fonctions de flots utiles pour les automates *)
 Section OPS.
@@ -928,3 +911,5 @@ Proof.
 Qed.
 
 End AUTO.
+
+End KAUTO.
