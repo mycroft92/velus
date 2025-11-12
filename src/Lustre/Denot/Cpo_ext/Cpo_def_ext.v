@@ -52,6 +52,25 @@ Qed.
 
 Global Hint Rewrite fcont_comp4_simpl fcont_comp5_simpl : cpodb.
 
+Definition chain_AP {D1 D2 D3 D4 : cpo} :
+  (D1 -C-> (D3 -C-> D4)) -> (D1 -C-> (D2 -C-> D3)) -> (D1 -C-> (D2 -C-> D4)).
+  intros * f g.
+  refine ((_ @2_ f) g).
+  apply curry, curry.
+  refine ((AP _ _ @2_ _) _).
+  apply (FST _ _ @_ FST _ _).
+  refine ((AP _ _ @2_ _) _).
+  apply (SND _ _ @_ FST _ _).
+  apply SND.
+Defined.
+
+Lemma chain_AP_eq :
+  forall (D1 D2 D3 D4 : cpo) (f : D1 -C-> D3 -C-> D4) (g : D1 -C-> D2 -C-> D3) x y,
+    @chain_AP D1 D2 D3 D4 f g x y = f x (g x y).
+Proof.
+  trivial.
+Qed.
+
 Lemma fcont_app_le_compat : forall (D1 D2:cpo) (f g : D1 -c> D2) (x y : D1),
     f <= g -> x <= y -> f x <= g y.
 Proof.
@@ -119,6 +138,15 @@ Add Parametric Morphism (D1 D2:cpo)(F:D1-C->D2) : (@fconti_fun D1 D2 F)
       as funconti_fun_compat2.
 Proof.
   apply fcont_stable.
+Qed.
+
+Lemma fcont_stable3 :
+  forall {D1 D2 D3 D4:cpo}
+    (f : D1 -C-> D2 -C-> D3 -C-> D4)
+    (x1 x2 : D1) (y1 y2 : D2) (z1 z2 : D3),
+    x1 == x2 -> y1 == y2 -> z1 == z2 -> f x1 y1 z1 == f x2 y2 z2.
+Proof.
+  intros * -> -> ->; reflexivity.
 Qed.
 
 (** like [fixp_ind], with a stronger hypothesis on arguments

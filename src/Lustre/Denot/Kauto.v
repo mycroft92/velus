@@ -1,6 +1,13 @@
 Require Import Common.Common.
 Require Import Cpo.
 
+(** * Définitions des automates du langage *)
+(** on donne aussi la définition des automates
+ - à transitions toutes [continue]
+ - à transitions toutes non-[continue]
+ cf. soumission aux JFLA 2026
+ *)
+
 (** identifiant de variable  *)
 Parameter id : Type.
 Inductive key : Type :=
@@ -237,7 +244,6 @@ Qed.
 
 
 (** * Automates  *)
-
 
 (* le "after_unless" de Marc
             c = F F F T F T F F ...
@@ -692,35 +698,6 @@ Qed.
 
 (** ** Transisions mixtes faibles *)
 
-(* TODO: move *)
-Definition chain_AP :
-  forall {D1 D2 D3 D4 : cpo},
-    (D1 -C-> (D3 -C-> D4)) -> (D1 -C-> (D2 -C-> D3)) -> (D1 -C-> (D2 -C-> D4)).
-  intros * f g.
-  refine ((_ @2_ f) g).
-  apply curry, curry.
-  refine ((AP _ _ @2_ _) _).
-  apply (FST _ _ @_ FST _ _).
-  refine ((AP _ _ @2_ _) _).
-  apply (SND _ _ @_ FST _ _).
-  apply SND.
-Defined.
-Lemma chain_AP_eq :
-  forall (D1 D2 D3 D4 : cpo) (f : D1 -C-> D3 -C-> D4) (g : D1 -C-> D2 -C-> D3) x y,
-    @chain_AP D1 D2 D3 D4 f g x y = f x (g x y).
-Proof.
-  trivial.
-Qed.
-
-Local Hint Rewrite chain_AP_eq : localdb.
-
-(* TODO: move *)
-Lemma fcont_stable3 : forall {D1 D2 D3 D4:cpo} (f : D1 -C-> D2 -C-> D3 -C-> D4) (x1 x2 : D1) (y1 y2 : D2) (z1 z2 : D3),
-    x1 == x2 -> y1 == y2 -> z1 == z2 -> f x1 y1 z1 == f x2 y2 z2.
-Proof.
-  intros * -> -> ->; reflexivity.
-Qed.
-
 Definition auto_weakf :
   Dprodi (fun _:id_st => env A -C-> env A) -C->
   Dprodi (fun _:id_st => env A -C-> DS (option (id_st * bool))) -C->
@@ -949,3 +926,5 @@ Lemma auto_strong_eq :
 Proof.
   reflexivity.
 Qed.
+
+End AUTO.
