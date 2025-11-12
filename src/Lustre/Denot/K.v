@@ -668,12 +668,19 @@ Proof.
   cases.
 Qed.
 
-(* TODO: move *)
+(* TODO: move? *)
 Definition tag_of_val (default:enumtag) : errv value -> enumtag :=
   fun v => match v with
         | val (Venum t) => t
         | _ => default
         end.
+
+(* TODO: move *)
+Definition assoc_enumtag {A} (x: enumtag) (xs: list (enumtag * A)): option A :=
+  match find (fun y => fst y ==b x) xs with
+  | Some (_, a) => Some a
+  | None => None
+  end.
 
 
 Section KDenot_blocks.
@@ -701,18 +708,13 @@ Section KDenot_blocks.
 
 End KDenot_blocks.
 
-(* TODO: move *)
-Definition assoc_enumtag {A} (x: enumtag) (xs: list (enumtag * A)): option A :=
-  match find (fun y => fst y ==b x) xs with
-  | Some (_, a) => Some a
-  | None => None
-  end.
-
 Definition kswitch {A} := @Kauto.switch ident enumtag Nat.eq_dec A.
+Definition auto_weak {A} := @Kauto.auto_weak ident enumtag Nat.eq_dec A.
+Definition auto_strong {A} := @Kauto.auto_strong ident enumtag Nat.eq_dec A.
 
 Fixpoint kdenot_block_ (b : block) :
   Dprod FEnv SEnv -C-> SEnv.
-  (* TODO: faire la définition directement, sans tactiques *)
+  (* TODO: faire la définition directement, sans tactiques ? *)
   (* revert b. *)
   (* fix kdenot_block_ 1. *)
   (* intro b. *)
@@ -762,6 +764,25 @@ Definition kdenot_block (b : block) : FEnv -C-> SEnv -C-> SEnv :=
 Definition kdenot_blocks (blks : list block) : FEnv -C-> SEnv -C-> SEnv :=
   curry (kdenot_blocks_ kdenot_block_ blks).
 
+
+
+Definition kdenot_scope (decls : list decl) (blks : list block) : FEnv -C-> SEnv -C-> SEnv.
+Admitted.
+
+(* TODO: commenter *)
+Lemma kdenot_scope_eq :
+  forall decls blks envG env,
+    kdenot_scope decls blks envG env =
+      let vars := List.map fst decls in
+      let env' := FIXP _ (kdenot_blocks blks envG @_ (union_env vars <___> env)) in
+      union_env vars env env'.
+Proof.
+Admitted.
+
+Definition kdenot_transitions (trans : list transition) :
+  FEnv -C-> SEnv -C-> DS (option (enumtag * bool)).
+Admitted.
+
 Lemma kdenot_block_eq :
   forall b envG env,
     kdenot_block b envG env
@@ -775,10 +796,40 @@ Lemma kdenot_block_eq :
                             | Some (Branch _ blks) => kdenot_blocks blks envG
                             | None => 0 (* TODO: plutôt ID ? ou CTE _ error_env ? *)
                             end) env
-      | Blocal (Scope decls blks) =>
-          let vars := List.map fst decls in
-          let env' := FIXP _ (kdenot_blocks blks envG @_ (union_env vars <___> env)) in
-          union_env vars env env'
+      | Blocal (Scope decls blks) => kdenot_scope decls blks envG env
+      | Bauto Strong ck (_, ini) states =>
+          let states := List.map (fun '((a,b),c) => (a,c)) states in
+          (* le corps et les transitions sont calculés indépendamment *)
+          auto_strong ini
+            (* corps des états *)
+            (fun i => match assoc_enumtag i states with
+                   | Some (Branch _ (_, Scope decls (blks, _))) =>
+                       kdenot_scope decls blks envG
+                   | None => 0
+                   end)
+            (* transitions *)
+            (fun i => match assoc_enumtag i states with
+                   (* les transitions fortes sont celles en dehors du scope *)
+                   | Some (Branch _ (ts, _)) => kdenot_transitions ts envG
+                   | None => 0
+                   end)
+            env
+      | Bauto Weak ck (_, ini) states =>
+          let states := List.map (fun '((a,b),c) => (a,c)) states in
+          auto_weak ini
+            (* corps des états *)
+            (fun i => match assoc_enumtag i states with
+                   | Some (Branch _ (_, Scope decls (blks, ts))) =>
+                       kdenot_scope decls blks envG
+                   | None => 0
+                   end)
+            (* transitions *)
+            (fun i => match assoc_enumtag i states with
+                   (* les transitions faibles sont dans le scope *)
+                   | Some (Branch _ (_, Scope decls (blks, ts))) => kdenot_transitions ts envG
+                   | None => 0
+                   end)
+            env
       | _ => env
       end.
 Proof.
