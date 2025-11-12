@@ -1,3 +1,4 @@
+Require Import Common.CommonTactics.
 Require Import Cpo.
 
 (** identifiant de variable  *)
@@ -684,7 +685,6 @@ Qed.
 
 (** transitions faibles, avec ou sans histoire *)
 
-
 (* TODO: move *)
 Definition chain_AP :
   forall {D1 D2 D3 D4 : cpo},
@@ -706,6 +706,13 @@ Proof.
 Qed.
 
 Local Hint Rewrite chain_AP_eq : localdb.
+
+(* TODO: move *)
+Lemma fcont_stable3 : forall {D1 D2 D3 D4:cpo} (f : D1 -C-> D2 -C-> D3 -C-> D4) (x1 x2 : D1) (y1 y2 : D2) (z1 z2 : D3),
+    x1 == x2 -> y1 == y2 -> z1 == z2 -> f x1 y1 z1 == f x2 y2 z2.
+Proof.
+  intros * -> -> ->; reflexivity.
+Qed.
 
 Definition eval_auto_weak_bothf :
   Dprodi (fun _:id_st => env A -C-> env A) -C->
@@ -754,6 +761,8 @@ Definition eval_auto_weak_bothf :
     refine (chain_AP (rem_until @_ t') (PROJ _ (i,T) @_ trim)).
 Defined.
 
+(* on utilise un type dépendant dans [trim] pour pouvoir l'appliquer à la fois
+ * à des [DS A] et des [env A] *)
 Lemma eval_auto_weak_bothf_simpl :
   forall fs ft F i reset e hist trim,
     eval_auto_weak_bothf fs ft F (i,reset) e hist trim ==
@@ -766,44 +775,27 @@ Lemma eval_auto_weak_bothf_simpl :
 Proof.
   intros.
   unfold eval_auto_weak_bothf.
-  autorewrite with localdb.
-  destruct reset; auto.
-  - (* distr *)
-    apply funconti_fun_compat1; auto.
-    apply Oprodi_eq_intro; intros [].
-    autorewrite with localdb.
-    apply funconti_fun_compat1; auto.
-    + apply funconti_fun_compat1; auto.
-    apply Oprodi_eq_intro; intro k; simpl.
-    autorewrite with localdb.
-    destruct (id_st_eqb k i); auto.
+  repeat rewrite ?curry_Curry, ?Curry_simpl, ?Dprodi_DISTR_simpl.
+  rewrite fcont_comp3_simpl.
+  apply (fcont_stable3 merge_until_env); auto.
+  { destruct reset; auto. }
+  { destruct reset; auto. }
+  apply Oprodi_eq_intro; intros [].
+  rewrite Dprodi_DISTR_simpl.
+  rewrite fcont_comp4_simpl.
+  apply (fcont_stable3 (F (i0,b))).
+  - destruct reset; auto.
+  - apply Oprodi_eq_intro; intro.
+    rewrite Dprodi_DISTR_simpl.
     apply Oprodi_eq_intro; intro.
-    change (fcontit ?f ?x) with (f x).
-    now autorewrite with localdb.
-    + simpl.
-    apply Oprodi_eq_intro; intros [].
-    simpl.
-    autorewrite with localdb.
-    destruct (id_st_eqb i1 i); auto.
-    apply Oprodi_eq_intro; now intros.
-  - 
-    apply funconti_fun_compat1; auto.
-    apply Oprodi_eq_intro; intros [].
-    autorewrite with localdb.
-    apply funconti_fun_compat1; auto.
-    + apply funconti_fun_compat1; auto.
-    apply Oprodi_eq_intro; intro k; simpl.
-    autorewrite with localdb.
-    destruct (id_st_eqb k i); auto.
+    destruct (id_st_eqb _ _); auto.
+    change (fcontit ?a ?b) with (a b).
+    destruct reset; reflexivity.
+  - apply Oprodi_eq_intro; intros [].
+    rewrite Dprodi_DISTR_simpl.
     apply Oprodi_eq_intro; intro.
-    change (fcontit ?f ?x) with (f x).
-    now autorewrite with localdb.
-    + simpl.
-    apply Oprodi_eq_intro; intros [].
-    simpl.
-    autorewrite with localdb.
-    destruct (id_st_eqb i1 i); auto.
-    apply Oprodi_eq_intro; now intros.
+    destruct (id_st_eqb _ _); auto.
+    destruct reset; auto.
 Qed.
 
 Definition eval_auto_weak_both (i : id_st) :
@@ -818,17 +810,17 @@ Definition eval_auto_weak_both (i : id_st) :
       pose (e := SND pl pr);
       idtac
   end.
-  pose (F := PROJ _ (true,i,false) @_ (FIXP _ @_ ((eval_auto_weak_bothf @2_ fs) ft))).
+  pose (F := PROJ _ (i,false) @_ (FIXP _ @_ ((eval_auto_weak_bothf @2_ fs) ft))).
   cbv beta iota in F.
   refine ((AP _ _ @4_ F) e _ _).
   apply CTE; intro; apply ID.
-  apply CTE; intro; apply ID.
+  apply CTE; intros []; apply ID.
 Defined.
 
 Lemma eval_auto_weak_both_simpl :
   forall i fs ft e,
     eval_auto_weak_both i fs ft e =
-      (FIXP _ (eval_auto_weak_bothf fs ft)) (true, i, false) e (fun i => ID _ ) (fun i => ID _).
+      (FIXP _ (eval_auto_weak_bothf fs ft)) (i, false) e (fun i => ID _ ) (fun '(i,_) => ID _).
 Proof.
   reflexivity.
 Qed.
@@ -839,29 +831,114 @@ Qed.
 Definition eval_auto_strong_bothf :
   Dprodi (fun _:id_st => env A -C-> env A) -C->
   Dprodi (fun _:id_st => env A -C-> DS (option (id_st * bool))) -C->
-  Dprodi (fun '((init,i,reset):(bool*id_st*bool)) =>
+  Dprodi (fun '((i,init,reset):(id_st*bool*bool)) =>
             (* e *)  env A -C->
             (* hist *) (Dprodi (fun i:id_st => env A -C-> env A)) -C->
-            (* trim *) (Dprodi (fun i:id_st => env A -C-> env A)) -C->
+            (* trim *) (Dprodi (fun '((i,A):id_st*Type) => DS A -C-> DS A)) -C->
             env A)
   -C->
-  Dprodi (fun '((init,i,reset):(bool*id_st*bool)) =>
+  Dprodi (fun '((i,init,reset):(id_st*bool*bool)) =>
             (* e *)  env A -C->
             (* hist *) (Dprodi (fun i:id_st => env A -C-> env A)) -C->
-            (* trim *) (Dprodi (fun i:id_st => env A -C-> env A)) -C->
+            (* trim *) (Dprodi (fun '((i,A):id_st*Type) => DS A -C-> DS A)) -C->
             env A).
-Admitted.
+  apply curry, curry.
+  apply Dprodi_DISTR; intros ((i & init) & reset).
+  apply curry, curry, curry.
+  match goal with
+  | |- _ (_ (Dprod ?pl ?pr) _) =>
+      pose (fs := FST _ _ @_ FST _ _ @_ FST _ _ @_ FST _ _ @_ FST pl pr);
+      pose (ft := SND _ _ @_ FST _ _ @_ FST _ _ @_ FST _ _ @_ FST pl pr);
+      pose (F := SND _ _ @_ FST _ _ @_ FST _ _ @_ FST pl pr);
+      pose (e := SND _ _ @_ FST _ _ @_ FST pl pr);
+      pose (hist := SND _ _ @_ FST pl pr);
+      pose (trim := SND pl pr);
+      idtac
+  end.
+
+  pose (t := if init then (PROJ _ i @2_ ft) e else
+             (if reset
+              then CONS None @_ (PROJ _ i @2_ ft) (REM_env @_ e)
+              else CONS None @_ (PROJ _ (i,_) @2_ trim) ((PROJ _ i @2_ ft) ((PROJ _ i @2_ hist) (REM_env @_ e))))).
+  pose (s := if reset
+             then (PROJ _ i @2_ fs) e
+             else (ext_env @2_ (PROJ _ (i,_) @_ trim)) ((PROJ _ i @2_ fs) ((PROJ _ i @2_ hist) e))).
+  pose (t' := MAP is_some @_ t).
+  refine ((merge_unless_env @3_ t) s _).
+  apply Dprodi_DISTR; intros (j,r).
+  refine ((PROJ _ (j,false,r) @4_ F) ((rem_unless_env @2_ t') e) _ _).
+  - (* new hist *)
+    apply Dprodi_DISTR; intro k.
+    refine (if id_st_eqb k i then _ else PROJ _ k @_ hist).
+    refine (chain_AP (PROJ _ i @_ hist)  ((merge_unless @2_ t') s)).
+  - (* new trim *)
+    apply Dprodi_DISTR; intros (k,T).
+    refine (if id_st_eqb k i then _ else PROJ _ (k,T) @_ trim).
+    refine (chain_AP (rem_unless @_ t') (PROJ _ (i,T) @_ trim)).
+Defined.
+
+(* on utilise un type dépendant dans [trim] pour pouvoir l'appliquer à la fois
+ * à des [DS A] et des [env A] *)
+Lemma eval_auto_strong_bothf_simpl :
+  forall fs ft F i init reset e hist trim,
+    eval_auto_strong_bothf fs ft F (i,init,reset) e hist trim ==
+      let t := if init then ft i e
+               else if reset then cons None (ft i (REM_env e))
+                    else cons None (trim (i,_) (ft i (hist i (REM_env e)))) in
+      let s := if reset then fs i e else ext_env (trim (i,_)) (fs i (hist i e)) in
+      let t' := map is_some t in
+      let hist := fun k =>      if id_st_eqb k i then hist i @_ merge_unless t' s else hist k in
+      let trim := fun '(k,T) => if id_st_eqb k i then rem_unless t' @_ trim (i,T) else trim (k,T) in
+      merge_unless_env t s (fun '(j,r) => F (j,false,r) (rem_unless_env t' e) hist trim).
+Proof.
+  intros.
+  unfold eval_auto_strong_bothf.
+  repeat rewrite ?curry_Curry, ?Curry_simpl, ?Dprodi_DISTR_simpl.
+  rewrite fcont_comp3_simpl.
+  apply (fcont_stable3 merge_unless_env); auto.
+  { destruct init, reset; auto. }
+  { destruct init, reset; auto. }
+  apply Oprodi_eq_intro; intros [].
+  rewrite Dprodi_DISTR_simpl.
+  rewrite fcont_comp4_simpl.
+  apply (fcont_stable3 (F (i0,false,b))).
+  - destruct init, reset; auto.
+  - apply Oprodi_eq_intro; intro.
+    rewrite Dprodi_DISTR_simpl.
+    apply Oprodi_eq_intro; intro.
+    destruct (id_st_eqb _ _); auto.
+    change (fcontit ?a ?b) with (a b).
+    destruct init, reset; reflexivity.
+  - apply Oprodi_eq_intro; intros [].
+    rewrite Dprodi_DISTR_simpl.
+    apply Oprodi_eq_intro; intro.
+    destruct (id_st_eqb _ _); auto.
+    destruct init, reset; auto.
+Qed.
 
 Definition eval_auto_strong_both (i : id_st) :
   Dprodi (fun _:id_st => env A -C-> env A) -C->
   Dprodi (fun _:id_st => env A -C-> DS (option (id_st * bool))) -C->
   env A -C-> env A.
-Admitted.
+  apply curry, curry.
+  match goal with
+  | |- _ (_ (Dprod ?pl ?pr) _) =>
+      pose (fs := FST _ _ @_ FST pl pr);
+      pose (ft := SND _ _ @_ FST pl pr);
+      pose (e := SND pl pr);
+      idtac
+  end.
+  pose (F := PROJ _ (i,true,false) @_ (FIXP _ @_ ((eval_auto_strong_bothf @2_ fs) ft))).
+  cbv beta iota in F.
+  refine ((AP _ _ @4_ F) e _ _).
+  apply CTE; intro; apply ID.
+  apply CTE; intros []; apply ID.
+Defined.
 
 Lemma eval_auto_strong_both_simpl :
   forall i fs ft e,
     eval_auto_strong_both i fs ft e =
-      (FIXP _ (eval_auto_strong_bothf fs ft)) (true, i, false) e (fun i => ID _ ) (fun i => ID _).
+      (FIXP _ (eval_auto_strong_bothf fs ft)) (i, true, false) e (fun i => ID _ ) (fun '(i,_) => ID _).
 Proof.
   reflexivity.
 Qed.
