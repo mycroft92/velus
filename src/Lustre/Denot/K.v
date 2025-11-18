@@ -675,6 +675,13 @@ Definition tag_of_val (default:enumtag) : errv value -> enumtag :=
         | _ => default
         end.
 
+(* TODO: move? *)
+Definition bool_of_val : errv value -> bool :=
+  fun v => match tag_of_val O v with
+        | 1 => true
+        | _ => false
+        end.
+
 (* TODO: move *)
 Definition assoc_enumtag {A} (x: enumtag) (xs: list (enumtag * A)): option A :=
   match find (fun y => fst y ==b x) xs with
@@ -682,6 +689,48 @@ Definition assoc_enumtag {A} (x: enumtag) (xs: list (enumtag * A)): option A :=
   | None => None
   end.
 
+
+Definition kdenot_transitions (l : list transition) :
+  FEnv -C-> SEnv -C-> DS (option (enumtag * bool)).
+  apply curry.
+  induction l as [|(e,(i,r)) l].
+  + apply CTE, (DS_const None).
+  + refine ((_ @2_ ID _) IHl).
+    apply curry.
+    epose (ts := MAP bool_of_val @_ cast_1 @_ uncurry (kdenot_exp e) @_ FST _ _).
+    refine ((ZIP (fun a b => match a,b with
+                         | Some jr, _ => Some jr
+                         | None, true => Some (i,r)
+                         | None, false => None
+                          end) @2_ SND _ _) ts).
+Defined.
+
+(** agrège, dans l'ordre, la listes des transitions en un unique
+    flot de transitions. Par exemple sur :
+      [ F F F T F F ..., ("S1",T);
+        F F T F F F ..., ("S2",F);
+        F T F F F F ..., ("S1",T); ]
+    ça donne :
+      None ("S1",T) ("S2",F) ("S1",T) None None ...
+ *)
+Lemma kdenot_transitions_eq :
+  forall l envG env,
+    kdenot_transitions l envG env ==
+      List.fold_right
+        (fun '(e,(i,r)) acc =>
+           let ts := map bool_of_val (cast_1 (kdenot_exp e envG env)) in
+           ZIP (fun a b => match a,b with
+                        | Some jr, _ => Some jr
+                        | None, true => Some (i,r)
+                        | None, false => None
+                        end) acc ts)
+        (DS_const None) l.
+Proof.
+  intros.
+  induction l as [|(?&?&?)]; auto.
+  simpl (fold_right _ _ _).
+  rewrite <- IHl; auto.
+Qed.
 
 Section KDenot_blocks.
 
@@ -706,7 +755,42 @@ Section KDenot_blocks.
     rewrite <- IHblks; auto.
   Qed.
 
+  Definition kdenot_scope_ (decls : list decl) (blks : list block) :
+    Dprod FEnv SEnv -C-> SEnv.
+    pose (vars := List.map fst decls).
+    refine ((union_env vars @2_ SND _ _) (FIXP _ @_ curry _)).
+    refine ((kdenot_blocks_ blks @_ (PAIR _ _ @2_ FST _ _ @_ FST _ _) _)).
+    refine ((union_env vars @2_ SND _ _) (SND _ _ @_ FST _ _)).
+  Defined.
+
+  (** The denotation of a local scope is done by computing the fixpoint
+    of sub-blocks and by removing the local variables from the resulting
+    environment *)
+  Lemma kdenot_scope__eq :
+    forall decls blks envG env,
+      kdenot_scope_ decls blks (envG,env) ==
+        let vars := List.map fst decls in
+        let env' :=
+          FIXP _ (curry (kdenot_blocks_ blks @_
+                    (PAIR _ _ @2_ FST _ _ @_ FST _ _)
+                    ((union_env vars @2_ SND _ _)
+                       (SND _ _ @_ FST _ _))) (envG, env))
+        in
+        (* let env' := FIXP _ (curry (kdenot_blocks_ blks (envG @_ (union_env vars <___> env))) in *)
+        union_env vars env env'.
+  Proof.
+    intros.
+    unfold kdenot_scope_.
+    autorewrite with cpodb.
+    simpl.
+    apply fcont_stable with (f := union_env _ _).
+    apply fcont_stable with (f := FIXP _).
+    apply Oprodi_eq_intro; intro i.
+    trivial.
+  Qed.
+
 End KDenot_blocks.
+
 
 Definition kswitch {A} := @Kauto.switch ident enumtag Nat.eq_dec A.
 Definition auto_weak {A} := @Kauto.auto_weak ident enumtag Nat.eq_dec A.
@@ -747,14 +831,47 @@ Fixpoint kdenot_block_ (b : block) :
   (*                    end *)
   (*     in (kswitch @3_ cs) (Dprodi_DISTR _ _ _ f)  (SND _ _) *)
 
-  | Blocal (Scope decls blks) =>
-      let vars := List.map fst decls in
-      let F := (curry (kdenot_blocks_ kdenot_block_ blks) @2_ FST _ _ @_ FST _ _)
-                 ((union_env vars @2_ SND _ _) (SND _ _ @_ FST _ _)) in
-      (union_env vars @2_ SND _ _) (FIXP _ @_ curry F)
-  | Breset blks e =>                   SND _ _   (* TODO *)
-  | Bauto Weak ck (ini, oth) states => SND _ _   (* TODO *)
-  | Bauto Strong ck (_, oth) states => SND _ _   (* TODO *)
+  | Blocal (Scope decls blks) => kdenot_scope_ kdenot_block_ decls blks
+  | Bauto Strong ck (_, ini) states =>
+      (* comme dans le switch, on créé d'abord une liste de fonctions *)
+      (* chaque corps d'état définit une fonction d'environnements *)
+      let fs := List.map (fun '((i,_), Branch _ (_, Scope decls (blks, _))) =>
+                            (i, kdenot_scope_ kdenot_block_ decls blks)) states in
+      (* les transitions fortes sont celles en dehors du scope *)
+      let ft := List.map (fun '((i,_), Branch _ (ts, _)) =>
+                            (i, kdenot_transitions ts)) states in
+      (auto_strong ini @3_
+         (Dprodi_DISTR _ _ _
+         (fun i => match assoc_enumtag i fs with
+                | Some fi => (curry ((curry fi @2_ FST _ _ @_ FST _ _) (SND _ _)))
+                | None => CTE _ _ 0
+                end)))
+         (Dprodi_DISTR _ _ _
+         (fun i => match assoc_enumtag i ft with
+                | Some fi => (curry ((fi @2_ FST _ _ @_ FST _ _) (SND _ _)))
+                | None => CTE _ _ 0
+                end))
+                 (SND _ _)
+  | Bauto Weak ck (_, ini) states =>
+      (* FIXME: les variables s'échappent de leur scope pour calculer les transitions *)
+      let fs := List.map (fun '((i,_), Branch _ (_, Scope decls (blks, _))) =>
+                            (i, kdenot_blocks_ kdenot_block_ blks)) states in
+      (* les transitions faibles sont celles dans le scope *)
+      let ft := List.map (fun '((i,_), Branch _ (_, Scope decls (_, ts))) =>
+                            (i, kdenot_transitions ts)) states in
+      (auto_weak ini @3_
+         (Dprodi_DISTR _ _ _
+         (fun i => match assoc_enumtag i fs with
+                | Some fi => (curry ((curry fi @2_ FST _ _ @_ FST _ _) (SND _ _)))
+                | None => CTE _ _ 0
+                end)))
+         (Dprodi_DISTR _ _ _
+         (fun i => match assoc_enumtag i ft with
+                | Some fi => (curry ((fi @2_ FST _ _ @_ FST _ _) (SND _ _)))
+                | None => CTE _ _ 0
+                end))
+                 (SND _ _)
+  | Breset blks e => SND _ _   (* TODO *)
   end.
 Defined.
 
@@ -764,24 +881,29 @@ Definition kdenot_block (b : block) : FEnv -C-> SEnv -C-> SEnv :=
 Definition kdenot_blocks (blks : list block) : FEnv -C-> SEnv -C-> SEnv :=
   curry (kdenot_blocks_ kdenot_block_ blks).
 
+Definition kdenot_scope (decls : list decl) (blks : list block) : FEnv -C-> SEnv -C-> SEnv :=
+  curry (kdenot_scope_ kdenot_block_ decls blks).
 
-
-Definition kdenot_scope (decls : list decl) (blks : list block) : FEnv -C-> SEnv -C-> SEnv.
-Admitted.
-
-(* TODO: commenter *)
+  (** The denotation of a local scope is done by computing the fixpoint
+      of sub-blocks and by removing the local variables from the resulting
+      environment *)
 Lemma kdenot_scope_eq :
   forall decls blks envG env,
-    kdenot_scope decls blks envG env =
+    kdenot_scope decls blks envG env ==
       let vars := List.map fst decls in
       let env' := FIXP _ (kdenot_blocks blks envG @_ (union_env vars <___> env)) in
       union_env vars env env'.
 Proof.
-Admitted.
+  intros.
+  unfold kdenot_scope, kdenot_scope_.
+  autorewrite with cpodb.
+  simpl.
+  apply fcont_stable with (f := union_env _ _).
+  apply fcont_stable with (f := FIXP _).
+  apply Oprodi_eq_intro; intro i.
+  trivial.
+Qed.
 
-Definition kdenot_transitions (trans : list transition) :
-  FEnv -C-> SEnv -C-> DS (option (enumtag * bool)).
-Admitted.
 
 Lemma kdenot_block_eq :
   forall b envG env,
@@ -820,7 +942,9 @@ Lemma kdenot_block_eq :
             (* corps des états *)
             (fun i => match assoc_enumtag i states with
                    | Some (Branch _ (_, Scope decls (blks, ts))) =>
-                       kdenot_scope decls blks envG
+                       kdenot_blocks blks envG
+                   (* FIXME: il faut virer les variables après avoir calculé les transitions *)
+                   (* kdenot_scope decls blks envG *)
                    | None => 0
                    end)
             (* transitions *)
@@ -846,14 +970,42 @@ Proof.
     unfold assoc_enumtag. simpl.
     destruct (t ==b i); auto; clear.
     apply Oprodi_eq_intro; auto.
-  - (* auto *) simpl. cases.
-  - (* Blocal *)
+  - (* Bauto Weak *)
     simpl.
     autorewrite with cpodb.
-    apply fcont_stable with (f := union_env _ _).
-    apply fcont_stable with (f := FIXP _).
-    apply Oprodi_eq_intro; intro i.
-    trivial.
+    simpl.
+    apply fcont_eq_elim with (f := auto_weak _ _ _).
+    apply fcont_stable2 with (f := auto_weak e).
+    + apply Oprodi_eq_intro; intro i.
+      rewrite Dprodi_DISTR_simpl.
+      induction l as [|[[j ?] [? [? [? []]]]]]; auto.
+      unfold assoc_enumtag. simpl.
+      destruct (j ==b i); auto; clear.
+      apply fcont_eq_intro; auto.
+    + apply Oprodi_eq_intro; intro i.
+      rewrite Dprodi_DISTR_simpl.
+      induction l as [|[[j ?] [? [? [? []]]]]]; auto.
+      unfold assoc_enumtag. simpl.
+      destruct (j ==b i); auto; clear.
+      apply fcont_eq_intro; auto.
+  - (* Bauto Strong *)
+    simpl.
+    autorewrite with cpodb.
+    simpl.
+    apply fcont_eq_elim with (f := auto_strong _ _ _).
+    apply fcont_stable2 with (f := auto_strong e).
+    + apply Oprodi_eq_intro; intro i.
+      rewrite Dprodi_DISTR_simpl.
+      induction l as [|[[j ?] [? [? [? []]]]]]; auto.
+      unfold assoc_enumtag. simpl.
+      destruct (j ==b i); auto; clear.
+      apply fcont_eq_intro; auto.
+    + apply Oprodi_eq_intro; intro i.
+      rewrite Dprodi_DISTR_simpl.
+      induction l as [|[[j ?] [? [? [? []]]]]]; auto.
+      unfold assoc_enumtag. simpl.
+      destruct (j ==b i); auto; clear.
+      apply fcont_eq_intro; auto.
 Qed.
 
 (* TODO: unifier les notations des lemmes, _eq, _simpl ?? *)

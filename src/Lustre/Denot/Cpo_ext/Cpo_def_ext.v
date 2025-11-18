@@ -140,6 +140,15 @@ Proof.
   apply fcont_stable.
 Qed.
 
+Lemma fcont_stable2 :
+  forall {D1 D2 D3 :cpo}
+    (f : D1 -C-> D2 -C-> D3)
+    (x1 x2 : D1) (y1 y2 : D2),
+    x1 == x2 -> y1 == y2 -> f x1 y1 == f x2 y2.
+Proof.
+  intros * -> ->; reflexivity.
+Qed.
+
 Lemma fcont_stable3 :
   forall {D1 D2 D3 D4:cpo}
     (f : D1 -C-> D2 -C-> D3 -C-> D4)
