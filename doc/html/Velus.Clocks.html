@@ -1,0 +1,678 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module Clocks</title>
+<meta name="description" content="Documentation of Coq module Clocks" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module Clocks</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html">Morphisms</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html">Permutation</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html">Classes.EquivDec</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="CLOCKS">CLOCKS</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span> : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>     : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span>  : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Clocks.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Clocks.html#Op">Op</a></span>).<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="CLOCKS.clock">clock</a></span> : <span class="kwd">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="CLOCKS.Cbase">Cbase</a></span> : <span class="id">clock</span>                            <br/>
+&nbsp;&nbsp;| <span class="id"><a name="CLOCKS.Con">Con</a></span>   : <span class="id">clock</span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Clocks.html#Op.type">type</a></span> * <span class="id"><a href="Velus.Clocks.html#Op.enumtag">enumtag</a></span> -&gt; <span class="id">clock</span>. <br/>
+<br/>
+<h2> Instantiate variable clocks from a base clock and substitution </h2>
+&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="CLOCKS.instck">instck</a></span> (<span class="id">bk</span>: <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span>) (<span class="id">sub</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">ck</span>: <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">ck</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Clocks.html#CLOCKS.Cbase">Cbase</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">bk</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">instck</span> <span class="id">bk</span> <span class="id">sub</span> <span class="id">ck</span>, <span class="id">sub</span> <span class="id">x</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">ck'</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">x'</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck'</span> <span class="id">x'</span> <span class="id">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _, _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="CLOCKS.nclock">nclock</a></span> : <span class="kwd">Type</span> := <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span> * <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="CLOCKS.stripname">stripname</a></span> : <span class="id"><a href="Velus.Clocks.html#CLOCKS.nclock">nclock</a></span> -&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="CLOCKS.indexes">indexes</a></span> (<span class="id">ncks</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.nclock">nclock</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#positive">positive</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_right">fold_right</a></span> (<span class="kwd">fun</span> <span class="id">nck</span> <span class="id">acc</span> =&gt; <span class="kwd">match</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">nck</span> <span class="kwd">with</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id">acc</span> | <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">nm</span> =&gt; <span class="id">nm</span>::<span class="id">acc</span> <span class="kwd">end</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span> <span class="id">ncks</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="CLOCKS.FreeCon1">FreeCon1</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ck'</span> <span class="id">xc</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Is_free_in_clock</span> <span class="id">x</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck'</span> <span class="id">x</span> <span class="id">xc</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="CLOCKS.FreeCon2">FreeCon2</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">y</span> <span class="id">ck'</span> <span class="id">xc</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Is_free_in_clock</span> <span class="id">x</span> <span class="id">ck'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id">Is_free_in_clock</span> <span class="id">x</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck'</span> <span class="id">y</span> <span class="id">xc</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.Is_free_in_clock_dec">Is_free_in_clock_dec</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">x</span> <span class="id">ck</span> } + { ~ <span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">x</span> <span class="id">ck</span> }.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">right</span>. <span class="id">intro</span> <span class="id">contra</span>. <span class="id">inv</span> <span class="id">contra</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">IHck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">left</span>. <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.FreeCon2">FreeCon2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">x</span> <span class="id">i</span>); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">left</span>. <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.FreeCon1">FreeCon1</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">right</span>. <span class="id">intro</span> <span class="id">contra</span>. <span class="id">now</span> <span class="id">inv</span> <span class="id">contra</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">bool</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="CLOCKS.clock_eq">clock_eq</a></span> (<span class="id">ck1</span> <span class="id">ck2</span>: <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">ck1</span>, <span class="id">ck2</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Clocks.html#CLOCKS.Cbase">Cbase</a></span>, <span class="id"><a href="Velus.Clocks.html#CLOCKS.Cbase">Cbase</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck1'</span> <span class="id">x1</span> <span class="id">tc1</span>, <span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck2'</span> <span class="id">x2</span> <span class="id">tc2</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x1</span> ==<span class="id">b</span> <span class="id">x2</span>) &amp;&amp; (<span class="id">tc1</span> ==<span class="id">b</span> <span class="id">tc2</span>) &amp;&amp; <span class="id">clock_eq</span> <span class="id">ck1'</span> <span class="id">ck2'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _, _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_eq_spec">clock_eq_spec</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck1</span> <span class="id">ck2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_eq">clock_eq</a></span> <span class="id">ck1</span> <span class="id">ck2</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> &lt;-&gt; <span class="id">ck1</span> = <span class="id">ck2</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck1</span>, <span class="id">ck2</span>; <span class="id">split</span>; <span class="id">intro</span> <span class="id">HH</span>; <span class="id">auto</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span> <span class="id">now</span> <span class="id">inversion</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion</span> <span class="id">HH</span> <span class="kwd">as</span> [<span class="id">Heq</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Heq</span> <span class="kwd">as</span> (<span class="id">Heq</span> &amp; <span class="id">Hc</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Heq</span> <span class="kwd">as</span> (<span class="id">Hi</span> &amp; <span class="id">Hb</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">Hi</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">Hb</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hi</span>, <span class="id">Hb</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IHck1</span> <span class="kwd">in</span> <span class="id">Hc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">subst</span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion</span> <span class="id">HH</span> <span class="kwd">as</span> [<span class="id">Heq</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">subst</span>. <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#andb_true_iff">Bool.andb_true_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>. 2:<span class="id">now</span> <span class="id">apply</span> <span class="id">IHck1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#andb_true_iff">Bool.andb_true_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_refl">equiv_decb_refl</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="CLOCKS.clock_EqDec">clock_EqDec</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ck1</span> <span class="id">ck2</span>. <span class="id">compute</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_eq_spec">clock_eq_spec</a></span> <span class="id">ck1</span> <span class="id">ck2</span>) <span class="kwd">as</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_eq">clock_eq</a></span> <span class="id">ck1</span> <span class="id">ck2</span>); [<span class="id">left</span>|<span class="id">right</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">HH</span>. <span class="id">apply</span> <span class="id">Heq</span> <span class="kwd">in</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_eqb_eq">clock_eqb_eq</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">x</span> <span class="id">y</span>: <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span>), <span class="id">x</span> ==<span class="id">b</span> <span class="id">y</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> &lt;-&gt; <span class="id">x</span> = <span class="id">y</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span>; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_eqb_neq">clock_eqb_neq</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">x</span> <span class="id">y</span>: <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span>), <span class="id">x</span> ==<span class="id">b</span> <span class="id">y</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span> &lt;-&gt; <span class="id">x</span> &lt;&gt; <span class="id">y</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> *; <span class="id">split</span>; <span class="id">intro</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intro</span> <span class="id">contra</span>. <span class="id">rewrite</span> &lt;- <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_eqb_eq">clock_eqb_eq</a></span> <span class="kwd">in</span> <span class="id">contra</span>. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id">x</span> ==<span class="id">b</span> <span class="id">y</span>) <span class="id">eqn</span>:<span class="id">Hec</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_eqb_eq">clock_eqb_eq</a></span> <span class="kwd">in</span> <span class="id">Hec</span>. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="CLOCKS.nclock_EqDec">nclock_EqDec</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.nclock">nclock</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#prod_eqdec">prod_eqdec</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_EqDec">clock_EqDec</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> <span class="id">y</span>; <span class="id">destruct</span> <span class="id">x</span>; <span class="id">destruct</span> <span class="id">y</span>; <span class="id">try</span> (<span class="id">right</span>; <span class="id">congruence</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">specialize</span> (<span class="id"><a href="Velus.Common.Common.html#EqDec_instance_0">Common.EqDec_instance_0</a></span> <span class="id">i</span> <span class="id">i0</span>) <span class="kwd">as</span> [?|?].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">left</span>. <span class="id">rewrite</span> <span class="id">e</span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">right</span>. <span class="id">intro</span> <span class="id">contra</span>. <span class="id">inv</span> <span class="id">contra</span>. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">left</span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.nclock_eqb_eq">nclock_eqb_eq</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">x</span> <span class="id">y</span>: <span class="id"><a href="Velus.Clocks.html#CLOCKS.nclock">nclock</a></span>), <span class="id">x</span> ==<span class="id">b</span> <span class="id">y</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> &lt;-&gt; <span class="id">x</span> = <span class="id">y</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span>; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_not_in_clock">clock_not_in_clock</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~(<span class="id">ck</span> = <span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">injection</span> <span class="id">Hck</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IHck</span>. <span class="id">now</span> <span class="id">subst</span> <span class="id">b</span> <span class="id">x</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Well-clocking </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="CLOCKS.wc_clock">wc_clock</a></span> (<span class="id">vars</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span>)) : <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="CLOCKS.CCbase">CCbase</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wc_clock</span> <span class="id">vars</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.Cbase">Cbase</a></span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="CLOCKS.CCon">CCon</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wc_clock</span> <span class="id">vars</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">ck</span>) <span class="id">vars</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wc_clock</span> <span class="id">vars</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.Clocks.html#wc_clock">wc_clock</a></span> : <span class="id">clocks</span> <span class="id">lclocking</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="CLOCKS.wc_env">wc_env</a></span> <span class="id">vars</span> : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">xck</span> =&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> <span class="id">vars</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">xck</span>)) <span class="id">vars</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.wc_env_var">wc_env_var</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">vars</span> <span class="id">x</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_env">wc_env</a></span> <span class="id">vars</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">ck</span>) <span class="id">vars</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> <span class="id">vars</span> <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">vars</span> <span class="id">x</span> <span class="id">ck</span> <span class="id">Hwc</span> <span class="id">Hcv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">with</span> (2:=<span class="id">Hcv</span>) <span class="kwd">in</span> <span class="id">Hwc</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="CLOCKS.wc_clock_incl">wc_clock_incl</a></span> : <span class="kwd">forall</span> <span class="id">vars</span> <span class="id">vars'</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> <span class="id">vars</span> <span class="id">vars'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> <span class="id">vars</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> <span class="id">vars'</span> <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">vars</span> <span class="id">vars'</span> <span class="id">ck</span> <span class="id">Hincl</span> <span class="id">Hwc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hwc</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">clocks</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.wc_env_app">wc_env_app</a></span> : <span class="kwd">forall</span> <span class="id">vars</span> <span class="id">vars'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_env">wc_env</a></span> <span class="id">vars</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_, <span class="id">ck</span>) =&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> (<span class="id">vars</span>++<span class="id">vars'</span>) <span class="id">ck</span>) <span class="id">vars'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_env">wc_env</a></span> (<span class="id">vars</span> ++ <span class="id">vars'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hwenv1</span> <span class="id">Hwenv2</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_env">wc_env</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_app">Forall_app</a></span>; <span class="id">split</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock_incl">wc_clock_incl</a></span>; [|<span class="id">eauto</span>]. <span class="id">solve_incl_app</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.wc_clock_sub">wc_clock_sub</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">vars</span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_env">wc_env</a></span> <span class="id">vars</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> <span class="id">vars</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">ck</span>) <span class="id">vars</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">vars</span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span> <span class="id">Hwc</span> <span class="id">Hclock</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">Hclock</span> <span class="kwd">as</span> [|? ? ? <span class="id">Hclock'</span> <span class="id">Hcv'</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assumption</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="CLOCKS.wc_clock_Proper">wc_clock_Proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span>) ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>) <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">env'</span> <span class="id">env</span> <span class="id">Henv</span> <span class="id">ck'</span> <span class="id">ck</span> <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hck</span>; <span class="id">clear</span> <span class="id">Hck</span> <span class="id">ck'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">IHck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">inversion_clear</span> 1; <span class="id">constructor</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span> <span class="id">rewrite</span> <span class="id">Henv</span> <span class="kwd">in</span> *;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="CLOCKS.wc_env_Proper">wc_env_Proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span>) ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>) <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_env">wc_env</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">env'</span> <span class="id">env</span> <span class="id">Henv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_env">wc_env</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intro</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> &lt;-<span class="id">Henv</span>. <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> &lt;-<span class="id">Henv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id">Henv</span>. <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">Henv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Parent relation </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> : <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="CLOCKS.CP0">CP0</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clock_parent</span> <span class="id">ck</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="CLOCKS.CP1">CP1</a></span>: <span class="kwd">forall</span> <span class="id">ck'</span> <span class="id">x</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clock_parent</span> <span class="id">ck</span> <span class="id">ck'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id">clock_parent</span> <span class="id">ck</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck'</span> <span class="id">x</span> <span class="id">b</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.Clocks.html#clock_parent">clock_parent</a></span> : <span class="id">clocks</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id">clock_parent_parent'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck'</span> <span class="id">ck</span> <span class="id">i</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck</span> <span class="id">i</span> <span class="id">b</span>) <span class="id">ck'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> <span class="id">ck'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck'</span> <span class="kwd">as</span> [|? <span class="id">IH</span>]; [<span class="id">now</span> <span class="id">inversion</span> 1|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ck</span> <span class="id">i'</span> <span class="id">b'</span> <span class="id">Hcp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span> <span class="id">Hcp</span> <span class="kwd">as</span> [|? ? ? <span class="id">Hcp'</span>]; [<span class="id">now</span> <span class="id">auto</span> <span class="kwd">with</span> <span class="id">clocks</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IH</span> <span class="kwd">in</span> <span class="id">Hcp'</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">clocks</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_parent_parent">clock_parent_parent</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck'</span> <span class="id">ck</span> <span class="id">i</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck</span> <span class="id">i</span> <span class="id">b</span>) <span class="id">ck'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck'</span> <span class="id">i</span> <span class="id">b</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">ck'</span>; [<span class="id">now</span> <span class="id">inversion</span> 1|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ck</span> <span class="id">i'</span> <span class="id">b'</span> <span class="id">Hcp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span> <span class="id">Hcp</span> <span class="kwd">as</span> [|? ? ? <span class="id">Hcp'</span>]; [<span class="id">now</span> <span class="id">auto</span> <span class="kwd">with</span> <span class="id">clocks</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">clock_parent_parent'</span> <span class="kwd">in</span> <span class="id">Hcp'</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">clocks</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_parent_trans">clock_parent_trans</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck1</span> <span class="id">ck2</span> <span class="id">ck3</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck1</span> <span class="id">ck2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck2</span> <span class="id">ck3</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck1</span> <span class="id">ck3</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck2</span>. <span class="id">now</span> <span class="id">inversion</span> 1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ck3</span> <span class="id">H12</span> <span class="id">H23</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">clock_parent_parent'</span> <span class="kwd">in</span> <span class="id">H23</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">H12</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="CLOCKS.clock_parent_Transitive">clock_parent_Transitive</a></span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Proof</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent_trans">clock_parent_trans</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_parent_Cbase">clock_parent_Cbase</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">i</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.Cbase">Cbase</a></span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck</span> <span class="id">i</span> <span class="id">b</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span> <span class="kwd">as</span> [|? <span class="id">IH</span>]; [<span class="id">now</span> <span class="id">constructor</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">constructor</span>; <span class="id">apply</span> <span class="id">IH</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_parent_not_refl">clock_parent_not_refl</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span> <span class="kwd">as</span> [|? <span class="id">IH</span>]; [<span class="id">now</span> <span class="id">inversion</span> 1|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Hp</span>; <span class="id">inversion</span> <span class="id">Hp</span> <span class="kwd">as</span> [? ? <span class="id">HR</span>|? ? ? <span class="id">Hp'</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id">HR</span> <span class="kwd">in</span> <span class="id">Hp</span>; <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">clock_parent_parent'</span> <span class="kwd">in</span> <span class="id">Hp'</span>; <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_parent_no_loops">clock_parent_no_loops</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">ck'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> <span class="id">ck'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id">ck</span> &lt;&gt; <span class="id">ck'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ck</span> <span class="id">ck'</span> <span class="id">Hck</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Heq</span> <span class="kwd">in</span> <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent_not_refl">clock_parent_not_refl</a></span> <span class="kwd">with</span> (1:=<span class="id">Hck</span>).<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_no_loops">clock_no_loops</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span> &lt;&gt; <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span> <span class="kwd">as</span> [|? <span class="id">IH</span>]; [<span class="id">discriminate</span> 1|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">injection</span> 1; <span class="id">intros</span> ? <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IH</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_parent_Con">clock_parent_Con</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">ck'</span> <span class="id">i</span> <span class="id">b</span> <span class="id">j</span> <span class="id">c</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck</span> <span class="id">i</span> <span class="id">b</span>) (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck'</span> <span class="id">j</span> <span class="id">c</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> <span class="id">ck'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">ck</span>; <span class="id">induction</span> <span class="id">ck'</span> <span class="kwd">as</span> [|? <span class="id">IH</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion</span> 1 <span class="kwd">as</span> [|? ? ? <span class="id">Hp</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">clock_parent_parent'</span> <span class="kwd">in</span> <span class="id">Hp</span>; <span class="id">inversion</span> <span class="id">Hp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span>; <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent_Cbase">clock_parent_Cbase</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion</span> 1 <span class="kwd">as</span> [|? ? ? <span class="id">Hp</span>]; <span class="id">inversion</span> <span class="id">Hp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> <span class="id">i'</span> <span class="id">b'</span> <span class="id">j</span>  <span class="id">c</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span> 1 <span class="kwd">as</span> [? ? <span class="id">Hck'</span>|? ? ? <span class="id">Hp</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id">rewrite</span> <span class="id">Hck'</span> <span class="kwd">in</span> <span class="id">IH</span>; <span class="id">now</span> <span class="id">constructor</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IH</span> <span class="kwd">in</span> <span class="id">Hp</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">clocks</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id">clock_parent_strict'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck'</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~(<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> <span class="id">ck'</span> /\ <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck'</span> <span class="id">ck</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck'</span> <span class="kwd">as</span> [|? <span class="id">IH</span>]; <span class="id">destruct</span> <span class="id">ck</span>; <span class="id">destruct</span> 1 <span class="kwd">as</span> [<span class="id">Hp</span> <span class="id">Hp'</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span> <span class="id">now</span> (<span class="id">inversion</span> <span class="id">Hp</span> || <span class="id">inversion</span> <span class="id">Hp'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent_Con">clock_parent_Con</a></span> <span class="kwd">in</span> <span class="id">Hp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent_Con">clock_parent_Con</a></span> <span class="kwd">in</span> <span class="id">Hp'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">IH</span>; <span class="id">split</span>; <span class="id">eassumption</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_parent_strict">clock_parent_strict</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck'</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> <span class="id">ck'</span> -&gt; ~<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck'</span> <span class="id">ck</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">ck'</span>; [<span class="id">now</span> <span class="id">inversion</span> 1|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ck</span> <span class="id">Hp</span> <span class="id">Hp'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">clock_parent_strict'</span>; <span class="id">split</span>; <span class="id">eassumption</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.Con_not_clock_parent">Con_not_clock_parent</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span>) <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ck</span> <span class="id">x</span> <span class="id">b</span> <span class="id">Hp</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent_strict">clock_parent_strict</a></span> <span class="kwd">with</span> (1:=<span class="id">Hp</span>); <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.Is_free_in_clock_self_or_parent">Is_free_in_clock_self_or_parent</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">x</span> <span class="id">ck</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="kwd">exists</span> <span class="id">ck'</span> <span class="id">b</span>, <span class="id">ck</span> = <span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck'</span> <span class="id">x</span> <span class="id">b</span> \/ <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck'</span> <span class="id">x</span> <span class="id">b</span>) <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span> <span class="kwd">as</span> [|? <span class="id">IH</span>]; [<span class="id">now</span> <span class="id">inversion</span> 1|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Hfree</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span> <span class="id">Hfree</span> <span class="kwd">as</span> [|? ? ? ? <span class="id">Hfree'</span>]; <span class="id">clear</span> <span class="id">Hfree</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="kwd">exists</span> <span class="id">ck</span>, <span class="id">p</span>; <span class="id">now</span> <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">IH</span> <span class="id">Hfree'</span>); <span class="id">clear</span> <span class="id">Hfree'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">IH</span> <span class="kwd">as</span> [<span class="id">ck'</span> [<span class="id">b'</span> <span class="id">Hcp</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">ck'</span>, <span class="id">b'</span>; <span class="id">right</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Hcp</span> <span class="kwd">as</span> [<span class="id">Hcp</span>|<span class="id">Hcp</span>]; [<span class="id">rewrite</span> <span class="id">Hcp</span>| <span class="id">inversion</span> <span class="id">Hcp</span>]; <span class="id">now</span> <span class="id">auto</span> <span class="kwd">with</span> <span class="id">clocks</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.Is_free_in_clock_parent">Is_free_in_clock_parent</a></span>: <span class="kwd">forall</span> <span class="id">vars</span> <span class="id">x</span> <span class="id">ck</span> <span class="id">ck'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">vars</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">ck'</span>) <span class="id">vars</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> <span class="id">vars</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">x</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck'</span> <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span> <span class="kwd">as</span> [|? <span class="id">IH</span>]; <span class="id">intros</span> <span class="id">ck'</span> <span class="id">Hndup</span> <span class="id">Hin</span> <span class="id">Hwc</span> <span class="id">Hfree</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hfree</span>; <span class="id">inv</span> <span class="id">Hwc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">clear</span> <span class="id">IH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers_det">NoDupMembers_det</a></span> <span class="kwd">with</span> (<span class="id">t</span>:=<span class="id">ck</span>) (<span class="id">t'</span>:=<span class="id">ck'</span>) <span class="kwd">in</span> <span class="id">Hndup</span>; <span class="id">eauto</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.wc_clock_parent">wc_clock_parent</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">C</span> <span class="id">ck'</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_env">wc_env</a></span> <span class="id">C</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> <span class="id">ck'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> <span class="id">C</span> <span class="id">ck'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> <span class="id">C</span> <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck'</span> <span class="kwd">as</span> [|<span class="id">ck'</span> <span class="id">IH</span>]; <span class="id">destruct</span> <span class="id">ck</span> <span class="kwd">as</span> [|<span class="id">ck</span> <span class="id">i'</span> <span class="id">ty'</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span> <span class="id">now</span> (<span class="id">inversion</span> 3 || <span class="id">auto</span> <span class="kwd">with</span> <span class="id">clocks</span>); <span class="id">auto</span> <span class="kwd">with</span> <span class="id">clocks</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Hwc</span> <span class="id">Hp</span> <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span> <span class="id">Hp</span> <span class="kwd">as</span> [<span class="id">j</span> <span class="id">c</span> [<span class="id">HR1</span> <span class="id">HR2</span> <span class="id">HR3</span>]|<span class="id">ck''</span> <span class="id">j</span> <span class="id">c</span> <span class="id">Hp'</span> [<span class="id">HR1</span> <span class="id">HR2</span> <span class="id">HR3</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> &lt;-<span class="id">HR1</span> <span class="kwd">in</span> *; <span class="id">clear</span> <span class="id">HR1</span> <span class="id">HR2</span> <span class="id">HR3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">inversion_clear</span> <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IH</span> <span class="kwd">with</span> (1:=<span class="id">Hwc</span>) (2:=<span class="id">Hp'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">inversion</span> <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.instck_parent">instck_parent</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">bk</span> <span class="id">sub</span> <span class="id">ck</span> <span class="id">ck'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.instck">instck</a></span> <span class="id">bk</span> <span class="id">sub</span> <span class="id">ck</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">ck'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">ck'</span> = <span class="id">bk</span> \/ <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">bk</span> <span class="id">ck'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">inversion_clear</span> 1; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>. <span class="id">intros</span> <span class="id">ck'</span> <span class="id">Hi</span>. <span class="id">right</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.instck">instck</a></span> <span class="id">bk</span> <span class="id">sub</span> <span class="id">ck</span>). 2:<span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">sub</span> <span class="id">i</span>). 2:<span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">IHck</span> <span class="id">c</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq_refl">eq_refl</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">Hi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">IHck</span>; <span class="id">subst</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">clocks</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.instck_subclock_not_clock_eq">instck_subclock_not_clock_eq</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">isub</span> <span class="id">xck</span> <span class="id">c</span> <span class="id">x</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.instck">instck</a></span> <span class="id">ck</span> <span class="id">isub</span> <span class="id">xck</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">c</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_eq">clock_eq</a></span> <span class="id">ck</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">c</span> <span class="id">x</span> <span class="id">b</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#not_true_is_false">Bool.not_true_is_false</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Heq</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_eq_spec">clock_eq_spec</a></span> <span class="kwd">in</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.instck_parent">instck_parent</a></span> <span class="kwd">in</span> <span class="id">Hck</span> <span class="kwd">as</span> [<span class="id">Hck</span>|<span class="id">Hck</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">subst</span> <span class="id">c</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_not_in_clock">clock_not_in_clock</a></span> <span class="kwd">in</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">subst</span> <span class="id">ck</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.Con_not_clock_parent">Con_not_clock_parent</a></span> <span class="kwd">in</span> <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.clock_parent_dec">clock_parent_dec</a></span> : <span class="kwd">forall</span> <span class="id">ck</span> <span class="id">ck'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> <span class="id">ck'</span> \/ ~<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> <span class="id">ck'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ck</span>; <span class="id">induction</span> <span class="id">ck'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">right</span>. <span class="id">intro</span> <span class="id">contra</span>; <span class="id">inv</span> <span class="id">contra</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">IHck'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">left</span>. <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_EqDec">clock_EqDec</a></span> <span class="id">ck</span> <span class="id">ck'</span>) <span class="kwd">as</span> [<span class="id">Heq</span>|<span class="id">Hneq</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">rewrite</span> <span class="id">Heq</span>. <span class="id">left</span>. <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">right</span>. <span class="id">intro</span> <span class="id">contra</span>. <span class="id">inv</span> <span class="id">contra</span>; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.exists_child_clock">exists_child_clock</a></span> : <span class="kwd">forall</span> (<span class="id">vars</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">vars</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span> \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">id</span>, <span class="kwd">exists</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">id</span>, <span class="id">ck</span>) <span class="id">vars</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_, <span class="id">ck'</span>) =&gt; ~<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck</span> <span class="id">ck'</span>) <span class="id">vars</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">vars</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">right</span>. <span class="id">destruct</span> <span class="id">a</span> <span class="kwd">as</span> [<span class="id">id</span> <span class="id">ck</span>]. <span class="id">destruct</span> <span class="id">IHvars</span> <span class="kwd">as</span> [?|[<span class="id">id'</span> [<span class="id">ck'</span> [<span class="id">HIn</span> <span class="id">cl</span>]]]]; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="kwd">exists</span> <span class="id">id</span>. <span class="kwd">exists</span> <span class="id">ck</span>. <span class="id">split</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">contra</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent_no_loops">clock_parent_no_loops</a></span> <span class="kwd">in</span> <span class="id">contra</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent_dec">clock_parent_dec</a></span> <span class="id">ck'</span> <span class="id">ck</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="kwd">exists</span> <span class="id">id</span>. <span class="kwd">exists</span> <span class="id">ck</span>. <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">left</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">contra</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent_strict">clock_parent_strict</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_impl">Forall_impl</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [<span class="id">id''</span> <span class="id">ck''</span>] <span class="id">Hpar</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Hpar</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">contra</span>. <span class="id">apply</span> <span class="id">Hpar</span>. <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="kwd">exists</span> <span class="id">id'</span>. <span class="kwd">exists</span> <span class="id">ck'</span>. <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">right</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id">exists_child_clock'</span> : <span class="kwd">forall</span> (<span class="id">vars</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock">clock</a></span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">vars</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_env">wc_env</a></span> <span class="id">vars</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">vars</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span> \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">id</span>, <span class="kwd">exists</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">id</span>, <span class="id">ck</span>) <span class="id">vars</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_, <span class="id">ck'</span>) =&gt; ~<span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">id</span> <span class="id">ck'</span>) <span class="id">vars</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">vars</span> <span class="id">Hndup</span> <span class="id">Hwc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Clocks.html#CLOCKS.exists_child_clock">exists_child_clock</a></span> <span class="id">vars</span>) <span class="kwd">as</span> [?|[<span class="id">id</span> [<span class="id">ck</span> [<span class="id">Hin</span> <span class="id">Hclock</span>]]]]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">right</span>. <span class="kwd">exists</span> <span class="id">id</span>. <span class="kwd">exists</span> <span class="id">ck</span>. <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_impl_In">Forall_impl_In</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [<span class="id">id'</span> <span class="id">ck'</span>] <span class="id">Hin'</span> <span class="id">H</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">contra</span>. <span class="id">apply</span> <span class="id">H</span>; <span class="id">clear</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock_parent">Is_free_in_clock_parent</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_env">wc_env</a></span> <span class="kwd">in</span> <span class="id">Hwc</span>. <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.wc_clock_nparent_remove">wc_clock_nparent_remove</a></span> : <span class="kwd">forall</span> <span class="id">vars</span> <span class="id">id</span> <span class="id">ck</span> <span class="id">ck'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck'</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> ((<span class="id">id</span>, <span class="id">ck'</span>)::<span class="id">vars</span>) <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> <span class="id">vars</span> <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>; <span class="id">intros</span> <span class="id">ck'</span> <span class="id">Hnpar</span> <span class="id">Hwc</span>; <span class="id">constructor</span>; <span class="id">inv</span> <span class="id">Hwc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id">IHck</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">clocks</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">H3</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">clocks</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exfalso</span>. <span class="id">apply</span> <span class="id">Hnpar</span>. <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="CLOCKS.wc_clock_no_loops_remove">wc_clock_no_loops_remove</a></span> : <span class="kwd">forall</span> <span class="id">vars</span> <span class="id">id</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> ((<span class="id">id</span>, <span class="id">ck</span>)::<span class="id">vars</span>) <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock">wc_clock</a></span> <span class="id">vars</span> <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">vars</span> <span class="id">id</span> <span class="id">ck</span> <span class="id">Hwc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.wc_clock_nparent_remove">wc_clock_nparent_remove</a></span> <span class="kwd">in</span> <span class="id">Hwc</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">contra</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent_no_loops">clock_parent_no_loops</a></span> <span class="kwd">in</span> <span class="id">contra</span>. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.instck_inv">instck_inv</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">bck</span> <span class="id">sub</span> <span class="id">ck</span> <span class="id">ck'</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.instck">instck</a></span> <span class="id">bck</span> <span class="id">sub</span> <span class="id">ck</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">ck'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">x</span> <span class="id">ck'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">x</span> <span class="id">bck</span> \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">exists</span> <span class="id">x'</span>, <span class="id">sub</span> <span class="id">x'</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">x</span> /\ <span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">x'</span> <span class="id">ck</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>; <span class="id">intros</span> * <span class="id">Hinst</span> <span class="id">Hfree</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hinst</span>. <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion</span> <span class="id">Hinst</span> <span class="kwd">as</span> [<span class="id">Hins</span>]. <span class="id">cases_eqn</span> <span class="id">Hins</span>. <span class="id">inv</span> <span class="id">Hins</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">Hfree</span> <span class="kwd">as</span> [| ???? <span class="id">Hfr</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">right</span>. <span class="kwd">exists</span> <span class="id">i</span>. <span class="id">split</span>. <span class="id">auto</span>. <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IHck</span> <span class="kwd">in</span> <span class="id">Hfr</span> <span class="kwd">as</span> [|[<span class="id">y</span> []]] ; <span class="id">auto</span>. <span class="id">right</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">y</span>. <span class="id">split</span>; <span class="id">auto</span>. <span class="id">now</span> <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.instck_free_bck">instck_free_bck</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">bck</span> <span class="id">sub</span> <span class="id">ck</span> <span class="id">ck'</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.instck">instck</a></span> <span class="id">bck</span> <span class="id">sub</span> <span class="id">ck</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">ck'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">x</span> <span class="id">bck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">x</span> <span class="id">ck'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>; <span class="id">intros</span> * <span class="id">Hinst</span> <span class="id">Hfree</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hinst</span>. <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion</span> <span class="id">Hinst</span> <span class="kwd">as</span> [<span class="id">Hins</span>]. <span class="id">cases_eqn</span> <span class="id">Hins</span>. <span class="id">inv</span> <span class="id">Hins</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">IHck</span> <span class="id">c</span> <span class="id">x</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq_refl">eq_refl</a></span> <span class="id">Hfree</span>). <span class="id">now</span> <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.instck_free_sub">instck_free_sub</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">bck</span> <span class="id">sub</span> <span class="id">ck</span> <span class="id">ck'</span> <span class="id">x</span> <span class="id">x'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.instck">instck</a></span> <span class="id">bck</span> <span class="id">sub</span> <span class="id">ck</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">ck'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">x</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">sub</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">x'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">x'</span> <span class="id">ck'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>; <span class="id">intros</span> * <span class="id">Hinst</span> <span class="id">Hfree</span> <span class="id">Hsub</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hfree</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hfree</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">inversion</span> <span class="id">Hinst</span> <span class="kwd">as</span> [<span class="id">Hins</span>]. <span class="id">cases_eqn</span> <span class="id">Hins</span>. <span class="id">inv</span> <span class="id">Hsub</span>. <span class="id">inv</span> <span class="id">Hins</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">inversion</span> <span class="id">Hinst</span> <span class="kwd">as</span> [<span class="id">Hins</span>]. <span class="id">cases_eqn</span> <span class="id">Hins</span>. <span class="id">inv</span> <span class="id">Hins</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">IHck</span> <span class="id">c</span> <span class="id">x</span> <span class="id">x'</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq_refl">eq_refl</a></span> <span class="id">H1</span> <span class="id">Hsub</span>). <span class="id">now</span> <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Checking parent relation </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="CLOCKS.is_clock_parent">is_clock_parent</a></span> <span class="id">ck1</span> <span class="id">ck2</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">ck2</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Clocks.html#CLOCKS.Cbase">Cbase</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Clocks.html#CLOCKS.Con">Con</a></span> <span class="id">ck2'</span> _ _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">ck1</span> ==<span class="id">b</span> <span class="id">ck2'</span>) || (<span class="id">is_clock_parent</span> <span class="id">ck1</span> <span class="id">ck2'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CLOCKS.is_clock_parent_spec">is_clock_parent_spec</a></span> : <span class="kwd">forall</span> <span class="id">ck1</span> <span class="id">ck2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Clocks.html#CLOCKS.is_clock_parent">is_clock_parent</a></span> <span class="id">ck1</span> <span class="id">ck2</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> &lt;-&gt; <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_parent">clock_parent</a></span> <span class="id">ck1</span> <span class="id">ck2</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> <span class="id">Hck</span>; <span class="id">induction</span> <span class="id">ck2</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#orb_true_iff">Bool.orb_true_iff</a></span> <span class="kwd">in</span> <span class="id">Hck</span> <span class="kwd">as</span> [<span class="id">Heq</span>|<span class="id">Hck</span>]; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">clocks</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS.clock_eqb_eq">clock_eqb_eq</a></span> <span class="kwd">in</span> <span class="id">Heq</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#orb_true_iff">Bool.orb_true_iff</a></span>. <span class="id">inv</span> <span class="id">Hck</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">left</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_refl">equiv_decb_refl</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="ClocksFun">ClocksFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>    : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>     : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span>  : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Clocks.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Clocks.html#Op">Op</a></span>)<br/>
+&lt;: <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span> <span class="id"><a href="Velus.Clocks.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Clocks.html#Op">Op</a></span> <span class="id"><a href="Velus.Clocks.html#OpAux">OpAux</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span> <span class="id"><a href="Velus.Clocks.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Clocks.html#Op">Op</a></span> <span class="id"><a href="Velus.Clocks.html#OpAux">OpAux</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Clocks.html#ClocksFun">ClocksFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module NoDup</title>
+<meta name="description" content="Documentation of Coq module NoDup" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module NoDup</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.PArith.PArith.html">PArith</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.NLustre.NLSyntax.html">NLustre.NLSyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html">CoreExpr.CESyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.NLustre.IsVariable.html">NLustre.IsVariable</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.NLustre.IsDefined.html">NLustre.IsDefined</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.NLustre.Memories.html">NLustre.Memories</a></span>.<br/>
+<br/>
+<h1> No duplication of variables </h1>
+<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="NODUP">NODUP</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>          : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>           : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span>        : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span>  <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>     <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>   <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Syn</span>   : <span class="id"><a href="Velus.NLustre.NLSyntax.html#NLSYNTAX">NLSYNTAX</a></span>   <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#CESyn">CESyn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Mem</span>   : <span class="id"><a href="Velus.NLustre.Memories.html#MEMORIES">MEMORIES</a></span>   <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">IsD</span>   : <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED">ISDEFINED</a></span>  <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Syn">Syn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Mem">Mem</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">IsV</span>   : <span class="id"><a href="Velus.NLustre.IsVariable.html#ISVARIABLE">ISVARIABLE</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Syn">Syn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Mem">Mem</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#IsD">IsD</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="NODUP.NoDup_defs">NoDup_defs</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Syn.equation">equation</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="NODUP.NDDNil">NDDNil</a></span>: <span class="id">NoDup_defs</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="NODUP.NDDCons">NDDCons</a></span>: <span class="kwd">forall</span> <span class="id">eq</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">NoDup_defs</span> <span class="id">eqs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.NLustre.NoDup.html#IsD.Is_defined_in_eq">Is_defined_in_eq</a></span> <span class="id">x</span> <span class="id">eq</span> -&gt; ~<span class="id"><a href="Velus.NLustre.NoDup.html#IsD.Is_defined_in">Is_defined_in</a></span> <span class="id">x</span> <span class="id">eqs</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">NoDup_defs</span> (<span class="id">eq</span> :: <span class="id">eqs</span>).<br/>
+<br/>
+<h2> Properties </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="NODUP.NoDup_defs_cons">NoDup_defs_cons</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">eq</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.NoDup.html#NODUP.NoDup_defs">NoDup_defs</a></span> (<span class="id">eq</span> :: <span class="id">eqs</span>) -&gt; <span class="id"><a href="Velus.NLustre.NoDup.html#NODUP.NoDup_defs">NoDup_defs</a></span> <span class="id">eqs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">eq</span> <span class="id">eqs</span> <span class="id">Hndd</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">eq</span>; <span class="id">inversion_clear</span> <span class="id">Hndd</span>; <span class="id">assumption</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="NODUP.NoDup_defs_NoDup_vars_defined">NoDup_defs_NoDup_vars_defined</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> (<span class="id"><a href="Velus.NLustre.NoDup.html#Syn.vars_defined">vars_defined</a></span> <span class="id">eqs</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> (<span class="id"><a href="Velus.NLustre.NoDup.html#Syn.lasts_defined">lasts_defined</a></span> <span class="id">eqs</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.NoDup.html#NODUP.NoDup_defs">NoDup_defs</a></span> <span class="id">eqs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.NoDup.html#Syn.vars_defined">vars_defined</a></span>, <span class="id"><a href="Velus.NLustre.NoDup.html#Syn.lasts_defined">lasts_defined</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">eqs</span> <span class="kwd">as</span> [|<span class="id">eq</span> <span class="id">eqs</span>]; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">VD</span> <span class="id">LD</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.NLustre.NoDup.html#NODUP.NoDup_defs">NoDup_defs</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDup_app_r">NoDup_app_r</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ? <span class="id">Hdef1</span> <span class="id">Hdef2</span>. <span class="id">destruct</span> <span class="id">x</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDup_app_In">NoDup_app_In</a></span> <span class="kwd">in</span> <span class="id">VD</span>. <span class="id">eapply</span> <span class="id">VD</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.NoDup.html#IsD.Is_defined_in_vars_defined">Is_defined_in_vars_defined</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.NoDup.html#IsD.Is_defined_in_var_defined">Is_defined_in_var_defined</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDup_app_In">NoDup_app_In</a></span> <span class="kwd">in</span> <span class="id">LD</span>. <span class="id">eapply</span> <span class="id">LD</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.NoDup.html#IsD.Is_defined_in_lasts_defined">Is_defined_in_lasts_defined</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.NoDup.html#IsD.Is_defined_in_last_defined">Is_defined_in_last_defined</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="NODUP.NoDup_defs_node">NoDup_defs_node</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.NoDup.html#NODUP.NoDup_defs">NoDup_defs</a></span> <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.NoDup.html#Syn.n_eqs">n_eqs</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.NLustre.NoDup.html#NODUP.NoDup_defs_NoDup_vars_defined">NoDup_defs_NoDup_vars_defined</a></span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.NLustre.NoDup.html#Syn.NoDup_var_defined_n_eqs">NoDup_var_defined_n_eqs</a></span>, <span class="id"><a href="Velus.NLustre.NoDup.html#Syn.NoDup_last_defined_n_eqs">NoDup_last_defined_n_eqs</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.NoDup.html#NODUP">NODUP</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="NoDupFun">NoDupFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span>  <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>     <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>   <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Syn</span>   : <span class="id"><a href="Velus.NLustre.NLSyntax.html#NLSYNTAX">NLSYNTAX</a></span>   <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#CESyn">CESyn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Mem</span>   : <span class="id"><a href="Velus.NLustre.Memories.html#MEMORIES">MEMORIES</a></span>   <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">IsD</span>   : <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED">ISDEFINED</a></span>  <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Syn">Syn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Mem">Mem</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">IsV</span>   : <span class="id"><a href="Velus.NLustre.IsVariable.html#ISVARIABLE">ISVARIABLE</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Syn">Syn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Mem">Mem</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#IsD">IsD</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;: <span class="id"><a href="Velus.NLustre.NoDup.html#NODUP">NODUP</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Syn">Syn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Mem">Mem</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#IsD">IsD</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#IsV">IsV</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.NLustre.NoDup.html#NODUP">NODUP</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Syn">Syn</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#Mem">Mem</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#IsD">IsD</a></span> <span class="id"><a href="Velus.NLustre.NoDup.html#IsV">IsV</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.NoDup.html#NoDupFun">NoDupFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

@@ -1,0 +1,797 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module IndexedStreams</title>
+<meta name="description" content="Documentation of Coq module IndexedStreams" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module IndexedStreams</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.FunctionalEnvironment.html">FunctionalEnvironment</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Setoids.Setoid.html">Setoid</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html">Morphisms</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.EqNat.html">Arith.EqNat</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Logic.FunctionalExtensionality.html">Logic.FunctionalExtensionality</a></span>.<br/>
+<br/>
+<h1> Extensional model of synchronous streams </h1>
+<br/>
+<div class="doc">Our model is extensional in the sense that it encodes a
+coinductive, infinite datastructure (streams) with a function of
+domain <span class="bracket"><span class="id">nat</span></span>. To reason about this object, we shall use functional
+extensionality <span class="bracket"> <span class="id">Logic.FunctionalExtensionality</span></span>. This axiom is
+believed to be consistent with Coq. </div>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="INDEXEDSTREAMS">INDEXEDSTREAMS</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span> : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Ids">Ids</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Clocks</span> : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Ids">Ids</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Op">Op</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux">OpAux</a></span>).<br/>
+<br/>
+<h2> Datatypes </h2>
+<br/>
+<div class="doc">A stream is represented by its characteristic function: </div>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.stream">stream</a></span> <span class="id">A</span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span> -&gt; <span class="id">A</span>.<br/>
+<br/>
+<div class="doc">An indexed stream of lists is well-formed when the length of the lists
+      is uniform over time. </div>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.wf_streams">wf_streams</a></span> {<span class="id">A</span>} (<span class="id">xss</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>)) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">k'</span> <span class="id">k</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id">xss</span> <span class="id">k</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id">xss</span> <span class="id">k'</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.eq_str">eq_str</a></span> {<span class="id">A</span>} (<span class="id">xs</span> <span class="id">xs'</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id">A</span>) := <span class="kwd">forall</span> <span class="id">n</span>, <span class="id">xs</span> <span class="id">n</span> = <span class="id">xs'</span> <span class="id">n</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Infix</span> <span class="string">"≈"</span> := <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.eq_str">eq_str</a></span> (<span class="kwd">at</span> <span class="id">level</span> 70, <span class="id">no</span> <span class="id">associativity</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.eq_str_refl">eq_str_refl</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">xs</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id">A</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">xs</span> <span class="id">≈</span> <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">n</span>; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.eq_str_sym">eq_str_sym</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">xs</span> <span class="id">xs'</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id">A</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">xs</span> <span class="id">≈</span> <span class="id">xs'</span> -&gt; <span class="id">xs'</span> <span class="id">≈</span> <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E</span> <span class="id">n</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.eq_str_trans">eq_str_trans</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">xs</span> <span class="id">ys</span> <span class="id">zs</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id">A</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">xs</span> <span class="id">≈</span> <span class="id">ys</span> -&gt; <span class="id">ys</span> <span class="id">≈</span> <span class="id">zs</span> -&gt; <span class="id">xs</span> <span class="id">≈</span> <span class="id">zs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E1</span> <span class="id">E2</span> <span class="id">n</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">E1</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Relation</span> <span class="id">A</span> : (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id">A</span>) (@<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.eq_str">eq_str</a></span> <span class="id">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span> <span class="id">proved</span> <span class="kwd">by</span> (@<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.eq_str_refl">eq_str_refl</a></span> <span class="id">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span> <span class="id">proved</span> <span class="kwd">by</span> (@<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.eq_str_sym">eq_str_sym</a></span> <span class="id">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">transitivity</span> <span class="id">proved</span> <span class="kwd">by</span> (@<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.eq_str_trans">eq_str_trans</a></span> <span class="id">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">eq_str_rel</span>.<br/>
+<br/>
+<div class="doc">A synchronous stream thus maps time to synchronous values: </div>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Notation</span> <span class="id"><a name="INDEXEDSTREAMS.vstream">vstream</a></span> := (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Implicit</span> <span class="kwd">Type</span> <span class="id">vs</span> : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.vstream">vstream</a></span>.<br/>
+<br/>
+<div class="doc">A clock is a stream that returns <span class="bracket"><span class="id">true</span></span> if the clocked stream
+contains a value (<span class="bracket"><span class="id">present</span> <span class="id">c</span></span>) at the corresponding instant, <span class="bracket"><span class="id">false</span></span>
+if the clocked stream is <span class="bracket"><span class="id">absent</span></span> at the corresponding instant. </div>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Notation</span> <span class="id"><a name="INDEXEDSTREAMS.cstream">cstream</a></span> := (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Implicit</span> <span class="kwd">Type</span> <span class="id">cs</span> : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.cstream">cstream</a></span>.<br/>
+<br/>
+<h2> Synchronous functions </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.present_injection">present_injection</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">x</span> <span class="id">y</span> : <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>), <span class="id">x</span> = <span class="id">y</span> &lt;-&gt; <span class="id"><a href="Velus.IndexedStreams.html#OpAux.present">present</a></span> <span class="id">x</span> = <span class="id"><a href="Velus.IndexedStreams.html#OpAux.present">present</a></span> <span class="id">y</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intro</span> <span class="id">H</span>; [<span class="id">rewrite</span> <span class="id">H</span>|<span class="id">injection</span> <span class="id">H</span>]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.not_absent_present">not_absent_present</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">x</span> : <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>), <span class="id">x</span> &lt;&gt; <span class="id"><a href="Velus.IndexedStreams.html#OpAux.absent">absent</a></span> &lt;-&gt; <span class="kwd">exists</span> <span class="id">c</span>, <span class="id">x</span> = <span class="id"><a href="Velus.IndexedStreams.html#OpAux.present">present</a></span> <span class="id">c</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intro</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span>; [<span class="id">auto</span> <span class="kwd">with</span> *|<span class="id">eauto</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">HH</span> <span class="kwd">as</span> [<span class="id">c</span> <span class="id">HH</span>]; <span class="id">rewrite</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>; <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.absent_list">absent_list</a></span> (<span class="id">xs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>): <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">v</span> =&gt; <span class="id">v</span> = <span class="id"><a href="Velus.IndexedStreams.html#OpAux.absent">absent</a></span>) <span class="id">xs</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.present_list">present_list</a></span> (<span class="id">xs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>): <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">v</span> =&gt; <span class="id">v</span> &lt;&gt; <span class="id"><a href="Velus.IndexedStreams.html#OpAux.absent">absent</a></span>) <span class="id">xs</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.all_absent">all_absent</a></span> {<span class="id">A</span>} (<span class="id">l</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> _ =&gt; <span class="id"><a href="Velus.IndexedStreams.html#OpAux.absent">absent</a></span>) <span class="id">l</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Remark</span> <span class="id"><a name="INDEXEDSTREAMS.all_absent_spec">all_absent_spec</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> (<span class="id">l</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.absent_list">absent_list</a></span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.all_absent">all_absent</a></span> <span class="id">l</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Remark</span> <span class="id"><a name="INDEXEDSTREAMS.nth_all_absent">nth_all_absent</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">xs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>) <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.all_absent">all_absent</a></span> <span class="id">xs</span>) <span class="id"><a href="Velus.IndexedStreams.html#OpAux.absent">absent</a></span> = <span class="id"><a href="Velus.IndexedStreams.html#OpAux.absent">absent</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>, <span class="id">n</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.absent_list_spec_b">absent_list_spec_b</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.absent_list">absent_list</a></span> <span class="id">xs</span> &lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id">x</span> ==<span class="id">b</span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.absent">absent</a></span>) <span class="id">xs</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">simpl</span>; <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion_clear</span> 1; <span class="id">subst</span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_true_intro">andb_true_intro</a></span>; <span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intro</span> <span class="id">H</span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> (<span class="id">E</span> &amp; <span class="id">Hforall</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">E</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IHxs</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<div class="doc">Count the number of resets ticks seen at <span class="bracket"><span class="id">n</span></span> so far. </div>
+&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="INDEXEDSTREAMS.count">count</a></span> (<span class="id">rs</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.cstream">cstream</a></span>) (<span class="id">n</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">c</span> := <span class="kwd">match</span> <span class="id">n</span> <span class="kwd">with</span> 0 =&gt; 0 | <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span> =&gt; <span class="id">count</span> <span class="id">rs</span> <span class="id">n</span> <span class="kwd">end</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> <span class="id">rs</span> <span class="id">n</span> <span class="kwd">then</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">c</span> <span class="kwd">else</span> <span class="id">c</span>.<br/>
+<br/>
+<div class="doc"><span class="bracket"><span class="id">mask</span> <span class="id">k</span> <span class="id">rs</span> <span class="id">xss</span></span> is the list of streams which clips the list of streams
+      <span class="bracket"><span class="id">xss</span></span> between the <span class="bracket"><span class="id">k</span></span>th and the <span class="bracket">(<span class="id">k</span>+1)</span>th reset, outputting absent
+      everywhere else. </div>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.mask">mask</a></span> (<span class="id">k</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span>) (<span class="id">rs</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.cstream">cstream</a></span>) (<span class="id">xss</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">n</span> =&gt; <span class="kwd">if</span> <span class="id">k</span> =? (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">rs</span> <span class="id">n</span>) <span class="kwd">then</span> <span class="id">xss</span> <span class="id">n</span> <span class="kwd">else</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.all_absent">all_absent</a></span> (<span class="id">xss</span> 0).<br/>
+<br/>
+<h2> Properties </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.count_le">count_le</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">r</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n</span> &lt;= <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">r</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>)); <span class="id">lia</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id">count_le'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">r</span> <span class="id">n'</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">n'</span> &lt; <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n'</span> &lt;= <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count_le">count_le</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl</span>; <span class="id">destruct</span> (<span class="id">r</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">m</span>)); <span class="id">lia</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.count_true_ge_1">count_true_ge_1</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span> <span class="id">r</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">r</span> <span class="id">n</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 &lt;= <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">E</span>; <span class="id">rewrite</span> <span class="id">E</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">lia</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.count_positive">count_positive</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">r</span> <span class="id">n'</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">r</span> <span class="id">n</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">n'</span> &lt; <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n'</span> &lt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Rn</span> <span class="id">Lt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">n</span>; <span class="id">try</span> <span class="id">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>; <span class="id">rewrite</span> <span class="id">Rn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> <span class="id">Rn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.lt_succ_r">Nat.lt_succ_r</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.lt_eq_cases">Nat.lt_eq_cases</a></span> <span class="kwd">in</span> <span class="id">Lt</span>. <span class="id">destruct</span> <span class="id">Lt</span> <span class="kwd">as</span> [<span class="id">Lt</span>|<span class="id">Lt</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">induction</span> <span class="id">n</span>; <span class="id">try</span> <span class="id">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.lt_succ_r">Nat.lt_succ_r</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.lt_eq_cases">Nat.lt_eq_cases</a></span> <span class="kwd">in</span> <span class="id">Lt</span>. <span class="id">destruct</span> <span class="id">Lt</span> <span class="kwd">as</span> [<span class="id">Lt</span>|<span class="id">Lt</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.lt_le_trans">Nat.lt_le_trans</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.succ_le_mono">Nat.succ_le_mono</a></span>. <span class="id">apply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count_le">count_le</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.lt_succ_r">Nat.lt_succ_r</a></span>, <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count_le">count_le</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">subst</span>; <span class="id">lia</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.mask_opaque">mask_opaque</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xss</span> <span class="id">k</span> <span class="id">r</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n</span> &lt;&gt; <span class="id">k</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span> <span class="id">k</span> <span class="id">r</span> <span class="id">xss</span> <span class="id">n</span> = <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.all_absent">all_absent</a></span> (<span class="id">xss</span> 0).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> ((<span class="id">k</span> =? <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span>) <span class="kwd">as</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">by</span> (<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.eqb_neq">Nat.eqb_neq</a></span>; <span class="id">lia</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.mask_transparent">mask_transparent</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xss</span> <span class="id">k</span> <span class="id">r</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n</span> = <span class="id">k</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span> <span class="id">k</span> <span class="id">r</span> <span class="id">xss</span> <span class="id">n</span> = <span class="id">xss</span> <span class="id">n</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> ((<span class="id">k</span> =? <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>) <span class="kwd">as</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">by</span> (<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.eqb_eq">Nat.eqb_eq</a></span>; <span class="id">lia</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.memory_masked_alt_cond">memory_masked_alt_cond</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">rs</span> <span class="id">k</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">rs</span> <span class="id">n</span> = (<span class="kwd">if</span> <span class="id">rs</span> <span class="id">n</span> <span class="kwd">then</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">k</span> <span class="kwd">else</span> <span class="id">k</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">k</span> = (<span class="kwd">match</span> <span class="id">n</span> <span class="kwd">with</span> 0 =&gt; 0 | <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">m</span> =&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">rs</span> <span class="id">m</span> <span class="kwd">end</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id">rs</span> 0); <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id">rs</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>)); [|<span class="id">now</span> <span class="id">auto</span> <span class="kwd">with</span> *].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">inversion</span> 1; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.count_reset_now">count_reset_now</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">rs</span> <span class="id">i</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rs</span> <span class="id">i</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">rs</span> <span class="id">i</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> (<span class="kwd">match</span> <span class="id">i</span> <span class="kwd">with</span> 0 =&gt; 0 | <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">m</span> =&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">rs</span> <span class="id">m</span> <span class="kwd">end</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">i</span>; <span class="id">intro</span> <span class="id">Hr</span>; <span class="id">simpl</span>; <span class="id">now</span> <span class="id">rewrite</span> <span class="id">Hr</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.count_reset_gt">count_reset_gt</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">rs</span> <span class="id">i</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rs</span> <span class="id">i</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">n</span> &lt; <span class="id">i</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">rs</span> <span class="id">n</span> &lt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">rs</span> <span class="id">i</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hrs</span> <span class="id">Hn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count_reset_now">count_reset_now</a></span> <span class="kwd">with</span> (1:=<span class="id">Hrs</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">i</span>; [<span class="id">now</span> <span class="id">inv</span> <span class="id">Hn</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hn</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span> &lt;= <span class="id">i</span>) <span class="id">and</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.le_succ_l">Nat.le_succ_l</a></span> <span class="kwd">in</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.lt_succ_r">Nat.lt_succ_r</a></span>, <span class="id">count_le'</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.eq_str">eq_str</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">count_eq_str</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E</span> <span class="id">n</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">simpl</span>; <span class="id">rewrite</span> <span class="id">E</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">IHn</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> <span class="id">k</span> : (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span> <span class="id">k</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.eq_str">eq_str</a></span> ==&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.eq_str">eq_str</a></span> ==&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.eq_str">eq_str</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">mask_eq_str</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E1</span> ? ? <span class="id">E2</span> <span class="id">n</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">E1</span>, 2 <span class="id">E2</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.mask_length">mask_length</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">k</span> <span class="id">xss</span> <span class="id">r</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.wf_streams">wf_streams</a></span> <span class="id">xss</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span> <span class="id">k</span> <span class="id">r</span> <span class="id">xss</span> <span class="id">n</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id">xss</span> <span class="id">n</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">k</span> =? <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.all_absent">all_absent</a></span>; <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<div class="doc">If all masks ar well-formed then the underlying stream of lists
+      is well-formed. </div>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.wf_streams_mask">wf_streams_mask</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xss</span> <span class="id">r</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">n</span>, <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.wf_streams">wf_streams</a></span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span> <span class="id">n</span> <span class="id">r</span> <span class="id">xss</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.wf_streams">wf_streams</a></span> <span class="id">xss</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.wf_streams">wf_streams</a></span>, <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span>; <span class="id">intros</span> * <span class="id">WF</span> <span class="id">k</span> <span class="id">k'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (<span class="id">WF</span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">k</span>) <span class="id">k'</span> <span class="id">k</span>) <span class="kwd">as</span> <span class="id">WFk</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (<span class="id">WF</span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">k'</span>) <span class="id">k'</span> <span class="id">k</span>) <span class="kwd">as</span> <span class="id">WFk'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.eqb_refl">Nat.eqb_refl</a></span> <span class="kwd">in</span> <span class="id">WFk</span>, <span class="id">WFk'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.eqb_sym">Nat.eqb_sym</a></span> <span class="kwd">in</span> <span class="id">WFk'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">k</span> =? <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">k'</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">WFk</span>, &lt;-<span class="id">WFk'</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Presence and absence in non-empty lists </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.not_absent_present_list">not_absent_present_list</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.present_list">present_list</a></span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.absent_list">absent_list</a></span> <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnz</span> <span class="id">Hpres</span> <span class="id">Habs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.present_list">present_list</a></span> <span class="kwd">in</span> <span class="id">Hpres</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.absent_list">absent_list</a></span> <span class="kwd">in</span> <span class="id">Habs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">xs</span>; [<span class="id">now</span> <span class="id">inversion</span> <span class="id">Hnz</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">inv</span> <span class="id">Hpres</span>; <span class="id">inv</span> <span class="id">Habs</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.absent_list_mask">absent_list_mask</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xss</span> <span class="id">k</span> <span class="id">r</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.absent_list">absent_list</a></span> (<span class="id">xss</span> <span class="id">n</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.absent_list">absent_list</a></span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span> <span class="id">k</span> <span class="id">r</span> <span class="id">xss</span> <span class="id">n</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.mask">mask</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">k</span> =? <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.count">count</a></span> <span class="id">r</span> <span class="id">n</span>); <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.all_absent_spec">all_absent_spec</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<div class="doc">Restrictions of FEnvironments </div>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="INDEXEDSTREAMS.HistoryRestriction">HistoryRestriction</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.env">env</a></span> {<span class="id">A</span>} := @<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">FEnv.t</a></span> <span class="id">A</span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id">history'</span> {<span class="id">A</span>} := @<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">FEnv.t</a></span> <span class="id">A</span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.restr_hist">restr_hist</a></span> {<span class="id">A</span>} (<span class="id">H</span> : @<span class="id">history'</span> <span class="id">A</span>) (<span class="id">n</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span>): <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">FEnv.map</a></span> (<span class="kwd">fun</span> <span class="id">xs</span> =&gt; <span class="id">xs</span> <span class="id">n</span>) <span class="id">H</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Hint</span> <span class="id">Unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.restr_hist">restr_hist</a></span> : <span class="id">fenv</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.FEnv_find_restr_hist">FEnv_find_restr_hist</a></span> {<span class="id">A</span>}:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">H</span>: @<span class="id">history'</span> <span class="id">A</span>) <span class="id">x</span> <span class="id">i</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.restr_hist">restr_hist</a></span> <span class="id">H</span> <span class="id">i</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> (<span class="kwd">fun</span> <span class="id">xs</span> =&gt; <span class="id">xs</span> <span class="id">i</span>) (<span class="id">H</span> <span class="id">x</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.restr_hist">restr_hist</a></span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.FEnv_add_restr_hist">FEnv_add_restr_hist</a></span> {<span class="id">A</span>} `{<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.fenv_key">FEnv.fenv_key</a></span> <span class="id">A</span>}:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">H</span>: @<span class="id">history'</span> <span class="id">A</span>) <span class="id">x</span> <span class="id">s</span> <span class="id">i</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">FEnv.Equiv</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.restr_hist">restr_hist</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">FEnv.add</a></span> <span class="id">x</span> <span class="id">s</span> <span class="id">H</span>) <span class="id">i</span>) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">FEnv.add</a></span> <span class="id">x</span> (<span class="id">s</span> <span class="id">i</span>) (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.restr_hist">restr_hist</a></span> <span class="id">H</span> <span class="id">i</span>)).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Hi</span> <span class="id">x</span> <span class="id">s</span> <span class="id">i</span> <span class="id">x'</span>. <span class="id">simpl_fenv</span>. <span class="id">destruct</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">fenv_key_eqdec</span> <span class="id">x'</span> <span class="id">x</span>). <span class="id">inv</span> <span class="id">e</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">subst</span>. <span class="id">now</span> <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.gss">FEnv.gss</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">now</span> <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.gso">FEnv.gso</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.FEnv_In_restr_hist">FEnv_In_restr_hist</a></span> {<span class="id">A</span>} `{<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.fenv_key">FEnv.fenv_key</a></span> <span class="id">A</span>}:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">H</span>: @<span class="id">history'</span> <span class="id">A</span>) <span class="id">x</span> <span class="id">i</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">FEnv.In</a></span> <span class="id">x</span> <span class="id">H</span> &lt;-&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">FEnv.In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.restr_hist">restr_hist</a></span> <span class="id">H</span> <span class="id">i</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.restr_hist">restr_hist</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map_in_iff">FEnv.map_in_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.FEnv_dom_restr_hist">FEnv_dom_restr_hist</a></span> {<span class="id">A</span>} `{<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.fenv_key">FEnv.fenv_key</a></span> <span class="id">A</span>}:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">H</span>: @<span class="id">history'</span> <span class="id">A</span>) <span class="id">xs</span> <span class="id">i</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom">FEnv.dom</a></span> <span class="id">H</span> <span class="id">xs</span> &lt;-&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom">FEnv.dom</a></span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.restr_hist">restr_hist</a></span> <span class="id">H</span> <span class="id">i</span>) <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> <span class="id">HH</span> <span class="id">x</span>; <span class="id">specialize</span> (<span class="id">HH</span> <span class="id">x</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> &lt;-<span class="id">HH</span>, <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.FEnv_In_restr_hist">FEnv_In_restr_hist</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.HistoryRestriction">HistoryRestriction</a></span>.<br/>
+<br/>
+<h2> Instantaneous semantics </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="INDEXEDSTREAMS.InstantSemantics">InstantSemantics</a></span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.history">history</a></span> {<span class="id">A</span>} := <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> (@<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> <span class="id">A</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> {<span class="id">A</span>} (<span class="id">R</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> <span class="id">A</span>) <span class="id">x</span> (<span class="id">v</span>: <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">R</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="INDEXEDSTREAMS.InstantSemantics.base">base</a></span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="INDEXEDSTREAMS.InstantSemantics.R">R</a></span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span>: <span class="id"><a href="Velus.IndexedStreams.html#Clocks.clock">clock</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="INDEXEDSTREAMS.Sbase">Sbase</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">sem_clock_instant</span> <span class="id"><a href="Velus.IndexedStreams.html#Clocks.Cbase">Cbase</a></span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.InstantSemantics.base">base</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="INDEXEDSTREAMS.Son">Son</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">x</span> <span class="id">t</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">sem_clock_instant</span> <span class="id">ck</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.InstantSemantics.R">R</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.IndexedStreams.html#OpAux.present">present</a></span> (<span class="id"><a href="Velus.IndexedStreams.html#Op.Venum">Venum</a></span> <span class="id">b</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">sem_clock_instant</span> (<span class="id"><a href="Velus.IndexedStreams.html#Clocks.Con">Con</a></span> <span class="id">ck</span> <span class="id">x</span> (<span class="id">t</span>, <span class="id">b</span>)) <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="INDEXEDSTREAMS.Son_abs1">Son_abs1</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">x</span> <span class="id">c</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">sem_clock_instant</span> <span class="id">ck</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.InstantSemantics.R">R</a></span> <span class="id">x</span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.absent">absent</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">sem_clock_instant</span> (<span class="id"><a href="Velus.IndexedStreams.html#Clocks.Con">Con</a></span> <span class="id">ck</span> <span class="id">x</span> <span class="id">c</span>) <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="INDEXEDSTREAMS.Son_abs2">Son_abs2</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">x</span> <span class="id">t</span> <span class="id">b</span> <span class="id">b'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">sem_clock_instant</span> <span class="id">ck</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.InstantSemantics.R">R</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.IndexedStreams.html#OpAux.present">present</a></span> (<span class="id"><a href="Velus.IndexedStreams.html#Op.Venum">Venum</a></span> <span class="id">b'</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">b</span> &lt;&gt; <span class="id">b'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">sem_clock_instant</span> (<span class="id"><a href="Velus.IndexedStreams.html#Clocks.Con">Con</a></span> <span class="id">ck</span> <span class="id">x</span> (<span class="id">t</span>, <span class="id">b</span>)) <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.InstantSemantics">InstantSemantics</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.IndexedStreams.html#sem_clock_instant">sem_clock_instant</a></span> : <span class="id">indexedstreams</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> {<span class="id">A</span>} : (@<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> <span class="id">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">FEnv.Equiv</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">sem_var_instant_morph</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">H</span> <span class="id">H'</span> <span class="id">EH</span> <span class="id">x</span> <span class="id">v</span> <span class="id">Hvar</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">EH</span> <span class="id">x</span>). <span class="id">rewrite</span> <span class="id">Hvar</span> <span class="kwd">in</span> <span class="id">EH</span>. <span class="id">inv</span> <span class="id">EH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span> <span class="kwd">in</span> <span class="id">H1</span>. <span class="id">eapply</span> <span class="id">H1</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> ==&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">FEnv.Equiv</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">sem_clock_instant_morph</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">b</span> <span class="id">H</span> <span class="id">H'</span> <span class="id">EH</span> <span class="id">ck</span>. <span class="id">revert</span> <span class="id">b</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>; <span class="id">intros</span> <span class="id">b</span> <span class="id">b'</span> <span class="id">Sem</span>; <span class="id">inv</span> <span class="id">Sem</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.Son">Son</a></span>; <span class="id">auto</span>. <span class="id">apply</span> <span class="id">IHck</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">EH</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.Son_abs1">Son_abs1</a></span>; <span class="id">auto</span>. <span class="id">apply</span> <span class="id">IHck</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">EH</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.Son_abs2">Son_abs2</a></span>; <span class="id">eauto</span>. <span class="id">apply</span> <span class="id">IHck</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">EH</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="INDEXEDSTREAMS.sem_clock_instant_true_inv">sem_clock_instant_true_inv</a></span> : <span class="kwd">forall</span> <span class="id">b</span> <span class="id">H</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span> <span class="id">b</span> <span class="id">H</span> <span class="id">ck</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">b</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hsem</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>; <span class="id">inv</span> <span class="id">Hsem</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="INDEXEDSTREAMS.LiftSemantics">LiftSemantics</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="INDEXEDSTREAMS.LiftSemantics.bk">bk</a></span> : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.lift">lift</a></span> {<span class="id">K</span> <span class="id">A</span> <span class="id">B</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>) (<span class="id">sem</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span> -&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> -&gt; <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x</span> (<span class="id">ys</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id">B</span>): <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span>, <span class="id">sem</span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.LiftSemantics.bk">bk</a></span> <span class="id">n</span>) (<span class="id">H</span> <span class="id">n</span>) <span class="id">x</span> (<span class="id">ys</span> <span class="id">n</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id">lift'</span> {<span class="id">K</span> <span class="id">A</span> <span class="id">B</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>) (<span class="id">sem</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> -&gt; <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) <span class="id">x</span> (<span class="id">ys</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id">B</span>): <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span>, <span class="id">sem</span> (<span class="id">H</span> <span class="id">n</span>) <span class="id">x</span> (<span class="id">ys</span> <span class="id">n</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.sem_var">sem_var</a></span> {<span class="id">K</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>) <span class="id">x</span> (<span class="id">xs</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span>): <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">lift'</span> <span class="id">H</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> <span class="id">x</span> <span class="id">xs</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.sem_clock">sem_clock</a></span> <span class="id">H</span> (<span class="id">ck</span>: <span class="id"><a href="Velus.IndexedStreams.html#Clocks.clock">clock</a></span>) (<span class="id">xs</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>): <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.lift">lift</a></span> <span class="id">H</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span> <span class="id">ck</span> <span class="id">xs</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.LiftSemantics">LiftSemantics</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.lift">lift</a></span> <span class="id">lift'</span> : <span class="id">indexedstreams</span>.<br/>
+<br/>
+<h2> Determinism of the semantics </h2>
+<br/>
+<h3> Instantaneous semantics </h3>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="INDEXEDSTREAMS.InstantDeterminism">InstantDeterminism</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="INDEXEDSTREAMS.InstantDeterminism.base">base</a></span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.sem_var_instant_det">sem_var_instant_det</a></span> {<span class="id">K</span>} (<span class="id">R</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> <span class="id">K</span>):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">v1</span> <span class="id">v2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> <span class="id">R</span> <span class="id">x</span> <span class="id">v1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> <span class="id">R</span> <span class="id">x</span> <span class="id">v2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id">v1</span> = <span class="id">v2</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.sem_clock_instant_det">sem_clock_instant_det</a></span> <span class="id">R</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">v1</span> <span class="id">v2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.InstantDeterminism.base">base</a></span> <span class="id">R</span> <span class="id">ck</span> <span class="id">v1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.InstantDeterminism.base">base</a></span> <span class="id">R</span> <span class="id">ck</span> <span class="id">v2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id">v1</span> = <span class="id">v2</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>; <span class="id">repeat</span> <span class="id">inversion</span> 1; <span class="id">subst</span>; <span class="id">auto</span> <span class="kwd">with</span> *;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span> <span class="id">repeat</span> <span class="id">progress</span> <span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H1</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span> ?<span class="id">bk</span> ?<span class="id">R</span> ?<span class="id">ck</span> ?<span class="id">l</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">H2</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span> ?<span class="id">bk</span> ?<span class="id">R</span> ?<span class="id">ck</span> ?<span class="id">r</span> |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IHck</span> <span class="kwd">with</span> (1:=<span class="id">H1</span>) <span class="kwd">in</span> <span class="id">H2</span>; <span class="id">discriminate</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H1</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> ?<span class="id">R</span> ?<span class="id">i</span> (<span class="id"><a href="Velus.IndexedStreams.html#OpAux.present">present</a></span> ?<span class="id">l</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">H2</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> ?<span class="id">R</span> ?<span class="id">i</span> (<span class="id"><a href="Velus.IndexedStreams.html#OpAux.present">present</a></span> ?<span class="id">r</span>) |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant_det">sem_var_instant_det</a></span> <span class="kwd">with</span> (1:=<span class="id">H1</span>) <span class="kwd">in</span> <span class="id">H2</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">injection</span> <span class="id">H2</span>; <span class="id">intro</span>; <span class="id">subst</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">exfalso</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.InstantDeterminism">InstantDeterminism</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="INDEXEDSTREAMS.LiftDeterminism">LiftDeterminism</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="INDEXEDSTREAMS.LiftDeterminism.bk">bk</a></span> : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.lift_det">lift_det</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">K</span> <span class="id">A</span> <span class="id">B</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>) (<span class="id">P</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span> -&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> -&gt; <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) (<span class="id">bk</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x</span> (<span class="id">xs1</span> <span class="id">xs2</span> : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id">B</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">b</span> <span class="id">R</span> <span class="id">v1</span> <span class="id">v2</span>, <span class="id">P</span> <span class="id">b</span> <span class="id">R</span> <span class="id">x</span> <span class="id">v1</span> -&gt; <span class="id">P</span> <span class="id">b</span> <span class="id">R</span> <span class="id">x</span> <span class="id">v2</span> -&gt; <span class="id">v1</span> = <span class="id">v2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.lift">lift</a></span> <span class="id">bk</span> <span class="id">H</span> <span class="id">P</span> <span class="id">x</span> <span class="id">xs1</span> -&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.lift">lift</a></span> <span class="id">bk</span> <span class="id">H</span> <span class="id">P</span> <span class="id">x</span> <span class="id">xs2</span> -&gt; <span class="id">xs1</span> = <span class="id">xs2</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hpoint</span> <span class="id">H1</span> <span class="id">H2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">extensionality</span> <span class="id">n</span>. <span class="id">specialize</span> (<span class="id">H1</span> <span class="id">n</span>). <span class="id">specialize</span> (<span class="id">H2</span> <span class="id">n</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Hpoint</span>; <span class="id">eassumption</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id">lift'_det</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">K</span> <span class="id">A</span> <span class="id">B</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>) (<span class="id">P</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> -&gt; <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x</span> (<span class="id">xs1</span> <span class="id">xs2</span> : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id">B</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">R</span> <span class="id">v1</span> <span class="id">v2</span>, <span class="id">P</span> <span class="id">R</span> <span class="id">x</span> <span class="id">v1</span> -&gt; <span class="id">P</span> <span class="id">R</span> <span class="id">x</span> <span class="id">v2</span> -&gt; <span class="id">v1</span> = <span class="id">v2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">lift'</span> <span class="id">H</span> <span class="id">P</span> <span class="id">x</span> <span class="id">xs1</span> -&gt; <span class="id">lift'</span> <span class="id">H</span> <span class="id">P</span> <span class="id">x</span> <span class="id">xs2</span> -&gt; <span class="id">xs1</span> = <span class="id">xs2</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hpoint</span> <span class="id">H1</span> <span class="id">H2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">extensionality</span> <span class="id">n</span>. <span class="id">specialize</span> (<span class="id">H1</span> <span class="id">n</span>). <span class="id">specialize</span> (<span class="id">H2</span> <span class="id">n</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Hpoint</span>; <span class="id">eassumption</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Ltac</span> <span class="id">apply_lift</span> <span class="id">sem_det</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">eapply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.lift_det">lift_det</a></span>; <span class="id">try</span> <span class="id">eassumption</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">compute</span>; <span class="id">intros</span>; <span class="id">eapply</span> <span class="id">sem_det</span>; <span class="id">eauto</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Ltac</span> <span class="id">apply_lift'</span> <span class="id">sem_det</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">eapply</span> <span class="id">lift'_det</span>; <span class="id">try</span> <span class="id">eassumption</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">compute</span>; <span class="id">intros</span>; <span class="id">eapply</span> <span class="id">sem_det</span>; <span class="id">eauto</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.sem_var_det">sem_var_det</a></span> {<span class="id">K</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">xs1</span> <span class="id">xs2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var">sem_var</a></span> <span class="id">H</span> <span class="id">x</span> <span class="id">xs1</span> -&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var">sem_var</a></span> <span class="id">H</span> <span class="id">x</span> <span class="id">xs2</span> -&gt; <span class="id">xs1</span> = <span class="id">xs2</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply_lift'</span> (@<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant_det">sem_var_instant_det</a></span> <span class="id">K</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.sem_clock_det">sem_clock_det</a></span> <span class="id">H</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">bs1</span> <span class="id">bs2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock">sem_clock</a></span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.LiftDeterminism.bk">bk</a></span> <span class="id">H</span> <span class="id">ck</span> <span class="id">bs1</span> -&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock">sem_clock</a></span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.LiftDeterminism.bk">bk</a></span> <span class="id">H</span> <span class="id">ck</span> <span class="id">bs2</span> -&gt; <span class="id">bs1</span> = <span class="id">bs2</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply_lift</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant_det">sem_clock_instant_det</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.LiftDeterminism">LiftDeterminism</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Ltac</span> <span class="id">sem_det</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H1</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span> ?<span class="id">bk</span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">X</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">H2</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span> ?<span class="id">bk</span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">Y</span> |- ?<span class="id">X</span> = ?<span class="id">Y</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant_det">sem_clock_instant_det</a></span>; <span class="id">eexact</span> <span class="id">H1</span> || <span class="id">eexact</span> <span class="id">H2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H1</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock">sem_clock</a></span> ?<span class="id">bk</span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">X</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">H2</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock">sem_clock</a></span> ?<span class="id">bk</span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">Y</span> |- ?<span class="id">X</span> = ?<span class="id">Y</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_det">sem_clock_det</a></span>; <span class="id">eexact</span> <span class="id">H1</span> || <span class="id">eexact</span> <span class="id">H2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H1</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">X</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">H2</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">Y</span> |- ?<span class="id">X</span> = ?<span class="id">Y</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant_det">sem_var_instant_det</a></span>; <span class="id">eexact</span> <span class="id">H1</span> || <span class="id">eexact</span> <span class="id">H2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H1</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var">sem_var</a></span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">X</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">H2</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var">sem_var</a></span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">Y</span> |- ?<span class="id">X</span> = ?<span class="id">Y</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_det">sem_var_det</a></span>; <span class="id">eexact</span> <span class="id">H1</span> || <span class="id">eexact</span> <span class="id">H2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Ltac</span> <span class="id">by_sem_det</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: <span class="kwd">exists</span> _, _ |- _ =&gt; <span class="id">destruct</span> <span class="id">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H1</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span> ?<span class="id">bk</span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">X</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">H2</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span> ?<span class="id">bk</span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">Y</span> |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id">X</span> = <span class="id">Y</span>) <span class="kwd">by</span> (<span class="id">eapply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant_det">sem_clock_instant_det</a></span>; <span class="id">eexact</span> <span class="id">H1</span> || <span class="id">eexact</span> <span class="id">H2</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H1</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">X</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">H2</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> ?<span class="id">H</span> ?<span class="id">C</span> ?<span class="id">Y</span> |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id">X</span> = <span class="id">Y</span>) <span class="kwd">by</span> (<span class="id">eapply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant_det">sem_var_instant_det</a></span>; <span class="id">eexact</span> <span class="id">H1</span> || <span class="id">eexact</span> <span class="id">H2</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>; <span class="id">discriminate</span>.<br/>
+<br/>
+<h2> Interpreter </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="INDEXEDSTREAMS.InstantInterpreter">InstantInterpreter</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="INDEXEDSTREAMS.InstantInterpreter.base">base</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.interp_var_instant">interp_var_instant</a></span> {<span class="id">K</span>} (<span class="id">R</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> <span class="id">K</span>) <span class="id">x</span>: <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">R</span> <span class="id">x</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> =&gt; <span class="id">v</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id"><a href="Velus.IndexedStreams.html#OpAux.absent">absent</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.interp_var_instant_complete">interp_var_instant_complete</a></span> {<span class="id">K</span>} (<span class="id">R</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> <span class="id">K</span>):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> <span class="id">R</span> <span class="id">x</span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">v</span> = <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_var_instant">interp_var_instant</a></span> <span class="id">R</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_var_instant">interp_var_instant</a></span>; <span class="id">now</span> <span class="id">intros</span> * -&gt;.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="INDEXEDSTREAMS.interp_clock_instant">interp_clock_instant</a></span> <span class="id">R</span> (<span class="id">c</span>: <span class="id"><a href="Velus.IndexedStreams.html#Clocks.clock">clock</a></span>): <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">c</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.IndexedStreams.html#Clocks.Cbase">Cbase</a></span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.InstantInterpreter.base">base</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.IndexedStreams.html#Clocks.Con">Con</a></span> <span class="id">c</span> <span class="id">x</span> (<span class="id">t</span>, <span class="id">b</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">cb</span> := <span class="id">interp_clock_instant</span> <span class="id">R</span> <span class="id">c</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb">andb</a></span> <span class="id">cb</span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_var_instant">interp_var_instant</a></span> <span class="id">R</span> <span class="id">x</span> ==<span class="id">b</span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.present">present</a></span> (<span class="id"><a href="Velus.IndexedStreams.html#Op.Venum">Venum</a></span> <span class="id">b</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Ltac</span> <span class="id">rw_exp_helper</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var_instant">sem_var_instant</a></span> ?<span class="id">R</span> ?<span class="id">x</span> ?<span class="id">v</span> |- <span class="id">context</span>[<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_var_instant">interp_var_instant</a></span> ?<span class="id">R</span> ?<span class="id">x</span>] =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> &lt;-(<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_var_instant_complete">interp_var_instant_complete</a></span> <span class="id">R</span> <span class="id">x</span> <span class="id">v</span>); <span class="id">eauto</span>; <span class="id">simpl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: <span class="id"><a href="Velus.IndexedStreams.html#Op.sem_unop">sem_unop</a></span> ?<span class="id">op</span> ?<span class="id">c</span> ?<span class="id">t</span> = _ |- <span class="id">context</span>[<span class="id"><a href="Velus.IndexedStreams.html#Op.sem_unop">sem_unop</a></span> ?<span class="id">op</span> ?<span class="id">c</span> ?<span class="id">t</span>] =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: <span class="id"><a href="Velus.IndexedStreams.html#Op.sem_binop">sem_binop</a></span> ?<span class="id">op</span> ?<span class="id">c1</span> ?<span class="id">t1</span> ?<span class="id">c2</span> ?<span class="id">t2</span> = _ |- <span class="id">context</span>[<span class="id"><a href="Velus.IndexedStreams.html#Op.sem_binop">sem_binop</a></span> ?<span class="id">op</span> ?<span class="id">c1</span> ?<span class="id">t1</span> ?<span class="id">c2</span> ?<span class="id">t2</span>] =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.interp_clock_instant_complete">interp_clock_instant_complete</a></span> <span class="id">R</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">c</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock_instant">sem_clock_instant</a></span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.InstantInterpreter.base">base</a></span> <span class="id">R</span> <span class="id">c</span> <span class="id">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">b</span> = <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_clock_instant">interp_clock_instant</a></span> <span class="id">R</span> <span class="id">c</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">auto</span>; <span class="id">simpl</span>; <span class="id">rw_exp_helper</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">IHsem_clock_instant</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">symmetry</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_refl">equiv_decb_refl</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">c</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">symmetry</span>. <span class="id">rewrite</span> &lt;-<span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#not_true_iff_false">Bool.not_true_iff_false</a></span>, <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue_eqb_eq">svalue_eqb_eq</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">contra</span>; <span class="id">inv</span> <span class="id">contra</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.InstantInterpreter">InstantInterpreter</a></span>.<br/>
+<br/>
+<h2> Liftings of instantaneous semantics </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="INDEXEDSTREAMS.LiftInterpreter">LiftInterpreter</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="INDEXEDSTREAMS.LiftInterpreter.bk">bk</a></span> : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.lift_interp">lift_interp</a></span> {<span class="id">K</span> <span class="id">A</span> <span class="id">B</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>) (<span class="id">interp</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span> -&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> -&gt; <span class="id">A</span> -&gt; <span class="id">B</span>) <span class="id">x</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id">B</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">n</span> =&gt; <span class="id">interp</span> (<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.LiftInterpreter.bk">bk</a></span> <span class="id">n</span>) (<span class="id">H</span> <span class="id">n</span>) <span class="id">x</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id">lift_interp'</span> {<span class="id">K</span> <span class="id">A</span> <span class="id">B</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>) (<span class="id">interp</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> -&gt; <span class="id">A</span> -&gt; <span class="id">B</span>) <span class="id">x</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id">B</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">n</span> =&gt; <span class="id">interp</span> (<span class="id">H</span> <span class="id">n</span>) <span class="id">x</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.interp_clock">interp_clock</a></span> <span class="id">H</span> (<span class="id">ck</span>: <span class="id"><a href="Velus.IndexedStreams.html#Clocks.clock">clock</a></span>): <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.lift_interp">lift_interp</a></span> <span class="id">H</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_clock_instant">interp_clock_instant</a></span> <span class="id">ck</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="INDEXEDSTREAMS.interp_var">interp_var</a></span> {<span class="id">K</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>) <span class="id">x</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.stream">stream</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux.svalue">svalue</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">lift_interp'</span> <span class="id">H</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_var_instant">interp_var_instant</a></span> <span class="id">x</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="INDEXEDSTREAMS.lift_complete">lift_complete</a></span> {<span class="id">K</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">sem</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span> -&gt; <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> -&gt; <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) <span class="id">interp</span> <span class="id">x</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">b</span> <span class="id">R</span> <span class="id">x</span> <span class="id">v</span>, <span class="id">sem</span> <span class="id">b</span> <span class="id">R</span> <span class="id">x</span> <span class="id">v</span> -&gt; <span class="id">v</span> = <span class="id">interp</span> <span class="id">b</span> <span class="id">R</span> <span class="id">x</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.lift">lift</a></span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.LiftInterpreter.bk">bk</a></span> <span class="id">H</span> <span class="id">sem</span> <span class="id">x</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">xs</span> <span class="id">≈</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.lift_interp">lift_interp</a></span> <span class="id">H</span> <span class="id">interp</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Instant</span> <span class="id">Sem</span> <span class="id">n</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Sem</span> <span class="id">n</span>); <span class="id">unfold</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.lift_interp">lift_interp</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id">lift'_complete</span> {<span class="id">K</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">sem</span>: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.env">env</a></span> -&gt; <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) <span class="id">interp</span> <span class="id">x</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">R</span> <span class="id">x</span> <span class="id">v</span>, <span class="id">sem</span> <span class="id">R</span> <span class="id">x</span> <span class="id">v</span> -&gt; <span class="id">v</span> = <span class="id">interp</span> <span class="id">R</span> <span class="id">x</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">lift'</span> <span class="id">H</span> <span class="id">sem</span> <span class="id">x</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">xs</span> <span class="id">≈</span> <span class="id">lift_interp'</span> <span class="id">H</span> <span class="id">interp</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Instant</span> <span class="id">Sem</span> <span class="id">n</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Sem</span> <span class="id">n</span>); <span class="id">unfold</span> <span class="id">lift_interp'</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="INDEXEDSTREAMS.interp_clock_complete">interp_clock_complete</a></span> <span class="id">H</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">bs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_clock">sem_clock</a></span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.LiftInterpreter.bk">bk</a></span> <span class="id">H</span> <span class="id">ck</span> <span class="id">bs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">bs</span> <span class="id">≈</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_clock">interp_clock</a></span> <span class="id">H</span> <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">eapply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.lift_complete">lift_complete</a></span>; <span class="id">eauto</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_clock_instant_complete">interp_clock_instant_complete</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="INDEXEDSTREAMS.interp_var_complete">interp_var_complete</a></span> {<span class="id">K</span>} (<span class="id">H</span>: @<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.history">history</a></span> <span class="id">K</span>):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">vs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.sem_var">sem_var</a></span> <span class="id">H</span> <span class="id">x</span> <span class="id">vs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">vs</span> <span class="id">≈</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_var">interp_var</a></span> <span class="id">H</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">eapply</span> <span class="id">lift'_complete</span>; <span class="id">eauto</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.interp_var_instant_complete">interp_var_instant_complete</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS.LiftInterpreter">LiftInterpreter</a></span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS">INDEXEDSTREAMS</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="IndexedStreamsFun">IndexedStreamsFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span> : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Ids">Ids</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Clocks</span> : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Ids">Ids</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Op">Op</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux">OpAux</a></span>)<br/>
+&lt;: <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS">INDEXEDSTREAMS</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Ids">Ids</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Op">Op</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Clocks">Clocks</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS">INDEXEDSTREAMS</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Ids">Ids</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Op">Op</a></span> <span class="id"><a href="Velus.IndexedStreams.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.IndexedStreams.html#Clocks">Clocks</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.IndexedStreams.html#IndexedStreamsFun">IndexedStreamsFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

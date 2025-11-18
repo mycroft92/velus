@@ -1,0 +1,714 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module CommonProgram</title>
+<meta name="description" content="Documentation of Coq module CommonProgram" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module CommonProgram</h1>
+<div class="coq">
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html">Permutation</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<br/>
+<span class="kwd">Class</span> <span class="id"><a name="ProgramUnit">ProgramUnit</a></span> (<span class="id">U</span>: <span class="kwd">Type</span>) := { <span class="id"><a name="name">name</a></span>: <span class="id">U</span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> }.<br/>
+<br/>
+<span class="kwd">Class</span> <span class="id"><a name="ProgramStateUnit">ProgramStateUnit</a></span> (<span class="id">U</span> <span class="id">T</span>: <span class="kwd">Type</span>) :=<br/>
+&nbsp;&nbsp;{ <span class="id"><a name="ProgramStateUnitProgramUnit">ProgramStateUnitProgramUnit</a></span> :: <span class="id"><a href="Velus.Common.CommonProgram.html#ProgramUnit">ProgramUnit</a></span> <span class="id">U</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="state_variables">state_variables</a></span>    : <span class="id">U</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id">T</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="instance_variables">instance_variables</a></span> : <span class="id">U</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>)<br/>
+&nbsp;&nbsp;}.<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="Program">Program</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Class</span> <span class="id"><a name="Program">Program</a></span> (<span class="id">U</span> <span class="id">Prog</span>: <span class="kwd">Type</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id"><a name="units">units</a></span>  : <span class="id">Prog</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">U</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="update">update</a></span> : <span class="id">Prog</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">U</span> -&gt; <span class="id">Prog</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="units_of_update">units_of_update</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">us</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">units</span> (<span class="id">update</span> <span class="id">p</span> <span class="id">us</span>) = <span class="id">us</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="update_idempotent">update_idempotent</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">us</span> <span class="id">us'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">update</span> (<span class="id">update</span> <span class="id">p</span> <span class="id">us</span>) <span class="id">us'</span> = <span class="id">update</span> <span class="id">p</span> <span class="id">us'</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="Program.U">U</a></span> <span class="id"><a name="Program.Prog">Prog</a></span>: <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> `{<span class="id"><a href="Velus.Common.CommonProgram.html#ProgramUnit">ProgramUnit</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#Program.U">U</a></span>} `{<span class="id"><a href="Velus.Common.CommonProgram.html#Program">Program</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#Program.U">U</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Prog">Prog</a></span>}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="find_unit">find_unit</a></span> (<span class="id">f</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">p</span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Prog">Prog</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#Program.U">U</a></span> * <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Prog">Prog</a></span>):=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="kwd">fix</span> <span class="id">find</span> <span class="id">p</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">p</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">u</span> :: <span class="id">p</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> <span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">f</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">then</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p</span>) <span class="kwd">else</span> <span class="id">find</span> <span class="id">p</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">find</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">us</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_empty">find_unit_empty</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">p</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = [] -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>; <span class="id">intros</span> * -&gt;; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="ltsuffix_prog">ltsuffix_prog</a></span> (<span class="id">p</span> <span class="id">p'</span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Prog">Prog</a></span>) := <span class="id"><a href="Velus.Common.CommonList.html#ltsuffix">ltsuffix</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ltsuffix_prog_wf">ltsuffix_prog_wf</a></span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Wf.html#well_founded">well_founded</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#ltsuffix_prog">ltsuffix_prog</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#ltsuffix_prog">ltsuffix_prog</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (@<span class="id"><a href="Velus.Common.CommonList.html#ltsuffix_wf">ltsuffix_wf</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#Program.U">U</a></span>) <span class="kwd">as</span> <span class="id">WF</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Wf.html#measure_wf">Wf.measure_wf</a></span> <span class="kwd">with</span> (<span class="id">m</span> := <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span>) <span class="kwd">in</span> <span class="id">WF</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_ltsuffix_prog">find_unit_ltsuffix_prog</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">p</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#ltsuffix_prog">ltsuffix_prog</a></span> <span class="id">p'</span> <span class="id">p</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#ltsuffix_prog">ltsuffix_prog</a></span>; <span class="id">intros</span> * <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) <span class="kwd">as</span> [|<span class="id">u'</span>]; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) <span class="id">f</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#ltsuffix_cons">ltsuffix_cons</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">IHl</span> <span class="kwd">as</span> (?&amp;?&amp;?); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eexists</span>; <span class="id">auto</span> <span class="kwd">with</span> *; <span class="id">eauto</span>; <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="program_ind">program_ind</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Prog">Prog</a></span> -&gt; <span class="kwd">Prop</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">p</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">f</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P</span> <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P</span> <span class="id">p</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span>, <span class="id">P</span> <span class="id">p</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">SomeCase</span> ?; <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Wf.html#well_founded_induction">well_founded_induction</a></span> <span class="kwd">with</span> (1 := <span class="id"><a href="Velus.Common.CommonProgram.html#ltsuffix_prog_wf">ltsuffix_prog_wf</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">IH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">SomeCase</span>; <span class="id">intros</span> * <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">IH</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_ltsuffix_prog">find_unit_ltsuffix_prog</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="equiv_program">equiv_program</a></span> (<span class="id">p</span> <span class="id">p'</span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Prog">Prog</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">us</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span> = <span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p'</span> <span class="id">us</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="equiv_program_refl">equiv_program_refl</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ??; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="equiv_program_sym">equiv_program_sym</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">p'</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p'</span> -&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p'</span> <span class="id">p</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * ??; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="equiv_program_trans">equiv_program_trans</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">p'</span> <span class="id">p''</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p'</span> -&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p'</span> <span class="id">p''</span> -&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p''</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * ???; <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Relation</span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Prog">Prog</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program_refl">equiv_program_refl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program_sym">equiv_program_sym</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">transitivity</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program_trans">equiv_program_trans</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">program_equiv_rel</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="equiv_program_update">equiv_program_update</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">us</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?? <span class="id">us'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_equiv_program">find_unit_equiv_program</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">f</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>; <span class="id">induction</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>); <span class="id">intros</span> * <span class="id">Find</span> <span class="id">us</span>; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">inv</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_now">find_unit_now</a></span>: <span class="kwd">forall</span> <span class="id">p</span> <span class="id">u</span> <span class="id">us</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">u</span> :: <span class="id">us</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hunits</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>. <span class="id">rewrite</span> <span class="id">Hunits</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> _ _); <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_later">find_unit_later</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">p</span> <span class="id">us</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">us</span> ++ <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">u</span> =&gt; <span class="id">f</span> &lt;&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">us</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Eq</span> <span class="id">E</span> <span class="id">Hnf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>; <span class="id">rewrite</span> <span class="id">E</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">generalize</span> <span class="id">dependent</span> <span class="id">p</span>; <span class="id">revert</span> <span class="id">p'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hnf</span> <span class="kwd">as</span> [|<span class="id">u</span> <span class="id">us'</span>]; <span class="id">intros</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">rewrite</span> <span class="id">Eq</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">erewrite</span> &lt;-<span class="id">IHHnf</span> <span class="kwd">with</span> (<span class="id">p</span> := <span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> (<span class="id">us'</span> ++ <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span>)); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">f</span>); <span class="id">subst</span>; <span class="id">try</span> <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intro</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>, <span class="id">Eq</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_other">find_unit_other</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">u</span> <span class="id">p</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span> &lt;&gt; <span class="id">f</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">u</span> :: <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Eq</span> <span class="id">Hnf</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>; <span class="id">rewrite</span> <span class="id">E</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">f</span>); <span class="id">try</span> <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">now</span> <span class="id">rewrite</span> <span class="id">Eq</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_In">find_unit_In</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">f</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span> = <span class="id">f</span> /\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">u</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) <span class="kwd">as</span> [|<span class="id">u</span>]; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">f</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Find</span>; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">IHl</span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> [ <span class="id">H1</span> <span class="id">H2</span> ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_Exists">find_unit_Exists</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">p</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> &lt;&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> &lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists">Exists</a></span> (<span class="kwd">fun</span> <span class="id">u</span> =&gt; <span class="id">f</span> = (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>)) (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) <span class="kwd">as</span> [|<span class="id">u</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists_nil">Exists_nil</a></span>; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">f</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">split</span>; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id">IHl</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists_cons">Exists_cons</a></span>; <span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Remark</span> <span class="id"><a name="In_find_unit">In_find_unit</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">u</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">u</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">p'</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Nodup</span> <span class="id">Hin</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) <span class="kwd">as</span> [|<span class="id">u'</span> <span class="id">p'</span>]; <span class="id">try</span> <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Nodup</span>; <span class="id">inversion_clear</span> <span class="id">Nodup</span> <span class="kwd">as</span> [|?? <span class="id">Hnin</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>)); <span class="id">eauto</span>; <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>)); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exfalso</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">e</span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map">in_map</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_spec">find_unit_spec</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">p</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span> = <span class="id">f</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="kwd">exists</span> <span class="id">us</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">us</span> ++ <span class="id">u</span> :: <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">u</span> =&gt; <span class="id">f</span> &lt;&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">us</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>; <span class="id">intros</span> * <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) <span class="kwd">as</span> [|<span class="id">u'</span>]; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) <span class="id">f</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Find</span>; <span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span>; <span class="id">simpl</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">IHl</span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> (?&amp; <span class="id">us</span> &amp; -&gt; &amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id">u'</span> :: <span class="id">us</span>); <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_None">find_unit_None</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">f</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> &lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">u</span> =&gt; <span class="id">f</span> &lt;&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) <span class="kwd">as</span> [|<span class="id">u</span>]; [<span class="id">auto</span> <span class="kwd">with</span> *|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">f</span>); <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_cons2">Forall_cons2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">try</span> <span class="id">discriminate</span>; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_Some">find_unit_Some</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">p</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">exists</span> <span class="id">us</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">u</span> :: <span class="id">us</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id">p'</span> = <span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span> = <span class="id">f</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">exists</span> <span class="id">u'</span> <span class="id">us</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">u'</span> :: <span class="id">us</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span> &lt;&gt; <span class="id">f</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>)).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>; <span class="id">intros</span> ??.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) <span class="kwd">as</span> [|<span class="id">u'</span>]; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [(?&amp;?&amp;?)|(?&amp;?&amp;?&amp;?&amp;?)]; <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) <span class="id">f</span>); <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">intros</span> <span class="id">E</span>; <span class="id">inv</span> <span class="id">E</span>; <span class="id">intuition</span> <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">intros</span> [(?&amp; <span class="id">E</span> &amp;?&amp;?)|(?&amp;?&amp; <span class="id">E</span> &amp; ?&amp;?)]; <span class="id">inv</span> <span class="id">E</span>; <span class="id">auto</span>; <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">rewrite</span> <span class="id">IHl</span>; <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [(<span class="id">us</span> &amp; <span class="id">E</span> &amp;?&amp;?)|(<span class="id">u''</span> &amp; <span class="id">us</span> &amp; <span class="id">E</span> &amp;?&amp;?)]; <span class="id">inv</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id">right</span>; <span class="kwd">exists</span> <span class="id">u'</span>, (<span class="id">u</span> :: <span class="id">us</span>); <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>)); <span class="id">try</span> <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id">right</span>; <span class="kwd">exists</span> <span class="id">u'</span>, (<span class="id">u''</span> :: <span class="id">us</span>); <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u''</span>) <span class="id">f</span>); <span class="id">try</span> <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">intros</span> [(<span class="id">us</span> &amp; <span class="id">E</span> &amp;?&amp;?)|(<span class="id">u''</span> &amp; <span class="id">us</span> &amp; <span class="id">E</span> &amp;?&amp; <span class="id">Find</span>)]; <span class="id">inv</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_app">find_unit_app</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">p</span> <span class="id">us</span> <span class="id">us'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">us</span> ++ <span class="id">us'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span>) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span> ++ <span class="id">us'</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>; <span class="id">intros</span> * -&gt;.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> ? <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">us</span> <span class="kwd">as</span> [|<span class="id">u</span>]; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">f</span>); <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id">IHus</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> ((<span class="kwd">fix</span> <span class="id">find</span> (<span class="id">p0</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#Program.U">U</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#Program.U">U</a></span> * <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#Program.U">U</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">p0</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">u0</span> :: <span class="id">p1</span> =&gt; <span class="kwd">if</span> <span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u0</span>) <span class="id">f</span> <span class="kwd">then</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u0</span>, <span class="id">p1</span>) <span class="kwd">else</span> <span class="id">find</span> <span class="id">p1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>) <span class="id">us</span>) <span class="kwd">as</span> [[]|]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> ? <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_cons">find_unit_cons</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">p</span> <span class="id">u</span> <span class="id">us</span> <span class="id">up'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">u</span> :: <span class="id">us</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id">up'</span> &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">f</span> = <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span> /\ <span class="id">up'</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\/ (<span class="id">f</span> &lt;&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span> /\ <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span>) = <span class="id">up'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * -&gt;.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">f</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>; [ <span class="id">auto</span> <span class="kwd">with</span> * | <span class="id">intuition</span> <span class="id">symmetry</span> ]; [ <span class="id">assumption</span> | ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">us</span>; <span class="id">auto</span> <span class="kwd">with</span> *. <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">right</span>; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> [[]|[? <span class="id">Find</span>]]; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="Program.Suffix">Suffix</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="suffix">suffix</a></span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Prog">Prog</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Prog">Prog</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="suffix_intro">suffix_intro</a></span>: <span class="kwd">forall</span> <span class="id">p</span> <span class="id">p'</span> <span class="id">us</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span> = <span class="id">us</span> ++ <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">suffix</span> <span class="id">p</span> <span class="id">p'</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="suffix_refl">suffix_refl</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#suffix">suffix</a></span> <span class="id">p</span> <span class="id">p</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program_refl">equiv_program_refl</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_nil_l">app_nil_l</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Relation</span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Prog">Prog</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#suffix">suffix</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.Common.CommonProgram.html#suffix_refl">suffix_refl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">suffix_rel</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="suffix_cons">suffix_cons</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">u</span> <span class="id">p</span> <span class="id">p'</span> <span class="id">p''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p''</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">u</span> :: <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p''</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#suffix">suffix</a></span> <span class="id">p</span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#suffix">suffix</a></span> <span class="id">p''</span> <span class="id">p'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E</span> <span class="id">E'</span> <span class="id">Hsub</span>; <span class="id">inv</span> <span class="id">Hsub</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">symmetry</span> <span class="kwd">in</span> <span class="id">E</span>; <span class="id">transitivity</span> <span class="id">p</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">take</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span> = _) <span class="id">and</span> <span class="id">rewrite</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">E'</span>, &lt;-<span class="id"><a href="Velus.Common.CommonList.html#app_last_app">app_last_app</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_suffix">find_unit_suffix</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">f</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#suffix">suffix</a></span> <span class="id">p'</span> <span class="id">p</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p'</span> <span class="id">p</span>) <span class="kwd">by</span> (<span class="id">symmetry</span>; <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_equiv_program">find_unit_equiv_program</a></span>; <span class="id">eauto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_spec">find_unit_spec</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> (?&amp;?&amp; <span class="id">E</span> &amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="Velus.Common.CommonList.html#app_last_app">app_last_app</a></span> <span class="kwd">in</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Suffix">Suffix</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="Program.Ordered">Ordered</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="Program.Ordered.Is_called_in">Is_called_in</a></span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#Program.U">U</a></span> -&gt; <span class="kwd">Prop</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ordered_program">Ordered_program</a></span> (<span class="id">p</span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Prog">Prog</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Forall'</span> (<span class="kwd">fun</span> <span class="id">us</span> <span class="id">u</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">f</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Program.Ordered.Is_called_in">Is_called_in</a></span> <span class="id">f</span> <span class="id">u</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f</span> &lt;&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="kwd">exists</span> <span class="id">u'</span> <span class="id">p'</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u'</span>, <span class="id">p'</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">u'</span> =&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span> &lt;&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) <span class="id">us</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ordered_program_append">Ordered_program_append</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">us</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">us</span> ++ <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Forall'</span> (<span class="kwd">fun</span> <span class="id">us</span> <span class="id">u</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">u'</span> =&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span> &lt;&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) (<span class="id">us</span> ++ <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span>)) <span class="id">us</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="id">p'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span>; <span class="id">intros</span> * <span class="id">E</span> -&gt; <span class="id">Ord</span>; <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">induction</span> <span class="id">us</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> &lt;-<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_comm_cons">app_comm_cons</a></span> <span class="kwd">in</span> <span class="id">Ord</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">Ord</span> <span class="kwd">as</span> [|?? [] <span class="id">Ord'</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IHus</span> <span class="kwd">in</span> <span class="id">Ord'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">Forall'_app_r</span> <span class="kwd">in</span> <span class="id">Ord</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Forall'_impl</span>; <span class="id">eauto</span>; <span class="id">simpl</span>; <span class="id">intros</span> * (<span class="id">Spec</span> &amp;?); <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Called</span>; <span class="id">apply</span> <span class="id">Spec</span> <span class="kwd">in</span> <span class="id">Called</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp; <span class="id">Find</span>); <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">E</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id">Ordered_program_append'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">us</span> <span class="id">us'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">us</span> ++ <span class="id">us'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Forall'</span> (<span class="kwd">fun</span> <span class="id">us</span> <span class="id">u</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">u'</span> =&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span> &lt;&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) (<span class="id">us</span> ++ <span class="id">us'</span>)) <span class="id">us</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us'</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E</span> <span class="id">Ord</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">us</span> ++ <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us'</span>)) <span class="kwd">by</span> <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> <span class="id">E</span>; <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program_append">Ordered_program_append</a></span> <span class="kwd">in</span> <span class="id">Ord</span> <span class="kwd">as</span> (?&amp;?); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Forall'_impl</span>; <span class="id">eauto</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program_update">equiv_program_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ordered_program_find_unit">Ordered_program_find_unit</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">f</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> (<span class="id">u</span> :: <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span>)).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> <span class="id">Find</span> <span class="kwd">as</span> <span class="id">Eq</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_equiv_program">find_unit_equiv_program</a></span> <span class="kwd">in</span> <span class="id">Eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_spec">find_unit_spec</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Ordered_program_append'</span> <span class="kwd">in</span> <span class="id">Ord</span> <span class="kwd">as</span> (?&amp; <span class="id">Ord</span>); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="not_Is_called_in_self">not_Is_called_in_self</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">f</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Ordered.Is_called_in">Is_called_in</a></span> <span class="id">f</span> <span class="id">u</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>; <span class="id">induction</span> 1 <span class="kwd">as</span> [|<span class="id">u'</span> ? (<span class="id">Spec</span> &amp; ?)]; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) <span class="id">f</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">E</span> <span class="id">Called</span>; <span class="id">inv</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Spec</span> <span class="kwd">in</span> <span class="id">Called</span> <span class="kwd">as</span> []; <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_later_not_Is_called_in">find_unit_later_not_Is_called_in</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f'</span> <span class="id">us</span> <span class="id">p</span> <span class="id">p'</span> <span class="id">u'</span> <span class="id">p''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">us</span> ++ <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f'</span> <span class="id">p'</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u'</span>, <span class="id">p''</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">u</span> =&gt; ~ <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Ordered.Is_called_in">Is_called_in</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">u'</span>) <span class="id">us</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span> <span class="id">E</span> <span class="id">Find'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_spec">find_unit_spec</a></span> <span class="kwd">in</span> <span class="id">Find'</span> <span class="kwd">as</span> (?&amp; <span class="id">us'</span> &amp; <span class="id">E'</span> &amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">E'</span> <span class="kwd">in</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> <span class="id">Ord</span> <span class="kwd">as</span> <span class="id">Ord'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Ordered_program_append'</span> <span class="kwd">in</span> <span class="id">Ord</span> <span class="kwd">as</span> (<span class="id">Ndp</span> &amp; <span class="id">Ord</span>); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span> <span class="kwd">in</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Ordered_program_append'</span> <span class="kwd">in</span> <span class="id">Ord'</span> <span class="kwd">as</span> (<span class="id">Ndp'</span> &amp; <span class="id">Ord'</span>); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="kwd">in</span> <span class="id">Ord</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span> <span class="kwd">in</span> <span class="id">Ord</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="kwd">in</span> <span class="id">Ord'</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span> <span class="kwd">in</span> <span class="id">Ord'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">Ord'</span> <span class="kwd">as</span> [|?? (<span class="id">Spec</span> &amp;?)].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span> * <span class="id">Hin</span> <span class="id">Called</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Spec</span> <span class="kwd">in</span> <span class="id">Called</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp; <span class="id">Find</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_In">find_unit_In</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> (?&amp; <span class="id">Hin'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span> <span class="kwd">in</span> <span class="id">Hin'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Forall'_In</span> <span class="kwd">in</span> <span class="id">Ndp</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp; <span class="id">Ndp</span>); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_app">Forall_app</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#Forall_cons2">Forall_cons2</a></span> <span class="kwd">in</span> <span class="id">Ndp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Ndp</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp; <span class="id">Ndp</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">with</span> (2 := <span class="id">Hin'</span>) <span class="kwd">in</span> <span class="id">Ndp</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="find_unit_other_not_Is_called_in">find_unit_other_not_Is_called_in</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f'</span> <span class="id">u</span> <span class="id">p</span> <span class="id">p'</span> <span class="id">u'</span> <span class="id">p''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">u</span> :: <span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f'</span> <span class="id">p'</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u'</span>, <span class="id">p''</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Ordered.Is_called_in">Is_called_in</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">u'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span> <span class="id">E</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#cons_is_app">cons_is_app</a></span> <span class="kwd">in</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_later_not_Is_called_in">find_unit_later_not_Is_called_in</a></span> <span class="kwd">in</span> <span class="id">Find</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">inv</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_not_Is_called_in">find_unit_not_Is_called_in</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">f</span> <span class="id">u</span> <span class="id">p'</span> <span class="id">g</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">g</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Ordered.Is_called_in">Is_called_in</a></span> <span class="id">g</span> <span class="id">u</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span> <span class="id">Findg</span> <span class="id">Findf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_spec">find_unit_spec</a></span> <span class="kwd">in</span> <span class="id">Findf</span> <span class="kwd">as</span> (?&amp; <span class="id">us</span> &amp; <span class="id">E</span> &amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Ordered_program_append'</span> <span class="kwd">in</span> <span class="id">Ord</span> <span class="kwd">as</span> (?&amp; <span class="id">Ord</span>); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="kwd">in</span> <span class="id">Ord</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span> <span class="kwd">in</span> <span class="id">Ord</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">Ord</span> <span class="kwd">as</span> [|?? (<span class="id">Spec</span> &amp;?)].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Called</span>; <span class="id">apply</span> <span class="id">Spec</span> <span class="kwd">in</span> <span class="id">Called</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp; <span class="id">Find</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_In">find_unit_In</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> (?&amp; <span class="id">Hin</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_None">find_unit_None</a></span> <span class="kwd">in</span> <span class="id">Findg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">E</span> <span class="kwd">in</span> <span class="id">Findg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_app">Forall_app</a></span> <span class="kwd">in</span> <span class="id">Findg</span> <span class="kwd">as</span> (?&amp; <span class="id">Findg</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_cons2">Forall_cons2</a></span> <span class="kwd">in</span> <span class="id">Findg</span> <span class="kwd">as</span> (?&amp; <span class="id">Findg</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">with</span> (2 := <span class="id">Hin</span>) <span class="kwd">in</span> <span class="id">Findg</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Program.Ordered">Ordered</a></span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Program">Program</a></span>.<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="Transformation">Transformation</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Class</span> <span class="id"><a name="TransformUnit">TransformUnit</a></span> (<span class="id">U</span> <span class="id">U'</span>: <span class="kwd">Type</span>) `{<span class="id"><a href="Velus.Common.CommonProgram.html#ProgramUnit">ProgramUnit</a></span> <span class="id">U</span>} `{<span class="id"><a href="Velus.Common.CommonProgram.html#ProgramUnit">ProgramUnit</a></span> <span class="id">U'</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id"><a name="transform_unit">transform_unit</a></span> : <span class="id">U</span> -&gt; <span class="id">U'</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="transform_unit_conservative_name">transform_unit_conservative_name</a></span> : <span class="kwd">forall</span> <span class="id">u</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> (<span class="id">transform_unit</span> <span class="id">u</span>) = <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Class</span> <span class="id"><a name="TransformStateUnit">TransformStateUnit</a></span> (<span class="id">U</span> <span class="id">U'</span>: <span class="kwd">Type</span>) {<span class="id">T</span>: <span class="kwd">Type</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id">P</span>: <span class="id"><a href="Velus.Common.CommonProgram.html#ProgramStateUnit">ProgramStateUnit</a></span> <span class="id">U</span> <span class="id">T</span>} `{<span class="id">P'</span>: <span class="id"><a href="Velus.Common.CommonProgram.html#ProgramStateUnit">ProgramStateUnit</a></span> <span class="id">U'</span> <span class="id">T</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id"><a name="TransformStateUnitTransformUnit">TransformStateUnitTransformUnit</a></span> :: <span class="id"><a href="Velus.Common.CommonProgram.html#TransformUnit">TransformUnit</a></span> <span class="id">U</span> <span class="id">U'</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="transform_unit_conservative_state">transform_unit_conservative_state</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">u</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#state_variables">state_variables</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> <span class="id">u</span>)) (<span class="id"><a href="Velus.Common.CommonProgram.html#state_variables">state_variables</a></span> <span class="id">u</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#instance_variables">instance_variables</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> <span class="id">u</span>)) (<span class="id"><a href="Velus.Common.CommonProgram.html#instance_variables">instance_variables</a></span> <span class="id">u</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="Transformation.Program">Program</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Class</span> <span class="id"><a name="TransformProgramWithoutUnits">TransformProgramWithoutUnits</a></span> (<span class="id">Prog</span> <span class="id">Prog'</span> : <span class="kwd">Type</span>) {<span class="id">U</span>: <span class="kwd">Type</span>} `{<span class="id"><a href="Velus.Common.CommonProgram.html#Program">Program</a></span> <span class="id">U</span> <span class="id">Prog</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id"><a name="transform_program_without_units">transform_program_without_units</a></span> : <span class="id">Prog</span> -&gt; <span class="id">Prog'</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="transform_program_without_units_update">transform_program_without_units_update</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">us</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">transform_program_without_units</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span class="id">transform_program_without_units</span> <span class="id">p</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="Transformation.Program.U">U</a></span> <span class="id">U'</span> <span class="id"><a name="Transformation.Program.Prog">Prog</a></span> <span class="id">Prog'</span>: <span class="kwd">Type</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id"><a href="Velus.Common.CommonProgram.html#TransformUnit">TransformUnit</a></span> <span class="id">U</span> <span class="id">U'</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id"><a name="Transformation.Program.ProgInst">ProgInst</a></span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program">Program</a></span> <span class="id">U</span> <span class="id">Prog</span>} `{<span class="id"><a href="Velus.Common.CommonProgram.html#Program">Program</a></span> <span class="id">U'</span> <span class="id">Prog'</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{@<span class="id"><a href="Velus.Common.CommonProgram.html#TransformProgramWithoutUnits">TransformProgramWithoutUnits</a></span> <span class="id">Prog</span> <span class="id">Prog'</span> _ <span class="id">ProgInst</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="transform_units">transform_units</a></span> (<span class="id">p</span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Transformation.Program.Prog">Prog</a></span>) : <span class="id">Prog'</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_program_without_units">transform_program_without_units</a></span> <span class="id">p</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>)).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_transform_units_backward">find_unit_transform_units_backward</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">p</span> <span class="id">tu</span> <span class="id">tp'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span> <span class="id">p</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">tu</span>, <span class="id">tp'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id">tu</span> = <span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> <span class="id">u</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id">tp'</span> = <span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span> <span class="id">p'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ??; <span class="id">induction</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) <span class="kwd">as</span> [|<span class="id">u'</span>]; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Find</span>; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit_conservative_name">transform_unit_conservative_name</a></span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) <span class="id">f</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Find</span>. <span class="id">do</span> 2 <span class="id">eexists</span>; <span class="id">eauto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#transform_program_without_units_update">transform_program_without_units_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> ((<span class="kwd">fix</span> <span class="id">find</span> (<span class="id">p</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">U'</span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> (<span class="id">U'</span> * <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">U'</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">p</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">u</span> :: <span class="id">p0</span> =&gt; <span class="kwd">if</span> <span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">f</span> <span class="kwd">then</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p0</span>) <span class="kwd">else</span> <span class="id">find</span> <span class="id">p0</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> <span class="id">l</span>)) <span class="kwd">as</span> [[]|]; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span> <span class="kwd">in</span> <span class="id">Find</span>, <span class="id">IHl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_unit_transform_units_forward">find_unit_transform_units_forward</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">p</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span> <span class="id">p</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> <span class="id">u</span>, <span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span> <span class="id">p'</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ??; <span class="id">induction</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) <span class="kwd">as</span> [|<span class="id">u'</span>]; <span class="id">intros</span> * <span class="id">Find</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit_conservative_name">transform_unit_conservative_name</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) <span class="id">f</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#transform_program_without_units_update">transform_program_without_units_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">IHl</span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="transform_units_Ordered_program">transform_units_Ordered_program</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> (<span class="id">Is_called_in</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#Transformation.Program.U">U</a></span> -&gt; <span class="kwd">Prop</span>) (<span class="id">Is_called_in'</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id">U'</span> -&gt; <span class="kwd">Prop</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">f</span> <span class="id">u</span>, <span class="id">Is_called_in'</span> <span class="id">f</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> <span class="id">u</span>) -&gt; <span class="id">Is_called_in</span> <span class="id">f</span> <span class="id">u</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="id">Is_called_in</span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="id">Is_called_in'</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span> <span class="id">p</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span>; <span class="id">intros</span> * <span class="id">SpecCall</span> <span class="id">Ord</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>; <span class="id">induction</span> <span class="id">Ord</span> <span class="kwd">as</span> [|?? (<span class="id">Spec</span> &amp; <span class="id">Ndp</span>)]; <span class="id">simpl</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> * <span class="id">Called</span>; <span class="id">apply</span> <span class="id">SpecCall</span>, <span class="id">Spec</span> <span class="kwd">in</span> <span class="id">Called</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp; <span class="id">Find</span>); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_transform_units_forward">find_unit_transform_units_forward</a></span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span> <span class="kwd">in</span> <span class="id">Find</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#transform_program_without_units_update">transform_program_without_units_update</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit_conservative_name">transform_unit_conservative_name</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_map">Forall_map</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hin</span>; <span class="id">eauto</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> 2 <span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit_conservative_name">transform_unit_conservative_name</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id">Forall'_impl</span>; <span class="id">eauto</span>; <span class="id">simpl</span>; <span class="id">intros</span> * (<span class="id">Spec'</span> &amp;?); <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Called</span>; <span class="id">apply</span> <span class="id">Spec'</span> <span class="kwd">in</span> <span class="id">Called</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp;<span class="id">Find</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Transformation.Program">Program</a></span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Transformation">Transformation</a></span>.<br/>
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">suffix_refl</span> <span class="id">suffix_cons</span> : <span class="id">program</span>.<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">find_unit_transform_units_backward</span> <span class="id">find_unit_transform_units_forward</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">transform_units_Ordered_program</span> : <span class="id">program</span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

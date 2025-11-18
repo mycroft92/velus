@@ -1,0 +1,682 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module StaticEnv</title>
+<meta name="description" content="Documentation of Coq module StaticEnv" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module StaticEnv</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html">Morphisms</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<h1> Static environment for analysis of Lustre programs </h1>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="STATICENV">STATICENV</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>  : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>   : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>  : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#OpAux">OpAux</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Record</span> <span class="id"><a name="STATICENV.annotation">annotation</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id"><a name="STATICENV.typ">typ</a></span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#Op.type">type</a></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="STATICENV.clo">clo</a></span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#Cks.clock">clock</a></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="STATICENV.causl">causl</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="STATICENV.causl_last">causl_last</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STATICENV.ann_with_clock">ann_with_clock</a></span> (<span class="id">ann</span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.annotation">annotation</a></span>) (<span class="id">ck</span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#Cks.clock">clock</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.Build_annotation">Build_annotation</a></span> <span class="id">ann</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.typ">typ</a></span>) <span class="id">ck</span> <span class="id">ann</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.causl">causl</a></span>) <span class="id">ann</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.causl_last">causl_last</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STATICENV.ann_with_caus">ann_with_caus</a></span> (<span class="id">ann</span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.annotation">annotation</a></span>) (<span class="id">cx</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.Build_annotation">Build_annotation</a></span> <span class="id">ann</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.typ">typ</a></span>) <span class="id">ann</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.clo">clo</a></span>) <span class="id">cx</span> <span class="id">ann</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.causl_last">causl_last</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STATICENV.static_env">static_env</a></span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.annotation">annotation</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="STATICENV.IsVar">IsVar</a></span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="STATICENV.IsVarC">IsVarC</a></span> : <span class="kwd">forall</span> <span class="id">senv</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#InMembers">InMembers</a></span> <span class="id">x</span> <span class="id">senv</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">IsVar</span> <span class="id">senv</span> <span class="id">x</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.IsVar_fst">IsVar_fst</a></span> : <span class="kwd">forall</span> <span class="id">Γ</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">Γ</span> <span class="id">x</span> &lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">Γ</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> []. <span class="id">now</span> <span class="id">rewrite</span> &lt;-<span class="id"><a href="Velus.Common.CommonList.html#fst_InMembers">fst_InMembers</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span>. <span class="id">constructor</span>. <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#fst_InMembers">fst_InMembers</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="STATICENV.HasType">HasType</a></span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#Op.type">type</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="STATICENV.HasTypeC">HasTypeC</a></span> : <span class="kwd">forall</span> <span class="id">senv</span> <span class="id">x</span> <span class="id">ty</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">e</span>) <span class="id">senv</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">e</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.typ">typ</a></span>) = <span class="id">ty</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">HasType</span> <span class="id">senv</span> <span class="id">x</span> <span class="id">ty</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="STATICENV.HasClock">HasClock</a></span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#Cks.clock">clock</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="STATICENV.HasClockC">HasClockC</a></span> : <span class="kwd">forall</span> <span class="id">senv</span> <span class="id">x</span> <span class="id">ck</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">e</span>) <span class="id">senv</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">e</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.clo">clo</a></span>) = <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">HasClock</span> <span class="id">senv</span> <span class="id">x</span> <span class="id">ck</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="STATICENV.HasCaus">HasCaus</a></span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="STATICENV.HasCausC">HasCausC</a></span> : <span class="kwd">forall</span> <span class="id">senv</span> <span class="id">x</span> <span class="id">cx</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">e</span>) <span class="id">senv</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">e</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.causl">causl</a></span>) = <span class="id">cx</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">HasCaus</span> <span class="id">senv</span> <span class="id">x</span> <span class="id">cx</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="STATICENV.IsLast">IsLast</a></span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="STATICENV.IsLastC">IsLastC</a></span> : <span class="kwd">forall</span> <span class="id">senv</span> <span class="id">x</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">e</span>) <span class="id">senv</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">e</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.causl_last">causl_last</a></span>) &lt;&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">IsLast</span> <span class="id">senv</span> <span class="id">x</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="STATICENV.HasLastCaus">HasLastCaus</a></span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="STATICENV.HasLastCausC">HasLastCausC</a></span> : <span class="kwd">forall</span> <span class="id">senv</span> <span class="id">x</span> <span class="id">cx</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">e</span>) <span class="id">senv</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">e</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.causl_last">causl_last</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">cx</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">HasLastCaus</span> <span class="id">senv</span> <span class="id">x</span> <span class="id">cx</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#IsVar">IsVar</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#HasType">HasType</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#HasClock">HasClock</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#HasCaus">HasCaus</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#IsLast">IsLast</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#HasLastCaus">HasLastCaus</a></span> : <span class="id">senv</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="STATICENV.IsVar_proper">IsVar_proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>) <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?? <span class="id">Hperm</span> ???; <span class="id">subst</span>; <span class="id">split</span>; <span class="id">intros</span> <span class="id">Hin</span>; <span class="id">inv</span> <span class="id">Hin</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">rewrite</span> <span class="id">Hperm</span> <span class="kwd">in</span> * || <span class="id">rewrite</span> &lt;-<span class="id">Hperm</span> <span class="kwd">in</span> * ); <span class="id">auto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="STATICENV.HasType_proper">HasType_proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>) <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?? <span class="id">Hperm</span> ??????; <span class="id">subst</span>; <span class="id">split</span>; <span class="id">intros</span> <span class="id">Hin</span>; <span class="id">inv</span> <span class="id">Hin</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">rewrite</span> <span class="id">Hperm</span> <span class="kwd">in</span> * || <span class="id">rewrite</span> &lt;-<span class="id">Hperm</span> <span class="kwd">in</span> * ); <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="STATICENV.HasClock_proper">HasClock_proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>) <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?? <span class="id">Hperm</span> ??????; <span class="id">subst</span>; <span class="id">split</span>; <span class="id">intros</span> <span class="id">Hin</span>; <span class="id">inv</span> <span class="id">Hin</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">rewrite</span> <span class="id">Hperm</span> <span class="kwd">in</span> * || <span class="id">rewrite</span> &lt;-<span class="id">Hperm</span> <span class="kwd">in</span> * ); <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="STATICENV.HasCaus_proper">HasCaus_proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>) <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasCaus">HasCaus</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?? <span class="id">Hperm</span> ??????; <span class="id">subst</span>; <span class="id">split</span>; <span class="id">intros</span> <span class="id">Hin</span>; <span class="id">inv</span> <span class="id">Hin</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">rewrite</span> <span class="id">Hperm</span> <span class="kwd">in</span> * || <span class="id">rewrite</span> &lt;-<span class="id">Hperm</span> <span class="kwd">in</span> * ); <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="STATICENV.IsLast_proper">IsLast_proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>) <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?? <span class="id">Hperm</span> ???; <span class="id">subst</span>; <span class="id">split</span>; <span class="id">intros</span> <span class="id">Hin</span>; <span class="id">inv</span> <span class="id">Hin</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">rewrite</span> <span class="id">Hperm</span> <span class="kwd">in</span> * || <span class="id">rewrite</span> &lt;-<span class="id">Hperm</span> <span class="kwd">in</span> * ); <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="STATICENV.HasLastCaus_proper">HasLastCaus_proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>) <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasLastCaus">HasLastCaus</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?? <span class="id">Hperm</span> ??????; <span class="id">subst</span>; <span class="id">split</span>; <span class="id">intros</span> <span class="id">Hin</span>; <span class="id">inv</span> <span class="id">Hin</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">rewrite</span> <span class="id">Hperm</span> <span class="kwd">in</span> * || <span class="id">rewrite</span> &lt;-<span class="id">Hperm</span> <span class="kwd">in</span> * ); <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.IsVar_incl">IsVar_incl</a></span> : <span class="kwd">forall</span> <span class="id">senv1</span> <span class="id">senv2</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> <span class="id">senv1</span> <span class="id">senv2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">senv1</span> <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">senv2</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hincl</span> <span class="id">Hv</span>. <span class="id">inv</span> <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonList.html#InMembers_incl">InMembers_incl</a></span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.IsVar_In">IsVar_In</a></span> : <span class="kwd">forall</span> <span class="id">Γ</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">Γ</span> <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">Γ</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#fst_InMembers">fst_InMembers</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.IsVar_incl_fst">IsVar_incl_fst</a></span> : <span class="kwd">forall</span> <span class="id">senv1</span> <span class="id">senv2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">senv1</span> <span class="id">x</span> -&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">senv2</span> <span class="id">x</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">senv1</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">senv2</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hincl</span> ? <span class="id">Hin</span>. <span class="id">simpl_In</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">senv1</span> <span class="id">a</span>) <span class="kwd">as</span> <span class="id">Hv</span> <span class="kwd">by</span> (<span class="id">econstructor</span>; <span class="id">solve_In</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Hincl</span> <span class="kwd">in</span> <span class="id">Hv</span>. <span class="id">inv</span> <span class="id">Hv</span>. <span class="id">solve_In</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.HasType_incl">HasType_incl</a></span> : <span class="kwd">forall</span> <span class="id">senv1</span> <span class="id">senv2</span> <span class="id">x</span> <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> <span class="id">senv1</span> <span class="id">senv2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> <span class="id">senv1</span> <span class="id">x</span> <span class="id">ty</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> <span class="id">senv2</span> <span class="id">x</span> <span class="id">ty</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hincl</span> <span class="id">Hv</span>. <span class="id">inv</span> <span class="id">Hv</span>. <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.HasClock_incl">HasClock_incl</a></span> : <span class="kwd">forall</span> <span class="id">senv1</span> <span class="id">senv2</span> <span class="id">x</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> <span class="id">senv1</span> <span class="id">senv2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">senv1</span> <span class="id">x</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">senv2</span> <span class="id">x</span> <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hincl</span> <span class="id">Hv</span>. <span class="id">inv</span> <span class="id">Hv</span>. <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.HasCaus_incl">HasCaus_incl</a></span> : <span class="kwd">forall</span> <span class="id">senv1</span> <span class="id">senv2</span> <span class="id">x</span> <span class="id">cx</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> <span class="id">senv1</span> <span class="id">senv2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasCaus">HasCaus</a></span> <span class="id">senv1</span> <span class="id">x</span> <span class="id">cx</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasCaus">HasCaus</a></span> <span class="id">senv2</span> <span class="id">x</span> <span class="id">cx</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hincl</span> <span class="id">Hv</span>. <span class="id">inv</span> <span class="id">Hv</span>. <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.IsLast_incl">IsLast_incl</a></span> : <span class="kwd">forall</span> <span class="id">senv1</span> <span class="id">senv2</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> <span class="id">senv1</span> <span class="id">senv2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> <span class="id">senv1</span> <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> <span class="id">senv2</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hincl</span> <span class="id">Hv</span>. <span class="id">inv</span> <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonList.html#InMembers_incl">InMembers_incl</a></span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.HasLastCaus_incl">HasLastCaus_incl</a></span> : <span class="kwd">forall</span> <span class="id">senv1</span> <span class="id">senv2</span> <span class="id">x</span> <span class="id">cx</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> <span class="id">senv1</span> <span class="id">senv2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasLastCaus">HasLastCaus</a></span> <span class="id">senv1</span> <span class="id">x</span> <span class="id">cx</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasLastCaus">HasLastCaus</a></span> <span class="id">senv2</span> <span class="id">x</span> <span class="id">cx</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hincl</span> <span class="id">Hv</span>. <span class="id">inv</span> <span class="id">Hv</span>. <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">IsVar_incl</span> <span class="id">HasType_incl</span> <span class="id">HasClock_incl</span> <span class="id">HasCaus_incl</span> <span class="id">IsLast_incl</span> <span class="id">HasLastCaus_incl</span> : <span class="id">senv</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.HasType_IsVar">HasType_IsVar</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">x</span> <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> <span class="id">env</span> <span class="id">x</span> <span class="id">ty</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">env</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hhas</span>. <span class="id">inv</span> <span class="id">Hhas</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonList.html#In_InMembers">In_InMembers</a></span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.HasClock_IsVar">HasClock_IsVar</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">x</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">env</span> <span class="id">x</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">env</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hhas</span>. <span class="id">inv</span> <span class="id">Hhas</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonList.html#In_InMembers">In_InMembers</a></span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.IsLast_IsVar">IsLast_IsVar</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> <span class="id">env</span> <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">env</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">His</span>. <span class="id">inv</span> <span class="id">His</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonList.html#In_InMembers">In_InMembers</a></span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">HasType_IsVar</span> <span class="id">HasClock_IsVar</span> <span class="id">IsLast_IsVar</span> : <span class="id">senv</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.IsVar_app">IsVar_app</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> (<span class="id">env1</span> ++ <span class="id">env2</span>) <span class="id">x</span> &lt;-&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">env1</span> <span class="id">x</span> \/ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">env2</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> * <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hv</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#InMembers_app">InMembers_app</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> [|]; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">Hv</span> <span class="kwd">as</span> [<span class="id">Hv</span>|<span class="id">Hv</span>]; <span class="id">inv</span> <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">constructor</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#InMembers_app">InMembers_app</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.IsVar_concat">IsVar_concat</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">env1</span> <span class="id">env2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">env1</span> <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#concat">concat</a></span> <span class="id">env2</span>) <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span> <span class="id">Hv</span>. <span class="id">inv</span> <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#InMembers_In">InMembers_In</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> (?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>. <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#In_InMembers">In_InMembers</a></span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id">in_concat'</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">IsVar_concat</span> : <span class="id">senv</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id">IsVar_concat'</span> : <span class="kwd">forall</span> <span class="id">env2</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#concat">concat</a></span> <span class="id">env2</span>) <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">env1</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">env1</span> <span class="id">env2</span> /\ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> <span class="id">env1</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hv</span>. <span class="id">inv</span> <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#InMembers_In">InMembers_In</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> (?&amp;<span class="id">In</span>). <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_concat">in_concat</a></span> <span class="kwd">in</span> <span class="id">In</span> <span class="kwd">as</span> (?&amp;?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> 2 <span class="id">esplit</span>; <span class="id">eauto</span>. <span class="id">econstructor</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonList.html#In_InMembers">In_InMembers</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.IsLast_app">IsLast_app</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> (<span class="id">env1</span> ++ <span class="id">env2</span>) <span class="id">x</span> &lt;-&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> <span class="id">env1</span> <span class="id">x</span> \/ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> <span class="id">env2</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> * <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hv</span>. <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> [|]; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">Hv</span> <span class="kwd">as</span> [<span class="id">Hv</span>|<span class="id">Hv</span>]; <span class="id">inv</span> <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">econstructor</span>; <span class="id">try</span> <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.HasType_app">HasType_app</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span> <span class="id">cx</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> (<span class="id">env1</span> ++ <span class="id">env2</span>) <span class="id">x</span> <span class="id">cx</span> &lt;-&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> <span class="id">env1</span> <span class="id">x</span> <span class="id">cx</span> \/ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> <span class="id">env2</span> <span class="id">x</span> <span class="id">cx</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> * <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hv</span>. <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> [|]; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">Hv</span> <span class="kwd">as</span> [<span class="id">Hv</span>|<span class="id">Hv</span>]; <span class="id">inv</span> <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">econstructor</span>; <span class="id">try</span> <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.HasClock_app">HasClock_app</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span> <span class="id">cx</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> (<span class="id">env1</span> ++ <span class="id">env2</span>) <span class="id">x</span> <span class="id">cx</span> &lt;-&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">env1</span> <span class="id">x</span> <span class="id">cx</span> \/ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">env2</span> <span class="id">x</span> <span class="id">cx</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> * <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hv</span>. <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> [|]; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">Hv</span> <span class="kwd">as</span> [<span class="id">Hv</span>|<span class="id">Hv</span>]; <span class="id">inv</span> <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">econstructor</span>; <span class="id">try</span> <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.HasCaus_app">HasCaus_app</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span> <span class="id">cx</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasCaus">HasCaus</a></span> (<span class="id">env1</span> ++ <span class="id">env2</span>) <span class="id">x</span> <span class="id">cx</span> &lt;-&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasCaus">HasCaus</a></span> <span class="id">env1</span> <span class="id">x</span> <span class="id">cx</span> \/ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasCaus">HasCaus</a></span> <span class="id">env2</span> <span class="id">x</span> <span class="id">cx</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> * <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hv</span>. <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> [|]; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">Hv</span> <span class="kwd">as</span> [<span class="id">Hv</span>|<span class="id">Hv</span>]; <span class="id">inv</span> <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">econstructor</span>; <span class="id">try</span> <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.HasLastCaus_app">HasLastCaus_app</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span> <span class="id">cx</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasLastCaus">HasLastCaus</a></span> (<span class="id">env1</span> ++ <span class="id">env2</span>) <span class="id">x</span> <span class="id">cx</span> &lt;-&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasLastCaus">HasLastCaus</a></span> <span class="id">env1</span> <span class="id">x</span> <span class="id">cx</span> \/ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasLastCaus">HasLastCaus</a></span> <span class="id">env2</span> <span class="id">x</span> <span class="id">cx</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> * <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hv</span>. <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> [|]; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">Hv</span> <span class="kwd">as</span> [<span class="id">Hv</span>|<span class="id">Hv</span>]; <span class="id">inv</span> <span class="id">Hv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">econstructor</span>; <span class="id">try</span> <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast_app">IsLast_app</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType_app">HasType_app</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock_app">HasClock_app</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasCaus_app">HasCaus_app</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasLastCaus_app">HasLastCaus_app</a></span> : <span class="id">list</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STATICENV.senv_of_tyck">senv_of_tyck</a></span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * (<span class="id"><a href="Velus.Lustre.StaticEnv.html#Op.type">type</a></span> * <span class="id"><a href="Velus.Lustre.StaticEnv.html#Cks.clock">clock</a></span>))) : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>, (<span class="id">ty</span>, <span class="id">ck</span>)) =&gt; (<span class="id">x</span>, <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.Build_annotation">Build_annotation</a></span> <span class="id">ty</span> <span class="id">ck</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#xH">xH</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>)) <span class="id">l</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STATICENV.senv_of_ins">senv_of_ins</a></span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * (<span class="id"><a href="Velus.Lustre.StaticEnv.html#Op.type">type</a></span> * <span class="id"><a href="Velus.Lustre.StaticEnv.html#Cks.clock">clock</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>))) : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>, (<span class="id">ty</span>, <span class="id">ck</span>, <span class="id">cx</span>)) =&gt; (<span class="id">x</span>, <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.Build_annotation">Build_annotation</a></span> <span class="id">ty</span> <span class="id">ck</span> <span class="id">cx</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>)) <span class="id">l</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STATICENV.senv_of_decls">senv_of_decls</a></span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * (<span class="id"><a href="Velus.Lustre.StaticEnv.html#Op.type">type</a></span> * <span class="id"><a href="Velus.Lustre.StaticEnv.html#Cks.clock">clock</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>))) : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>, (<span class="id">ty</span>, <span class="id">ck</span>, <span class="id">cx</span>, <span class="id">o</span>)) =&gt; (<span class="id">x</span>, <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.Build_annotation">Build_annotation</a></span> <span class="id">ty</span> <span class="id">ck</span> <span class="id">cx</span> <span class="id">o</span>)) <span class="id">l</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_ins">senv_of_ins</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_decls">senv_of_decls</a></span> : <span class="id">list</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.senv_of_decls_app">senv_of_decls_app</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">ys</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_decls">senv_of_decls</a></span> (<span class="id">xs</span> ++ <span class="id">ys</span>) = <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_decls">senv_of_decls</a></span> <span class="id">xs</span> ++ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_decls">senv_of_decls</a></span> <span class="id">ys</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_app">map_app</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.map_fst_senv_of_tyck">map_fst_senv_of_tyck</a></span> : <span class="kwd">forall</span> <span class="id">l</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_tyck">senv_of_tyck</a></span> <span class="id">l</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">l</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> *. <span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_tyck">senv_of_tyck</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_ext">map_ext</a></span>; <span class="id">auto</span>. <span class="id">intros</span>; <span class="id">destruct_conjs</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.map_fst_senv_of_ins">map_fst_senv_of_ins</a></span> : <span class="kwd">forall</span> <span class="id">l</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_ins">senv_of_ins</a></span> <span class="id">l</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">l</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> *. <span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_ins">senv_of_ins</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_ext">map_ext</a></span>; <span class="id">auto</span>. <span class="id">intros</span>; <span class="id">destruct_conjs</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.map_fst_senv_of_decls">map_fst_senv_of_decls</a></span> : <span class="kwd">forall</span> <span class="id">l</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_decls">senv_of_decls</a></span> <span class="id">l</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">l</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> *. <span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_decls">senv_of_decls</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_ext">map_ext</a></span>; <span class="id">auto</span>. <span class="id">intros</span>; <span class="id">destruct_conjs</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> -&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.map_fst_senv_of_tyck">map_fst_senv_of_tyck</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> -&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.map_fst_senv_of_ins">map_fst_senv_of_ins</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> -&gt; @<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.map_fst_senv_of_decls">map_fst_senv_of_decls</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.InMembers_senv_of_decls">InMembers_senv_of_decls</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">locs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#InMembers">InMembers</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_decls">senv_of_decls</a></span> <span class="id">locs</span>) &lt;-&gt; <span class="id"><a href="Velus.Common.CommonList.html#InMembers">InMembers</a></span> <span class="id">x</span> <span class="id">locs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> *. <span class="id">symmetry</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span>. <span class="id">autorewrite</span> <span class="kwd">with</span> <span class="id">list</span>. <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.map_fst_senv_of_decls">map_fst_senv_of_decls</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> -&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.InMembers_senv_of_decls">InMembers_senv_of_decls</a></span> : <span class="id">list</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.NoDupMembers_senv_of_decls">NoDupMembers_senv_of_decls</a></span> : <span class="kwd">forall</span> <span class="id">locs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_decls">senv_of_decls</a></span> <span class="id">locs</span>) &lt;-&gt; <span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">locs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> *. <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#fst_NoDupMembers">fst_NoDupMembers</a></span>, <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.map_fst_senv_of_decls">map_fst_senv_of_decls</a></span>, &lt;-<span class="id"><a href="Velus.Common.CommonList.html#fst_NoDupMembers">fst_NoDupMembers</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.IsVar_senv_of_decls">IsVar_senv_of_decls</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">locs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar">IsVar</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_decls">senv_of_decls</a></span> <span class="id">locs</span>) <span class="id">x</span> &lt;-&gt; <span class="id"><a href="Velus.Common.CommonList.html#InMembers">InMembers</a></span> <span class="id">x</span> <span class="id">locs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> * <span class="id">Hiv</span>; [<span class="id">inv</span> <span class="id">Hiv</span>|<span class="id">constructor</span>]; <span class="id">autorewrite</span> <span class="kwd">with</span> <span class="id">list</span> <span class="kwd">in</span> *; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> -&gt; @<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsVar_senv_of_decls">IsVar_senv_of_decls</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.IsLast_senv_of_decls">IsLast_senv_of_decls</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">locs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_decls">senv_of_decls</a></span> <span class="id">locs</span>) <span class="id">x</span> -&gt; <span class="id"><a href="Velus.Common.CommonList.html#InMembers">InMembers</a></span> <span class="id">x</span> <span class="id">locs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hiv</span>; <span class="id">inv</span> <span class="id">Hiv</span>; <span class="id">solve_In</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STATICENV.idty">idty</a></span> (<span class="id">env</span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Lustre.StaticEnv.html#Op.type">type</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>, <span class="id">entry</span>) =&gt; (<span class="id">x</span>, <span class="id">entry</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.typ">typ</a></span>))) <span class="id">env</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STATICENV.idck">idck</a></span> (<span class="id">env</span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Lustre.StaticEnv.html#Cks.clock">clock</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>, <span class="id">entry</span>) =&gt; (<span class="id">x</span>, <span class="id">entry</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.clo">clo</a></span>))) <span class="id">env</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idty">idty</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idck">idck</a></span> : <span class="id">list</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STATICENV.idcaus_of_senv">idcaus_of_senv</a></span> (<span class="id">env</span> : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.static_env">static_env</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>, <span class="id">e</span>) =&gt; (<span class="id">x</span>, <span class="id">e</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.causl">causl</a></span>))) <span class="id">env</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id"><a href="Velus.Common.CommonList.html#map_filter">map_filter</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>, <span class="id">e</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> (<span class="kwd">fun</span> <span class="id">cx</span> =&gt; (<span class="id">x</span>, <span class="id">cx</span>)) <span class="id">e</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.causl_last">causl_last</a></span>)) <span class="id">env</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html">Permutation</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.idcaus_of_senv_app">idcaus_of_senv_app</a></span> : <span class="kwd">forall</span> <span class="id">Γ1</span> <span class="id">Γ2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span> (<span class="id">Γ1</span> ++ <span class="id">Γ2</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span> <span class="id">Γ1</span> ++ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span> <span class="id">Γ2</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span>. <span class="id">simpl_app</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_app_head">Permutation_app_head</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#Permutation_swap">Permutation_swap</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.idcaus_of_senv_In">idcaus_of_senv_In</a></span> : <span class="kwd">forall</span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">cx</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasCaus">HasCaus</a></span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">cx</span> \/ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasLastCaus">HasLastCaus</a></span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">cx</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">cx</span>) (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span> <span class="id">Γ</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> *. <span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span>. <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; (<span class="id">intros</span> [|]; [<span class="id">left</span>|<span class="id">right</span>]).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">H</span>. <span class="id">solve_In</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">H</span>. <span class="id">solve_In</span>. <span class="id">simpl</span>. <span class="id">rewrite</span> <span class="id">H1</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl_In</span>. <span class="id">econstructor</span>; <span class="id">solve_In</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl_In</span>. <span class="id">econstructor</span>; <span class="id">solve_In</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.HasCaus_snd_det">HasCaus_snd_det</a></span> <span class="id">Γ</span> : <span class="kwd">forall</span> <span class="id">x1</span> <span class="id">x2</span> <span class="id">cx</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span> <span class="id">Γ</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasCaus">HasCaus</a></span> <span class="id">Γ</span> <span class="id">x1</span> <span class="id">cx</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasCaus">HasCaus</a></span> <span class="id">Γ</span> <span class="id">x2</span> <span class="id">cx</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x1</span> = <span class="id">x2</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnd</span> <span class="id">Hc1</span> <span class="id">Hc2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span> <span class="kwd">in</span> *. <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_app">map_app</a></span> <span class="kwd">in</span> <span class="id">Hnd</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDup_app_l">NoDup_app_l</a></span> <span class="kwd">in</span> <span class="id">Hnd</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hc1</span>. <span class="id">inv</span> <span class="id">Hc2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDup_snd_det">NoDup_snd_det</a></span> <span class="kwd">in</span> <span class="id">Hnd</span>; <span class="id">eauto</span>. 2:<span class="id">solve_In</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> <span class="id">H0</span>; <span class="id">solve_In</span>. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.HasLastCaus_snd_det">HasLastCaus_snd_det</a></span> <span class="id">Γ</span> : <span class="kwd">forall</span> <span class="id">x1</span> <span class="id">x2</span> <span class="id">cx</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span> <span class="id">Γ</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasLastCaus">HasLastCaus</a></span> <span class="id">Γ</span> <span class="id">x1</span> <span class="id">cx</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasLastCaus">HasLastCaus</a></span> <span class="id">Γ</span> <span class="id">x2</span> <span class="id">cx</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x1</span> = <span class="id">x2</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnd</span> <span class="id">Hc1</span> <span class="id">Hc2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span> <span class="kwd">in</span> *. <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_app">map_app</a></span> <span class="kwd">in</span> <span class="id">Hnd</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDup_app_r">NoDup_app_r</a></span> <span class="kwd">in</span> <span class="id">Hnd</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hc1</span>. <span class="id">inv</span> <span class="id">Hc2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDup_snd_det">NoDup_snd_det</a></span> <span class="kwd">in</span> <span class="id">Hnd</span>; <span class="id">eauto</span>. 2:<span class="id">solve_In</span>; <span class="id">simpl</span>; <span class="id">rewrite</span> <span class="id">H2</span>; <span class="id">simpl</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> <span class="id">H1</span>; <span class="id">solve_In</span>. <span class="id">simpl</span>; <span class="id">rewrite</span> <span class="id">H0</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.NoDup_HasCaus_HasLastCaus">NoDup_HasCaus_HasLastCaus</a></span> <span class="id">Γ</span> : <span class="kwd">forall</span> <span class="id">x1</span> <span class="id">x2</span> <span class="id">cx</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span> <span class="id">Γ</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasCaus">HasCaus</a></span> <span class="id">Γ</span> <span class="id">x1</span> <span class="id">cx</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasLastCaus">HasLastCaus</a></span> <span class="id">Γ</span> <span class="id">x2</span> <span class="id">cx</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#False">False</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnd</span> <span class="id">Hc1</span> <span class="id">Hc2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idcaus_of_senv">idcaus_of_senv</a></span> <span class="kwd">in</span> *. <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_app">map_app</a></span> <span class="kwd">in</span> <span class="id">Hnd</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hc1</span>. <span class="id">inv</span> <span class="id">Hc2</span>. <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDup_app_In">NoDup_app_In</a></span> <span class="kwd">in</span> <span class="id">Hnd</span>. <span class="id">eapply</span> <span class="id">Hnd</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">solve_In</span>. <span class="id">rewrite</span> <span class="id">H1</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">clear</span> <span class="id">H0</span>. <span class="id">solve_In</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.senv_of_tyck_NoLast">senv_of_tyck_NoLast</a></span> : <span class="kwd">forall</span> <span class="id">Γ</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, ~<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_tyck">senv_of_tyck</a></span> <span class="id">Γ</span>) <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hl</span>. <span class="id">inv</span> <span class="id">Hl</span>. <span class="id">simpl_In</span>. <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.senv_of_ins_NoLast">senv_of_ins_NoLast</a></span> : <span class="kwd">forall</span> <span class="id">Γ</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, ~<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_ins">senv_of_ins</a></span> <span class="id">Γ</span>) <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hl</span>. <span class="id">inv</span> <span class="id">Hl</span>. <span class="id">simpl_In</span>. <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.NoLast_app">NoLast_app</a></span> : <span class="kwd">forall</span> <span class="id">Γ1</span> <span class="id">Γ2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span>, ~<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> (<span class="id">Γ1</span> ++ <span class="id">Γ2</span>) <span class="id">x</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; (<span class="kwd">forall</span> <span class="id">x</span>, ~<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> <span class="id">Γ1</span> <span class="id">x</span>) /\ (<span class="kwd">forall</span> <span class="id">x</span>, ~<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> <span class="id">Γ2</span> <span class="id">x</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> *. <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast_app">IsLast_app</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span>. <span class="id">split</span>; <span class="id">intros</span> ? <span class="id">Hl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> (<span class="id">H1</span>&amp;<span class="id">H2</span>). <span class="id">intros</span> [|]; [<span class="id">eapply</span> <span class="id">H1</span>|<span class="id">eapply</span> <span class="id">H2</span>]; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.senv_HasType">senv_HasType</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span> <span class="id">ty</span> <span class="id">ck</span> <span class="id">i</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>,(<span class="id">ty</span>,<span class="id">ck</span>,<span class="id">i</span>)) <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_ins">senv_of_ins</a></span> <span class="id">l</span>) <span class="id">x</span> <span class="id">ty</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_ins">senv_of_ins</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map_iff">in_map_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id">x</span>,(<span class="id">ty</span>,<span class="id">ck</span>,<span class="id">i</span>)); <span class="id">auto</span>. <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.senv_HasClock">senv_HasClock</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span> <span class="id">ty</span> <span class="id">ck</span> <span class="id">i</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>,(<span class="id">ty</span>,<span class="id">ck</span>,<span class="id">i</span>)) <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_ins">senv_of_ins</a></span> <span class="id">l</span>) <span class="id">x</span> <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_ins">senv_of_ins</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map_iff">in_map_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id">x</span>,(<span class="id">ty</span>,<span class="id">ck</span>,<span class="id">i</span>)); <span class="id">auto</span>. <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.In_HasType">In_HasType</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">l</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">l</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">ty</span>, <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_ins">senv_of_ins</a></span> <span class="id">l</span>) <span class="id">x</span> <span class="id">ty</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.senv_of_ins">senv_of_ins</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map_iff">in_map_iff</a></span> <span class="kwd">in</span> <span class="id">Hin</span> <span class="kwd">as</span> ((?&amp;(<span class="id">ty</span>,?)&amp;?)&amp;?&amp;?); <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">ty</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map_iff">in_map_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">esplit</span>; <span class="id">split</span>; <span class="id">now</span> <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.HasType_det">HasType_det</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">ty1</span> <span class="id">ty2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">Γ</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">ty1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">ty2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">ty1</span> = <span class="id">ty2</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">ND</span> <span class="id">C1</span> <span class="id">C2</span>; <span class="id">inv</span> <span class="id">C1</span>; <span class="id">inv</span> <span class="id">C2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers_det">NoDupMembers_det</a></span> <span class="kwd">with</span> (<span class="id">t</span> := <span class="id">e</span>) <span class="kwd">in</span> <span class="id">ND</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.HasClock_det">HasClock_det</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">ck1</span> <span class="id">ck2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">Γ</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">ck1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">ck2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">ck1</span> = <span class="id">ck2</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">ND</span> <span class="id">C1</span> <span class="id">C2</span>; <span class="id">inv</span> <span class="id">C1</span>; <span class="id">inv</span> <span class="id">C2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers_det">NoDupMembers_det</a></span> <span class="kwd">with</span> (<span class="id">t</span> := <span class="id">e</span>) <span class="kwd">in</span> <span class="id">ND</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.HasType_IsLast_app">HasType_IsLast_app</a></span> : <span class="kwd">forall</span> <span class="id">Γ1</span> <span class="id">Γ2</span> <span class="id">x</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> (<span class="id">Γ1</span> ++ <span class="id">Γ2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> (<span class="id">Γ1</span> ++ <span class="id">Γ2</span>) <span class="id">x</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> (<span class="id">Γ1</span> ++ <span class="id">Γ2</span>) <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> <span class="id">Γ1</span> <span class="id">x</span> <span class="id">ck</span> /\ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> <span class="id">Γ1</span> <span class="id">x</span>) \/ (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType">HasType</a></span> <span class="id">Γ2</span> <span class="id">x</span> <span class="id">ck</span> /\ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> <span class="id">Γ2</span> <span class="id">x</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">ND</span> <span class="id">Ck</span> <span class="id">L</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasType_app">HasType_app</a></span> <span class="kwd">in</span> <span class="id">Ck</span> <span class="kwd">as</span> [<span class="id">Ck</span>|<span class="id">Ck</span>]; <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast_app">IsLast_app</a></span> <span class="kwd">in</span> <span class="id">L</span> <span class="kwd">as</span> [<span class="id">L</span>|<span class="id">L</span>]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">exfalso</span>; <span class="id">inv</span> <span class="id">Ck</span>; <span class="id">inv</span> <span class="id">L</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers_app_InMembers">NoDupMembers_app_InMembers</a></span> <span class="kwd">in</span> <span class="id">ND</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonList.html#In_InMembers">In_InMembers</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STATICENV.HasClock_IsLast_app">HasClock_IsLast_app</a></span> : <span class="kwd">forall</span> <span class="id">Γ1</span> <span class="id">Γ2</span> <span class="id">x</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> (<span class="id">Γ1</span> ++ <span class="id">Γ2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> (<span class="id">Γ1</span> ++ <span class="id">Γ2</span>) <span class="id">x</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> (<span class="id">Γ1</span> ++ <span class="id">Γ2</span>) <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">Γ1</span> <span class="id">x</span> <span class="id">ck</span> /\ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> <span class="id">Γ1</span> <span class="id">x</span>) \/ (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">Γ2</span> <span class="id">x</span> <span class="id">ck</span> /\ <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast">IsLast</a></span> <span class="id">Γ2</span> <span class="id">x</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">ND</span> <span class="id">Ck</span> <span class="id">L</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock_app">HasClock_app</a></span> <span class="kwd">in</span> <span class="id">Ck</span> <span class="kwd">as</span> [<span class="id">Ck</span>|<span class="id">Ck</span>]; <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.IsLast_app">IsLast_app</a></span> <span class="kwd">in</span> <span class="id">L</span> <span class="kwd">as</span> [<span class="id">L</span>|<span class="id">L</span>]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">exfalso</span>; <span class="id">inv</span> <span class="id">Ck</span>; <span class="id">inv</span> <span class="id">L</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers_app_InMembers">NoDupMembers_app_InMembers</a></span> <span class="kwd">in</span> <span class="id">ND</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonList.html#In_InMembers">In_InMembers</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.map_fst_senv_of_ins">map_fst_senv_of_ins</a></span> : <span class="id">list</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="STATICENV.HasClock_idck_incl">HasClock_idck_incl</a></span> : <span class="kwd">forall</span> <span class="id">Γ1</span> <span class="id">Γ2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ck</span>, <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">Γ1</span> <span class="id">x</span> <span class="id">ck</span> -&gt; <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">Γ2</span> <span class="id">x</span> <span class="id">ck</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idck">idck</a></span> <span class="id">Γ1</span>) (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idck">idck</a></span> <span class="id">Γ2</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">InclCk</span> ? <span class="id">In</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.idck">idck</a></span> <span class="kwd">in</span> *. <span class="id">simpl_In</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.HasClock">HasClock</a></span> <span class="id">Γ2</span> <span class="id">i0</span> <span class="id">a0</span>.(<span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV.clo">clo</a></span>)) <span class="kwd">as</span> <span class="id">Ck</span> <span class="kwd">by</span> <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">senv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Ck</span>. <span class="id">solve_In</span>. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV">STATICENV</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="StaticEnvFun">StaticEnvFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>      : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>       : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>      : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#OpAux">OpAux</a></span>) &lt;: <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV">STATICENV</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Cks">Cks</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV">STATICENV</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#Cks">Cks</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Lustre.StaticEnv.html#StaticEnvFun">StaticEnvFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

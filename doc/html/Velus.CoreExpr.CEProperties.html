@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module CEProperties</title>
+<meta name="description" content="Documentation of Coq module CEProperties" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module CEProperties</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Environment.html">Environment</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Export</span> <span class="id"><a href="Velus.IndexedStreams.html">IndexedStreams</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html">CoreExpr.CESyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html">CoreExpr.CETyping</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CESemantics.html">CoreExpr.CESemantics</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CEIsFree.html">CoreExpr.CEIsFree</a></span>.<br/>
+<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<br/>
+<h1> Properties of Core Expressions </h1>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="CEPROPERTIES">CEPROPERTIES</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>        : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>         : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span>      : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span>   <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span> : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>          <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Syn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>        <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Str</span> : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS">INDEXEDSTREAMS</a></span>  <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Sem</span> : <span class="id"><a href="Velus.CoreExpr.CESemantics.html#CESEMANTICS">CESEMANTICS</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Syn">Syn</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Str">Str</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Typ</span> : <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING">CETYPING</a></span>    <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">IsF</span> : <span class="id"><a href="Velus.CoreExpr.CEIsFree.html#CEISFREE">CEISFREE</a></span>    <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Syn">Syn</a></span>).<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<div class="doc">Well-typed expressions and free variables </div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#CEPROPERTIES">CEPROPERTIES</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="CEProperties">CEProperties</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span>   <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>          <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Syn</span>   : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>        <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Str</span>   : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS">INDEXEDSTREAMS</a></span>  <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Sem</span>   : <span class="id"><a href="Velus.CoreExpr.CESemantics.html#CESEMANTICS">CESEMANTICS</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Syn">Syn</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Str">Str</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Typ</span>   : <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING">CETYPING</a></span>    <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">IsF</span>   : <span class="id"><a href="Velus.CoreExpr.CEIsFree.html#CEISFREE">CEISFREE</a></span>    <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;: <span class="id"><a href="Velus.CoreExpr.CEProperties.html#CEPROPERTIES">CEPROPERTIES</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Syn">Syn</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Str">Str</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Sem">Sem</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Typ">Typ</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#IsF">IsF</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#CEPROPERTIES">CEPROPERTIES</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Cks">Cks</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Syn">Syn</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Str">Str</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Sem">Sem</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#Typ">Typ</a></span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#IsF">IsF</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.CoreExpr.CEProperties.html#CEProperties">CEProperties</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

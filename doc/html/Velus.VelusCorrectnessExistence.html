@@ -1,0 +1,646 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module VelusCorrectnessExistence</title>
+<meta name="description" content="Documentation of Coq module VelusCorrectnessExistence" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module VelusCorrectnessExistence</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">compcert</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html">common.Errors</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">compcert</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Behaviors.html">common.Behaviors</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">compcert</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="../../CompCert/doc/html/compcert.driver.Compiler.html">driver.Compiler</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Ident.html">Ident</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoindStreams.html">CoindStreams</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html">ObcToClight.Interface</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html">Instantiator</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Lustre.LustreElab.html">Lustre.LustreElab</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Velus.html">Velus</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.NLCorrectness.html">NLCorrectness</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Traces.html">Traces</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.VelusWorld.html">VelusWorld</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.VelusCorrectness.html">VelusCorrectness</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html">Cpo_def</a></span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html">Nprod</a></span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html">Cpo_streams_type</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html">CommonDS</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.String.html">String</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html">Permutation</a></span>.<br/>
+<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#Stc.Syn">Stc.Syn</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#NL">NL</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#L">L</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Syn">Obc.Syn</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Sem">Obc.Sem</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Typ">Obc.Typ</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Equ">Obc.Equ</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Def">Obc.Def</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Obc.Fusion.html">Fusion</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#Stc2ObcInvariants">Stc2ObcInvariants</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#L.CkCor.IStr">IStr</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr">CStr</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#L.ClockSwitch.Correct.CIStr">CIStr</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux">OpAux</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Op">Op</a></span>.<br/>
+<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">error_monad_scope</span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">stream_scope</span>.<br/>
+<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#Restr">Restr</a></span> <span class="id"><a href="Velus.Instantiator.html#Den.SdR">Den.SdR</a></span> <span class="id"><a href="Velus.Instantiator.html#Den.Sd">Den.Sd</a></span> <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html">SDfuns</a></span> <span class="id"><a href="Velus.Instantiator.html#Den.Safe">Den.Safe</a></span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html">DS_ext</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html">DS_ext</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#Den.OpErr">Den.OpErr</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.html">Cpo</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html">Cpo_ext.Nprod</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#Den.SdR">Den.SdR</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#Den.Inf">Den.Inf</a></span>.<br/>
+<br/>
+<h1> The new correctness statements thanks to the denotational semantics </h1>
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="HasType_In">HasType_In</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span> <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#L.Senv.HasType">HasType</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Senv.senv_of_ins">senv_of_ins</a></span> <span class="id">l</span>) <span class="id">x</span> <span class="id">ty</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>,<span class="id">ty</span>) (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> <span class="id">l</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">HH</span>; <span class="id">inv</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#L.Senv.senv_of_ins">senv_of_ins</a></span>, <span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id">solve_In</span>.<br/>
+Qed.</div></details>
+<span class="kwd">Lemma</span> <span class="id"><a name="HasClock_In">HasClock_In</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#L.Senv.HasClock">HasClock</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Senv.senv_of_ins">senv_of_ins</a></span> <span class="id">l</span>) <span class="id">x</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>,<span class="id">ck</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>, (_, <span class="id">ck</span>, _)) =&gt; (<span class="id">x</span>, <span class="id">ck</span>)) <span class="id">l</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">HH</span>; <span class="id">inv</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#L.Senv.senv_of_ins">senv_of_ins</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id">solve_In</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="SForall_map">SForall_map</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> <span class="id">B</span> <span class="id">P</span> (<span class="id">f</span>:<span class="id">A</span>-&gt;<span class="id">B</span>) <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonStreams.html#SForall">SForall</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id">P</span> (<span class="id">f</span> <span class="id">x</span>)) <span class="id">xs</span> &lt;-&gt; <span class="id"><a href="Velus.Common.CommonStreams.html#SForall">SForall</a></span> <span class="id">P</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#map">Streams.map</a></span> <span class="id">f</span> <span class="id">xs</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> 2 <span class="id"><a href="Velus.Common.CommonStreams.html#SForall_forall">SForall_forall</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth_map">Str_nth_map</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">tauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<div class="doc">conversion from Coq Stream to nprod DS </div>
+<span class="kwd">Section</span> <span class="id"><a name="Streams_conversion">Streams_conversion</a></span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="sampl_of_svalue">sampl_of_svalue</a></span> :=<br/>
+&nbsp;&nbsp;<span class="kwd">fun</span> (<span class="id">sv</span>:<span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.svalue">svalue</a></span>) =&gt; <span class="kwd">match</span> <span class="id">sv</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.present">present</a></span> <span class="id">v</span> =&gt; <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#pres">pres</a></span> <span class="id">v</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.absent">absent</a></span> =&gt; <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#abs">abs</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="s_vs">s_vs</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">s</span> <span class="id">Inf</span>, <span class="id"><a href="Velus.Instantiator.html#Den.SdR.S_of_DSv">S_of_DSv</a></span> (<span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S">DS_of_S</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#map">Streams.map</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#sampl_of_svalue">sampl_of_svalue</a></span> <span class="id">s</span>)) <span class="id">Inf</span> <span class="id">≡</span> <span class="id">s</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">remember_st</span> (<span class="id"><a href="Velus.Instantiator.html#Den.SdR.S_of_DSv">S_of_DSv</a></span> (<span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S">DS_of_S</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#map">Streams.map</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#sampl_of_svalue">sampl_of_svalue</a></span> <span class="id">s</span>)) <span class="id">Inf</span>) <span class="kwd">as</span> <span class="id">t</span>.<br/>
+&nbsp;&nbsp;<span class="id">revert_all</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">cofix</span> <span class="id">Cof</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;- <span class="id">rewrite</span> &lt;- <span class="id">Ht</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">s</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">edestruct</span> (<span class="id"><a href="Velus.Instantiator.html#Den.SdR.S_of_DSv_eq">S_of_DSv_eq</a></span> _ <span class="id">Inf</span>) <span class="kwd">as</span> (<span class="id">Inf2</span> &amp; -&gt;).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#map_Cons">map_Cons</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">replace</span> (<span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S">DS_of_S</a></span> _) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#cons">cons</a></span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#sampl_of_svalue">sampl_of_svalue</a></span> <span class="id">s</span>) (<span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S">DS_of_S</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#map">Streams.map</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#sampl_of_svalue">sampl_of_svalue</a></span> <span class="id">s0</span>))).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;2:{ <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS_inv">DS_inv</a></span>; <span class="id">auto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#Den.SdR.S_of_DSv">S_of_DSv</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#S_of_DS_cons">S_of_DS_cons</a></span>. <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">s</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">s</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Cof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Unshelve</span>. 2: <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S_inf">DS_of_S_inf</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id">Ht</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">edestruct</span> (<span class="id"><a href="Velus.Instantiator.html#Den.SdR.S_of_DSv_eq">S_of_DSv_eq</a></span> _ <span class="id">Inf</span>) <span class="kwd">as</span> (<span class="id">Inf2</span> &amp; -&gt;).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#map_Cons">map_Cons</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">replace</span> (<span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S">DS_of_S</a></span> _) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#cons">cons</a></span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#sampl_of_svalue">sampl_of_svalue</a></span> <span class="id">s</span>) (<span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S">DS_of_S</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#map">Streams.map</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#sampl_of_svalue">sampl_of_svalue</a></span> <span class="id">s0</span>))).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;2:{ <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS_inv">DS_inv</a></span>; <span class="id">auto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#Den.SdR.S_of_DSv">S_of_DSv</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#S_of_DS_cons">S_of_DS_cons</a></span>. <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#_S_of_DS_eq">_S_of_DS_eq</a></span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Fixpoint</span> <span class="id"><a name="nprod_of_Ss">nprod_of_Ss</a></span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.svalue">svalue</a></span>)) : @<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html#nprod">nprod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> (<span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#sampl">sampl</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.value">value</a></span>)) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length">length</a></span> <span class="id">l</span>) :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">l</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| [] =&gt; 0<br/>
+&nbsp;&nbsp;| <span class="id">s</span> :: <span class="id">tl</span> =&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html#nprod_cons">nprod_cons</a></span> (<span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S">DS_of_S</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#map">Streams.map</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#sampl_of_svalue">sampl_of_svalue</a></span> <span class="id">s</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">nprod_of_Ss</span> <span class="id">tl</span>)<br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="nth_nprod_of_Ss">nth_nprod_of_Ss</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xs</span> <span class="id">k</span> <span class="id">d</span> <span class="id">d'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">k</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length">length</a></span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html#get_nth">get_nth</a></span> <span class="id">k</span> <span class="id">d</span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#nprod_of_Ss">nprod_of_Ss</a></span> <span class="id">xs</span>) = <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S">DS_of_S</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#map">Streams.map</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#sampl_of_svalue">sampl_of_svalue</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">k</span> <span class="id">xs</span> <span class="id">d'</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span> <span class="kwd">as</span> [|? []]; <span class="id">intros</span> * <span class="id">Hl</span>. <span class="id">inv</span> <span class="id">Hl</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">k</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">lia</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">k</span>.<br/>
+&nbsp;&nbsp;- <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html#nprod_hd_cons">nprod_hd_cons</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- (<span class="id">IHxs</span> _ <span class="id">d</span>); <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Ss_of_nprod_of_Ss">Ss_of_nprod_of_Ss</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xs</span> <span class="id">Infxs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.EqSts">EqSts</a></span> (<span class="id"><a href="Velus.Instantiator.html#Den.SdR.Ss_of_nprod">Ss_of_nprod</a></span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#nprod_of_Ss">nprod_of_Ss</a></span> <span class="id">xs</span>) <span class="id">Infxs</span>) <span class="id">xs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span> <span class="kwd">as</span> [|? []]; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#s_vs">s_vs</a></span>.<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>. 2: <span class="id">apply</span> <span class="id">IHxs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#s_vs">s_vs</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="nprod_of_Ss_inf">nprod_of_Ss_inf</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xs</span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html#forall_nprod">forall_nprod</a></span> (@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#infinite">infinite</a></span> _) (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#nprod_of_Ss">nprod_of_Ss</a></span> <span class="id">xs</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span> <span class="kwd">as</span> [|? []]; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S_inf">DS_of_S_inf</a></span>.<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S_inf">DS_of_S_inf</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IHxs</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="DSForall_DS_of_S">DSForall_DS_of_S</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> (<span class="id">P</span>:<span class="id">A</span>-&gt; <span class="kwd">Prop</span>) <span class="id">s</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonStreams.html#SForall">SForall</a></span> <span class="id">P</span> <span class="id">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DSForall">DSForall</a></span> <span class="id">P</span> (<span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DS_of_S">DS_of_S</a></span> <span class="id">s</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="kwd">cofix</span> <span class="id">Cof</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">s</span>; <span class="id">inv</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS_inv">DS_inv</a></span>; <span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Streams_conversion">Streams_conversion</a></span>.<br/>
+<br/>
+<div class="doc">Properties of streams with only present values </div>
+<span class="kwd">Section</span> <span class="id"><a name="PSTR">PSTR</a></span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="pStr_EqSts">pStr_EqSts</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ss1</span> <span class="id">ss2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.EqSts">EqSts</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">ss1</span>) (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">ss2</span>)-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.EqSts">EqSts</a></span> <span class="id">ss1</span> <span class="id">ss2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.EqSts">EqSts</a></span>, <span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">H</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall2_map_1">Forall2_map_1</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#Forall2_map_2">Forall2_map_2</a></span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall2_impl_In">Forall2_impl_In</a></span>, <span class="id">H</span>; <span class="id">simpl</span>; <span class="id">intros</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#ntheq_eqst">ntheq_eqst</a></span>; <span class="id">intro</span> <span class="id">n</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#eqst_ntheq">eqst_ntheq</a></span> <span class="id">n</span>) <span class="kwd">in</span> <span class="id">H2</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth_map">Str_nth_map</a></span> <span class="kwd">in</span> <span class="id">H2</span>.<br/>
+&nbsp;&nbsp;<span class="id">now</span> <span class="id">injection</span> <span class="id">H2</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="all_pres">all_pres</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.svalue">svalue</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonStreams.html#SForall">SForall</a></span> (<span class="kwd">fun</span> <span class="id">v</span> =&gt; <span class="kwd">match</span> <span class="id">v</span> <span class="kwd">with</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.absent">absent</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#False">False</a></span> | <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.present">present</a></span> _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span> <span class="kwd">end</span>).<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="all_pres_pStr">all_pres_pStr</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xs</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres">all_pres</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">xs</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres">all_pres</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#SForall_forall">SForall_forall</a></span>; <span class="id">intro</span>.<br/>
+&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth_map">Str_nth_map</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="clocks_of_pres">clocks_of_pres</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">xs</span> &lt;&gt; [] -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres">all_pres</a></span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.clocks_of">clocks_of</a></span> <span class="id">xs</span> <span class="id">≡</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#const">Streams.const</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">xs</span>; <span class="id">simpl</span>; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * ? <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.clocks_of_cons">clocks_of_cons</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#ntheq_eqst">ntheq_eqst</a></span>; <span class="id">intro</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth_zipWith">Str_nth_zipWith</a></span>, <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.const_nth">const_nth</a></span>, <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.ac_nth">ac_nth</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres">all_pres</a></span>, <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.abstract_clock">abstract_clock</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#SForall_forall">SForall_forall</a></span> <span class="kwd">in</span> <span class="id">H2</span>.<br/>
+&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">H2</span> <span class="id">n</span>).<br/>
+&nbsp;&nbsp;<span class="id">cases</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="ac_all_pres">ac_all_pres</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.abstract_clock">abstract_clock</a></span> <span class="id">x</span> <span class="id">≡</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#const">Streams.const</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> &lt;-&gt; <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres">all_pres</a></span> <span class="id">x</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres">all_pres</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intro</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#SForall_forall">SForall_forall</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">split</span>.<br/>
+&nbsp;&nbsp;- <span class="id">intros</span> <span class="id">H</span> <span class="id">n</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#eqst_ntheq">eqst_ntheq</a></span> <span class="id">n</span>) <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.const_nth">const_nth</a></span>, <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.ac_nth">ac_nth</a></span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>.<br/>
+&nbsp;&nbsp;- <span class="id">intros</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#ntheq_eqst">ntheq_eqst</a></span>; <span class="id">intro</span> <span class="id">n</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">H</span> <span class="id">n</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.const_nth">const_nth</a></span>, <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.ac_nth">ac_nth</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="all_pres_pStr1">all_pres_pStr1</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xs</span>, <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres">all_pres</a></span> <span class="id">xs</span> -&gt; <span class="kwd">exists</span> <span class="id">ys</span>, <span class="id">xs</span> <span class="id">≡</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#map">Streams.map</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.present">present</a></span> <span class="id">ys</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres">all_pres</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> <span class="id">xs</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#map">Streams.map</a></span> (<span class="kwd">fun</span> <span class="id">v</span> =&gt; <span class="kwd">match</span> <span class="id">v</span> <span class="kwd">with</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.absent">absent</a></span> =&gt; <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.Vscalar">Vscalar</a></span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Values.html#Vundef">Values.Vundef</a></span> | <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.present">present</a></span> <span class="id">v</span> =&gt; <span class="id">v</span> <span class="kwd">end</span>) <span class="id">xs</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#SForall_forall">SForall_forall</a></span> <span class="kwd">in</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#ntheq_eqst">ntheq_eqst</a></span>; <span class="id">intro</span> <span class="id">n</span>.<br/>
+&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Hf</span> <span class="id">n</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth_map">Str_nth_map</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.svalue">svalue</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">cases</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="pStr_all_pres">pStr_all_pres</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres">all_pres</a></span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">rs</span>, <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.EqSts">EqSts</a></span> <span class="id">xs</span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">rs</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">intros</span> * <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">exists</span> []; <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">IHxs</span> <span class="kwd">as</span> (<span class="id">rs</span> &amp; <span class="id">Heq</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres_pStr1">all_pres_pStr1</a></span> _ <span class="id">H1</span>) <span class="kwd">as</span> (<span class="id">ys</span> &amp; ?).<br/>
+&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id">ys</span> :: <span class="id">rs</span>).<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#PSTR">PSTR</a></span>.<br/>
+<br/>
+<br/>
+<div class="doc">Correspondance of definitions of valid inputs in the two models.
+    It could probably work with sampled inputs too. </div>
+<span class="kwd">Lemma</span> <span class="id"><a name="wt_wc_wf_inputs">wt_wc_wf_inputs</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Instantiator.html#L.Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">main</span> <span class="id">n</span> <span class="id">ins</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#L.Syn.find_node">find_node</a></span> <span class="id">main</span> <span class="id">G</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_, (_, <span class="id">ck</span>, _)) =&gt; <span class="id">ck</span> = <span class="id"><a href="Velus.ObcToClight.Interface.html#Cks.Cbase">Cks.Cbase</a></span>) (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span> <span class="id">n</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusCorrectness.html#wt_ins">wt_ins</a></span> <span class="id">G</span> <span class="id">main</span> <span class="id">ins</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusCorrectness.html#wc_ins">wc_ins</a></span> <span class="id">G</span> <span class="id">main</span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">ins</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#Den.SdR.wf_inputs">wf_inputs</a></span> <span class="id">n</span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#nprod_of_Ss">nprod_of_Ss</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">ins</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind</span> <span class="id">Hbase</span> <span class="id">Hwt</span> <span class="id">Hwc</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Hwc</span> <span class="kwd">as</span> (<span class="id">H</span> &amp; <span class="id">n'</span> &amp;?&amp; <span class="id">Hf1</span> &amp; <span class="id">Hf2</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hfind</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> _ = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> _) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;<span class="id">assert</span> (<span class="id">Hl</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length">length</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">ins</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length">length</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span> <span class="id">n'</span>)).<br/>
+&nbsp;&nbsp;{ <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall2_length">Forall2_length</a></span> <span class="kwd">in</span> <span class="id">Hf2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span> <span class="kwd">in</span> *; <span class="id">auto</span>. }<br/>
+&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Hwt</span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> <span class="id">Hwti</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLCorrectness.html#wt_streams">NLCorrectness.wt_streams</a></span> <span class="kwd">in</span> <span class="id">Hwti</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> <span class="id">ty</span> <span class="id">ck</span> <span class="id">Hty</span> <span class="id">Hck</span> <span class="id">s</span>; <span class="id">subst</span> <span class="id">s</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#Den.Sd.denot_var">denot_var</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#mem_ident">mem_ident</a></span> <span class="id">x</span> _) <span class="id">eqn</span>:<span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;2:{  <span class="comment">(*&nbsp;if&nbsp;x&nbsp;is&nbsp;not&nbsp;an&nbsp;input,&nbsp;it&nbsp;is&nbsp;ok&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>; <span class="id">try</span> <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DSForall_bot">DSForall_bot</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#Den.Safe.cl_DS">cl_DS</a></span>. <span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#AC">AC</a></span>. <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#MAP_map">MAP_map</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#map_bot">map_bot</a></span>; <span class="id">auto</span>. }<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#mem_ident_spec">mem_ident_spec</a></span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Instantiator.html#Den.Safe.HasType_ins_app">HasType_ins_app</a></span> <span class="kwd">in</span> <span class="id">Hty</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Instantiator.html#L.Syn.node_NoDupMembers">node_NoDupMembers</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Instantiator.html#Den.Safe.HasClock_ins_app">HasClock_ins_app</a></span> <span class="kwd">in</span> <span class="id">Hck</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Instantiator.html#L.Syn.node_NoDupMembers">node_NoDupMembers</a></span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;pas&nbsp;génial&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">assert</span> (<span class="id">Hmap</span> : <span class="kwd">forall</span> <span class="id">l</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> <span class="id">l</span>)) = <span class="id"><a href="Velus.Instantiator.html#L.Syn.idents">idents</a></span> <span class="id">l</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">intro</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span>, <span class="id"><a href="Velus.Instantiator.html#L.Syn.idents">idents</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_ext">List.map_ext</a></span>; <span class="id">auto</span>. }<br/>
+&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;ty_DS&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#HasType_In">HasType_In</a></span> <span class="kwd">in</span> <span class="id">Hty</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In_nth">In_nth</a></span> <span class="kwd">with</span> (<span class="id">d</span> := _) <span class="kwd">in</span> <span class="id">Hty</span> <span class="kwd">as</span> (<span class="id">k</span> &amp; <span class="id">Hk</span> &amp; <span class="id">Hnth</span>); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#f_equal">f_equal</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span>) <span class="kwd">in</span> <span class="id">Hnth</span> <span class="kwd">as</span> <span class="id">Hfnth</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_nth">map_nth</a></span> <span class="kwd">in</span> <span class="id">Hfnth</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Hfnth</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id">Hfnth</span>, <span class="id">Hmap</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_nth">CommonList2.Forall2_nth</a></span> <span class="kwd">with</span> (<span class="id">n</span> := <span class="id">k</span>) <span class="kwd">in</span> <span class="id">Hwti</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hnth</span> <span class="kwd">in</span> <span class="id">Hwti</span>; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id"><a href="Velus.Instantiator.html#Den.Sd.env_of_np_nth">env_of_np_nth</a></span> , <span class="id"><a href="Velus.VelusCorrectnessExistence.html#nth_nprod_of_Ss">nth_nprod_of_Ss</a></span> <span class="kwd">with</span> (<span class="id">k</span>:=<span class="id">k</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span>. <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_nth">map_nth</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#DSForall_DS_of_S">DSForall_DS_of_S</a></span>, <span class="id"><a href="Velus.VelusCorrectnessExistence.html#SForall_map">SForall_map</a></span>, <span class="id"><a href="Velus.VelusCorrectnessExistence.html#SForall_map">SForall_map</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>: <span class="id">unfold</span> <span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span>, <span class="id"><a href="Velus.Instantiator.html#L.Syn.idents">idents</a></span>, <span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> <span class="kwd">in</span> *; <span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#Den.Sd.mem_nth">mem_nth</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth_nth">CommonList2.mem_nth_nth</a></span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Instantiator.html#L.Syn.node_NoDup_in">node_NoDup_in</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;cl_DS&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#HasClock_In">HasClock_In</a></span> <span class="kwd">in</span> <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#Den.Safe.cl_DS">cl_DS</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">remember</span> (<span class="id"><a href="Velus.Instantiator.html#Den.Sd.env_of_np">env_of_np</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.idents">idents</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span> <span class="id">n'</span>)) (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#nprod_of_Ss">nprod_of_Ss</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">ins</span>))) <span class="kwd">as</span> <span class="id">env</span> <span class="id">eqn</span>:<span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id">Henv</span> : <span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.idents">idents</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span> <span class="id">n'</span>)) -&gt; <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#AC">AC</a></span> (<span class="id">env</span> <span class="id">x</span>) == <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#DS_const">DS_const</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">subst</span> <span class="id">env</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">y</span> <span class="id">Hiny</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> - <span class="id">Hiny</span> <span class="id">Hl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In_nth">In_nth</a></span> <span class="kwd">with</span> (<span class="id">d</span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#xH">xH</a></span>) <span class="kwd">in</span> <span class="id">Hiny</span> <span class="kwd">as</span> (<span class="id">k</span> &amp; <span class="id">Hk</span> &amp; <span class="id">Hnth</span>); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id"><a href="Velus.Instantiator.html#Den.Sd.env_of_np_nth">env_of_np_nth</a></span> , <span class="id"><a href="Velus.VelusCorrectnessExistence.html#nth_nprod_of_Ss">nth_nprod_of_Ss</a></span> <span class="kwd">with</span> (<span class="id">k</span>:=<span class="id">k</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_nth">map_nth</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span>, &lt;- 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_nth">map_nth</a></span>, 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_indep">nth_indep</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_nth">map_nth</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">remember</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">k</span> <span class="id">ins</span> _) <span class="id">eqn</span>:<span class="id">HH</span>; <span class="id">clear</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> <span class="id">Hl</span> <span class="id">Hk</span>. <span class="id">clear</span> <span class="id">n'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">coind_Oeq</span> <span class="id">Cof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">s</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS_inv">DS_inv</a></span> <span class="kwd">in</span> <span class="id">HU</span> <span class="kwd">at</span> 3.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">intros</span>; <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">HU</span>, <span class="id">HV</span>. <span class="id">simpl</span>. <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#AC_cons">AC_cons</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#DS_const_eq">DS_const_eq</a></span>, 2 <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#first_cons">first_cons</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Cof</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">HU</span>; <span class="id">simpl</span>. <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#AC_cons">AC_cons</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#rem_cons">rem_cons</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">HV</span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#DS_const_eq">DS_const_eq</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#rem_cons">rem_cons</a></span> <span class="kwd">at</span> 1; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>: <span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#L.Syn.idents">idents</a></span>, <span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="kwd">in</span> *; <span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#Den.Sd.mem_nth">mem_nth</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth_nth">CommonList2.mem_nth_nth</a></span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Instantiator.html#L.Syn.node_NoDup_in">node_NoDup_in</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>; <span class="id">auto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> <span class="id">HH</span>; <span class="id">rewrite</span> <span class="id">Henv</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#bss">bss</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.idents">idents</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span> <span class="id">n'</span>)) <span class="id">env</span> == <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#DS_const">DS_const</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>) <span class="kwd">as</span> -&gt;.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">assert</span>  ((<span class="id"><a href="Velus.Instantiator.html#L.Syn.idents">idents</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span> <span class="id">n'</span>))  &lt;&gt; []) <span class="kwd">as</span> <span class="id">Hn0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#L.Syn.idents">idents</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_ingt0">n_ingt0</a></span> <span class="id">n'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>; <span class="id">subst</span>; <span class="id">inv</span> <span class="id">H1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_eq_nil">map_eq_nil</a></span> <span class="kwd">in</span> <span class="id">H3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H3</span> <span class="kwd">in</span> *; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">lia</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> - <span class="id">Hn0</span> <span class="id">Henv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">revert</span> <span class="id">Hn0</span> <span class="id">Henv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">generalize</span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.idents">idents</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span> <span class="id">n'</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span> <span class="kwd">as</span> [|?[]]; <span class="id">intros</span>; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id">Henv</span>; <span class="id">auto</span>. <span class="id">constructor</span>; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#bss_cons">bss_cons</a></span>, <span class="id">IHl</span>; <span class="id">try</span> <span class="id">congruence</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2: <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Henv</span>. 2: <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#zip_const">zip_const</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#MAP_map">MAP_map</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#map_DS_const">map_DS_const</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq_le">Oeq_le</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id">ck</span> = <span class="id"><a href="Velus.ObcToClight.Interface.html#Cks.Cbase">Cks.Cbase</a></span>); <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> - <span class="id">Hbase</span> <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map_iff">in_map_iff</a></span> <span class="kwd">in</span> <span class="id">Hck</span> <span class="kwd">as</span> ((?&amp;[]&amp;?)&amp;?&amp;?). <span class="id">inv</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;safe_DS&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In_nth">In_nth</a></span> <span class="kwd">with</span> (<span class="id">d</span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#xH">xH</a></span>) <span class="kwd">in</span> <span class="id">Hin</span> <span class="kwd">as</span> (<span class="id">k</span> &amp; <span class="id">Hk</span> &amp; <span class="id">Hnth</span>); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id"><a href="Velus.Instantiator.html#Den.Sd.env_of_np_nth">env_of_np_nth</a></span> , <span class="id"><a href="Velus.VelusCorrectnessExistence.html#nth_nprod_of_Ss">nth_nprod_of_Ss</a></span> <span class="kwd">with</span> (<span class="id">k</span>:=<span class="id">k</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span>. <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_nth">map_nth</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#DSForall_DS_of_S">DSForall_DS_of_S</a></span>, <span class="id"><a href="Velus.VelusCorrectnessExistence.html#SForall_map">SForall_map</a></span>, <span class="id"><a href="Velus.VelusCorrectnessExistence.html#SForall_map">SForall_map</a></span>; <span class="id">simpl</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonStreams.html#SForall_forall">SForall_forall</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>: <span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#L.Syn.idents">idents</a></span>, <span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="kwd">in</span> *; <span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#Den.Sd.mem_nth">mem_nth</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth_nth">CommonList2.mem_nth_nth</a></span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Instantiator.html#L.Syn.node_NoDup_in">node_NoDup_in</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Unshelve</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>: <span class="id">eauto</span>. <span class="id">all</span>: <span class="id">try</span> <span class="id">exact</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#const">Streams.const</a></span> (<span class="id"><a href="Velus.ObcToClight.Interface.html#Op.Vscalar">Vscalar</a></span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Values.html#Vundef">Values.Vundef</a></span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exact</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#const">Streams.const</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux.absent">absent</a></span>).<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="sem_node_outs">sem_node_outs</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">HasCausInj</span> : <span class="kwd">forall</span> (<span class="id">Γ</span> : <span class="id"><a href="Velus.Instantiator.html#L.Senv.static_env">static_env</a></span>) (<span class="id">x</span> <span class="id">cx</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>), <span class="id"><a href="Velus.Instantiator.html#L.Senv.HasCaus">HasCaus</a></span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">cx</span> -&gt; <span class="id">cx</span> = <span class="id">x</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Instantiator.html#L.Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">n</span> <span class="id">ins</span> <span class="id">outs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#L.Syn.find_node">find_node</a></span> <span class="id">f</span> <span class="id">G</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres">all_pres</a></span> <span class="id">ins</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_, (_, <span class="id">ck</span>, _, _)) =&gt; <span class="id">ck</span> = <span class="id"><a href="Velus.ObcToClight.Interface.html#Cks.Cbase">Cks.Cbase</a></span>) (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_out">n_out</a></span> <span class="id">n</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#L.CkSem.sem_node_ck">sem_node_ck</a></span> <span class="id">G</span> <span class="id">f</span> <span class="id">ins</span> <span class="id">outs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres">all_pres</a></span> <span class="id">outs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> ? * <span class="id">Hfind</span> <span class="id">Hin</span> <span class="id">Hout</span> <span class="id">Hsem</span>.<br/>
+&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hsem</span>.<br/>
+&nbsp;&nbsp;<span class="id">subst</span> <span class="id">bs</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hfind</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> _ = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> _) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#clocks_of_pres">clocks_of_pres</a></span> <span class="kwd">in</span> <span class="id">Hin</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;2:{ <span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_ingt0">n_ingt0</a></span> <span class="id">n0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>; <span class="id">subst</span>; <span class="id">inv</span> <span class="id">H1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#symmetry">symmetry</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_eq_nil">map_eq_nil</a></span> <span class="kwd">in</span> <span class="id">H6</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H6</span> <span class="kwd">in</span> *; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">lia</span>. }<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hin</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Instantiator.html#L.CkSem.clocked_node">clocked_node</a></span> _ _ _) <span class="id">and</span> <span class="id">destruct</span> <span class="id">it</span> <span class="kwd">as</span> (<span class="id">Hdom</span>&amp;<span class="id">Hsc</span>).<br/>
+&nbsp;&nbsp;<span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall2_in_right">Forall2_in_right</a></span> <span class="kwd">with</span> (<span class="id">y</span>:=<span class="id">x</span>) <span class="kwd">in</span> <span class="id">H2</span> <span class="kwd">as</span> (?&amp;?&amp;?); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Instantiator.html#L.CkCor.sc_vars_sc_var_inv">sc_vars_sc_var_inv</a></span> <span class="kwd">with</span> (<span class="id">x</span>:=<span class="id">i</span>) <span class="kwd">in</span> <span class="id">Hsc</span> <span class="kwd">as</span> [].<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#L.CkCor.sc_var">sc_var</a></span> <span class="kwd">in</span> <span class="id">H5</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H5</span> <span class="kwd">with</span> (<span class="id">ck</span> := <span class="id"><a href="Velus.ObcToClight.Interface.html#Cks.Cbase">Cks.Cbase</a></span>) <span class="kwd">in</span> <span class="id">H4</span>.<br/>
+&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">H4</span>; <span class="id">apply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#ac_all_pres">ac_all_pres</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#symmetry">symmetry</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.Instantiator.html#Den.Inf.HasCausRefl">Den.Inf.HasCausRefl</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">H4</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Hdom</span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.find_In">FunctionalEnvironment.FEnv.find_In</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.Instantiator.html#Den.Safe.HasClock_app_r">HasClock_app_r</a></span>, <span class="id">senv_HasClock'</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="find_node_complete">find_node_complete</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">G</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#L.Syn.find_node">find_node</a></span> <span class="id">f</span> <span class="id">G</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#L.Syn.find_node">find_node</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Instantiator.html#L.Complete.Complete.complete_global">complete_global</a></span> <span class="id">G</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Complete.Complete.complete_node">complete_node</a></span> <span class="id">n</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#L.Syn.find_node">find_node</a></span>, <span class="id"><a href="Velus.Instantiator.html#L.Complete.Complete.complete_global">complete_global</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonTactics.html#option_map_inv">option_map_inv</a></span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> ([] &amp; <span class="id">Hfind</span> &amp;?); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_transform_units_forward">CommonProgram.find_unit_transform_units_forward</a></span> <span class="kwd">in</span> <span class="id">Hfind</span>; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hfind</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="wc_ins_complete">wc_ins_complete</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">G</span> <span class="id">f</span> <span class="id">ins</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusCorrectness.html#wc_ins">wc_ins</a></span> <span class="id">G</span> <span class="id">f</span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">ins</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusCorrectness.html#wc_ins">wc_ins</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Complete.Complete.complete_global">complete_global</a></span> <span class="id">G</span>) <span class="id">f</span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">ins</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusCorrectness.html#wc_ins">wc_ins</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#L.CkCor.sem_clock_inputs">sem_clock_inputs</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * (<span class="id">H</span> &amp; <span class="id">n</span> &amp; <span class="id">Hfind</span> &amp; <span class="id">F1</span> &amp; <span class="id">F2</span>).<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#find_node_complete">find_node_complete</a></span> <span class="kwd">in</span> <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;<span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<br/>
+<span class="id">Local</span> <span class="kwd">Hint</span> <span class="id">Resolve</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wc_global_Ordered_nodes</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">complete_global_wt</span> <span class="id">complete_global_wc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">auto_global_wt</span> <span class="id">auto_global_wc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">switch_global_wt</span> <span class="id">switch_global_wc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inlinelocal_global_wt</span> <span class="id">inlinelocal_global_wc</span> <span class="id">inlinelocal_global_sem</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unnest_global_wt</span> <span class="id">unnest_global_wc</span> <span class="id">unnest_global_sem</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">normlast_global_wt</span> <span class="id">normlast_global_wc</span> <span class="id">normlast_global_sem</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">normfby_global_wt</span> <span class="id">normfby_global_wc</span> <span class="id">normfby_global_sem</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">check_causality_correct</span> : <span class="id">core</span>.<br/>
+<br/>
+<span class="id">Local</span> <span class="kwd">Ltac</span> <span class="id">unfold_l_to_nl</span> <span class="id">Hltonl</span> :=<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Velus.html#l_to_nl">l_to_nl</a></span> <span class="kwd">in</span> <span class="id">Hltonl</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Hltonl</span>;<br/>
+&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="../../CompCert/doc/html/compcert.driver.Compiler.html#print_identity">print_identity</a></span> <span class="kwd">in</span> <span class="id">Hltonl</span>;<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Velus.html#is_causal">is_causal</a></span> _) <span class="id">eqn</span>:<span class="id">Hcaus</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Hltonl</span>; [|<span class="id">inv</span> <span class="id">Hltonl</span>];<br/>
+&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="../../CompCert/doc/html/compcert.driver.Compiler.html#print_identity">print_identity</a></span> <span class="kwd">in</span> <span class="id">Hltonl</span>;<br/>
+&nbsp;&nbsp;<span class="id">Errors.monadInv</span> <span class="id">Hcaus</span>.<br/>
+<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="Theorems">Theorems</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variables</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.D">D</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Lustre.Parser.LustreAst.html#declaration">LustreAst.declaration</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.G">G</a></span> : @<span class="id"><a href="Velus.Instantiator.html#L.Syn.global">global</a></span> (<span class="kwd">fun</span> _ _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span>) <span class="id"><a href="Velus.Ident.html#Ids.elab_prefs">elab_prefs</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.Gp">Gp</a></span> : <span class="id"><a href="Velus.Instantiator.html#L.Typ.wt_global">wt_global</a></span> <span class="id">G</span> /\ <span class="id"><a href="Velus.Instantiator.html#L.Clo.wc_global">wc_global</a></span> <span class="id">G</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.P">P</a></span> : <span class="id"><a href="../../CompCert/doc/html/compcert.x86.Asm.html#program">Asm.program</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.main">main</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.ins">ins</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.value">value</a></span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.n">n</a></span> : @<span class="id"><a href="Velus.Instantiator.html#L.Syn.node">node</a></span> (<span class="kwd">fun</span> _ _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span>) <span class="id"><a href="Velus.Ident.html#Ids.elab_prefs">elab_prefs</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.Restr">Restr</a></span> :  <span class="id"><a href="Velus.Instantiator.html#Restr.restr_global">Restr.restr_global</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.HasCausInj">HasCausInj</a></span> : <span class="kwd">forall</span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">cx</span>, <span class="id"><a href="Velus.Instantiator.html#L.Senv.HasCaus">HasCaus</a></span> <span class="id">Γ</span> <span class="id">x</span> <span class="id">cx</span> -&gt; <span class="id">cx</span> = <span class="id">x</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.Elab">Elab</a></span> :   <span class="id"><a href="Velus.Lustre.LustreElab.html#elab_declarations">elab_declarations</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.D">D</a></span> = <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#exist">exist</a></span> _ <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.Gp">Gp</a></span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.Comp">Comp</a></span> :   <span class="id"><a href="Velus.Velus.html#lustre_to_asm">lustre_to_asm</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span>) <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span> = <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.P">P</a></span>)     <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.Hwti">Hwti</a></span> :   <span class="id"><a href="Velus.VelusCorrectness.html#wt_ins">wt_ins</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.Hwci">Hwci</a></span> :   <span class="id"><a href="Velus.VelusCorrectness.html#wc_ins">wc_ins</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.Hcau">Hcau</a></span> :   <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.Instantiator.html#L.Cau.node_causal">node_causal</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.nodes">nodes</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.Hfind">Hfind</a></span> :  <span class="id"><a href="Velus.Instantiator.html#L.Syn.find_node">find_node</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.n">n</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.Hckin">Hckin</a></span> :  <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_,(_,<span class="id">ck</span>,_)) =&gt; <span class="id">ck</span> = <span class="id"><a href="Velus.ObcToClight.Interface.html#Cks.Cbase">Cks.Cbase</a></span>) (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.n">n</a></span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Theorems.Hckout">Hckout</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_,(_,<span class="id">ck</span>,_,_)) =&gt; <span class="id">ck</span> = <span class="id"><a href="Velus.ObcToClight.Interface.html#Cks.Cbase">Cks.Cbase</a></span>) (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_out">n_out</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.n">n</a></span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Theorem</span> <span class="id"><a name="behavior_asm_exists">behavior_asm_exists</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#Den.OpErr.no_rte_global_main">no_rte_global_main</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span> (<span class="id"><a href="Velus.Instantiator.html#Den.Sd.env_of_np">env_of_np</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.n">n</a></span>)) (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#nprod_of_Ss">nprod_of_Ss</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span>))) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">outs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#L.Sem.sem_node">Sem.sem_node</a></span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span>) <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span>) (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">outs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="kwd">exists</span> <span class="id">T</span>, <span class="id"><a href="../../CompCert/doc/html/compcert.common.Behaviors.html#program_behaves">program_behaves</a></span> (<span class="id"><a href="../../CompCert/doc/html/compcert.x86.Asm.html#semantics">Asm.semantics</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.P">P</a></span>) (<span class="id"><a href="../../CompCert/doc/html/compcert.common.Behaviors.html#Reacts">Reacts</a></span> <span class="id">T</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.VelusCorrectness.html#bisim_IO">bisim_IO</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span> <span class="id">outs</span> <span class="id">T</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Norte</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id">Comp2</span> := <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.Comp">Comp</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Velus.html#lustre_to_asm">lustre_to_asm</a></span> <span class="kwd">in</span> <span class="id">Comp</span>. <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Comp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Velus.html#l_to_nl">l_to_nl</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span>) <span class="kwd">as</span> [<span class="id">G'</span>|] <span class="id">eqn</span>: <span class="id">Comp'</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Comp</span>; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.Gp">Gp</a></span> <span class="kwd">as</span> (<span class="id">Hwc</span>&amp;<span class="id">Hwt</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold_l_to_nl</span> <span class="id">Comp'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Instantiator.html#L.Cau.check_causality_correct">check_causality_correct</a></span> <span class="kwd">in</span> <span class="id">EQ</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">ltyping</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">EQ</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> (<span class="id">xs</span> := <span class="id"><a href="Velus.VelusCorrectnessExistence.html#nprod_of_Ss">nprod_of_Ss</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Instantiator.html#Den.SdR.ok_global_main">ok_global_main</a></span> <span class="kwd">with</span> (<span class="id">xs</span> := <span class="id">xs</span>) (<span class="id">InfXs</span> := <span class="id"><a href="Velus.VelusCorrectnessExistence.html#nprod_of_Ss_inf">nprod_of_Ss_inf</a></span> _) <span class="kwd">in</span> <span class="id">Norte</span> <span class="kwd">as</span> (<span class="id">outs</span> &amp; <span class="id">InfO</span> &amp; <span class="id">Hsem</span>); <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#wt_wc_wf_inputs">wt_wc_wf_inputs</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">subst</span> <span class="id">xs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Ss_of_nprod_of_Ss">Ss_of_nprod_of_Ss</a></span> <span class="kwd">in</span> <span class="id">Hsem</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Instantiator.html#L.Complete.Correct.complete_global_sem">complete_global_sem</a></span> <span class="kwd">in</span> <span class="id">Hsem</span>  <span class="kwd">as</span> <span class="id">HsemC</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#wc_ins_complete">wc_ins_complete</a></span> <span class="kwd">in</span> <span class="id">Hwci</span> <span class="kwd">as</span> ?.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Instantiator.html#L.CkCor.sem_node_sem_node_ck">sem_node_sem_node_ck</a></span> <span class="kwd">in</span> <span class="id">HsemC</span> <span class="kwd">as</span> <span class="id">Hsemck</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#find_node_complete">find_node_complete</a></span> <span class="kwd">in</span> <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#sem_node_outs">sem_node_outs</a></span>, <span class="id"><a href="Velus.VelusCorrectnessExistence.html#pStr_all_pres">pStr_all_pres</a></span> <span class="kwd">in</span> <span class="id">Hsemck</span> <span class="kwd">as</span> (?&amp; <span class="id">Heqouts</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#all_pres_pStr">all_pres_pStr</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Heqouts</span> <span class="kwd">in</span> <span class="id">Hsem</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.VelusCorrectness.html#behavior_asm">behavior_asm</a></span> <span class="kwd">in</span> <span class="id">Hsem</span> <span class="kwd">as</span> <span class="id">Ht</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<br/>
+<div class="doc">We introduce a local notion of streams unicity </div>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="unique_sts">unique_sts</a></span> {<span class="id">A</span>} (<span class="id">P</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id">A</span>)-&gt;<span class="kwd">Prop</span>) (<span class="id">x</span>:<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id">A</span>)) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P</span> <span class="id">x</span> /\ <span class="kwd">forall</span> (<span class="id">x'</span>:<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id">A</span>)), <span class="id">P</span> <span class="id">x'</span> -&gt; <span class="id"><a href="Velus.ObcToClight.Interface.html#CStr.EqSts">EqSts</a></span> <span class="id">x</span> <span class="id">x'</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Local</span> <span class="id">Disable</span> <span class="kwd">Notation</span> <span class="string">"'exists' ! x .. y , p"</span>.<br/>
+&nbsp;&nbsp;<span class="id">Local</span> <span class="kwd">Notation</span> <span class="string">"'exists' ! x .. y , p"</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#ex">ex</a></span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#unique_sts">unique_sts</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; .. (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#ex">ex</a></span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#unique_sts">unique_sts</a></span> (<span class="kwd">fun</span> <span class="id">y</span> =&gt; <span class="id">p</span>))) ..)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">at</span> <span class="id">level</span> 200, <span class="id">x</span> <span class="id">binder</span>, <span class="id">right</span> <span class="id">associativity</span>).<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="behavior_asm_exists_uniq">behavior_asm_exists_uniq</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#Den.OpErr.no_rte_global_main">no_rte_global_main</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span> (<span class="id"><a href="Velus.Instantiator.html#Den.Sd.env_of_np">env_of_np</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.n">n</a></span>)) (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#nprod_of_Ss">nprod_of_Ss</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span>))) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> ! <span class="id">outs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#L.Sem.sem_node">Sem.sem_node</a></span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span>) <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span>) (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">outs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="kwd">exists</span> <span class="id">T</span>, <span class="id"><a href="../../CompCert/doc/html/compcert.common.Behaviors.html#program_behaves">program_behaves</a></span> (<span class="id"><a href="../../CompCert/doc/html/compcert.x86.Asm.html#semantics">Asm.semantics</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.P">P</a></span>) (<span class="id"><a href="../../CompCert/doc/html/compcert.common.Behaviors.html#Reacts">Reacts</a></span> <span class="id">T</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.VelusCorrectness.html#bisim_IO">bisim_IO</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span> <span class="id">outs</span> <span class="id">T</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Norte</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#behavior_asm_exists">behavior_asm_exists</a></span> <span class="kwd">in</span> <span class="id">Norte</span> <span class="kwd">as</span> <span class="id">HH</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">HH</span> <span class="kwd">as</span> (<span class="id">outs</span> &amp; <span class="id">Hsem</span> &amp; <span class="id">HsemOk</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> <span class="id">Hcau</span>. <span class="comment">(*&nbsp;this&nbsp;time&nbsp;we&nbsp;need&nbsp;causality&nbsp;on&nbsp;the&nbsp;complete&nbsp;node&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">outs</span>; <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;uniqueness&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">outs'</span> (<span class="id">Hsem'</span> &amp;  <span class="id">HsemOk'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;to&nbsp;obtain&nbsp;causality&nbsp;on&nbsp;(complete_global&nbsp;G)&nbsp;:&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Velus.html#lustre_to_asm">lustre_to_asm</a></span> <span class="kwd">in</span> <span class="id">Comp</span>. <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Comp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Velus.html#l_to_nl">l_to_nl</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span>) <span class="kwd">as</span> [<span class="id">G'</span>|] <span class="id">eqn</span>: <span class="id">Comp'</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Comp</span>; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.Gp">Gp</a></span> <span class="kwd">as</span> (<span class="id">Hwc</span>&amp;<span class="id">Hwt</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold_l_to_nl</span> <span class="id">Comp'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Instantiator.html#L.Cau.check_causality_correct">check_causality_correct</a></span> <span class="kwd">in</span> <span class="id">EQ</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">ltyping</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">EQ</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Instantiator.html#L.Complete.Correct.complete_global_sem">complete_global_sem</a></span> <span class="kwd">in</span> <span class="id">Hsem</span>, <span class="id">Hsem'</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Instantiator.html#L.SemDet.det_global">det_global</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> (<span class="id">ins</span> := <span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span>) (<span class="id">outs1</span> := <span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">outs</span>)  (<span class="id">outs2</span> := <span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">outs'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">in</span> <span class="id">Hsem'</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#pStr_EqSts">pStr_EqSts</a></span>, <span class="id">Hsem'</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<br/>
+<div class="doc">Correction with no-run-time-errors check </div>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="behavior_asm_exists_check">behavior_asm_exists_check</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#CheckOp.check_global">CheckOp.check_global</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">outs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Instantiator.html#L.Sem.sem_node">Sem.sem_node</a></span> (<span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span>) <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span> (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span>) (<span class="id"><a href="Velus.NLCorrectness.html#pStr">pStr</a></span> <span class="id">outs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="kwd">exists</span> <span class="id">T</span>, <span class="id"><a href="../../CompCert/doc/html/compcert.common.Behaviors.html#program_behaves">program_behaves</a></span> (<span class="id"><a href="../../CompCert/doc/html/compcert.x86.Asm.html#semantics">Asm.semantics</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.P">P</a></span>) (<span class="id"><a href="../../CompCert/doc/html/compcert.common.Behaviors.html#Reacts">Reacts</a></span> <span class="id">T</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.VelusCorrectness.html#bisim_IO">bisim_IO</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.G">G</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.main">main</a></span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.ins">ins</a></span> <span class="id">outs</span> <span class="id">T</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Hchk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#behavior_asm_exists">behavior_asm_exists</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems.Gp">Gp</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Instantiator.html#Den.OpErr.no_rte_global_main_global">no_rte_global_main_global</a></span>, <span class="id"><a href="Velus.Instantiator.html#Den.OpErr.check_global_ok">check_global_ok</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.VelusCorrectnessExistence.html#Theorems">Theorems</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

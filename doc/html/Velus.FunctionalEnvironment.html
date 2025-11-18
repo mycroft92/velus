@@ -1,0 +1,959 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module FunctionalEnvironment</title>
+<meta name="description" content="Documentation of Coq module FunctionalEnvironment" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module FunctionalEnvironment</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.CommonTactics.html">Common.CommonTactics</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Setoids.Setoid.html">Setoid</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html">Morphisms</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html">Classes.RelationClasses</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html">Relation_Definitions</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="FEnv">FEnv</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Class</span> <span class="id"><a name="FEnv.fenv_key">fenv_key</a></span> (<span class="id">A</span> : <span class="kwd">Type</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id"><a name="FEnv.fenv_key_eqdec">fenv_key_eqdec</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id">A</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> }.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="FEnv.ident_fenv_key">ident_fenv_key</a></span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.fenv_key">fenv_key</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.fenv_key_eqdec">fenv_key_eqdec</a></span> := <span class="id"><a href="Velus.Common.Common.html#EqDec_instance_0">EqDec_instance_0</a></span> |}.<br/>
+<br/>
+<div class="doc">Encoding environment as "partial" functions. </div>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv">FEnv</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.K">K</a></span> : <span class="kwd">Type</span>} `{<span class="id"><a name="FEnv.FEnv.K_key">K_key</a></span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.fenv_key">fenv_key</a></span> <span class="id">K</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Local</span> <span class="kwd">Instance</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.K">K</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> := { <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#equiv_dec">equiv_dec</a></span> := <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.fenv_key_eqdec">fenv_key_eqdec</a></span> }.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.t">t</a></span> <span class="id">A</span> := <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.K">K</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id">A</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.empty">empty</a></span> <span class="id">A</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id">A</span> := <span class="kwd">fun</span> _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.In">In</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.In.A">A</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.In">In</a></span> <span class="id">x</span> (<span class="id">env</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.In.A">A</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">v</span>, <span class="id">env</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.find_In">find_In</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">x</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Find</span>. <span class="id">esplit</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.not_find_In">not_find_In</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env</span> &lt;-&gt; <span class="id">env</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span>; <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">env</span> <span class="id">x</span>) <span class="id">eqn</span>:<span class="id">Hfind</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exfalso</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> <span class="id">Hnone</span> (?&amp;<span class="id">Hfind</span>). <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.In">In</a></span>.<br/>
+<br/>
+<div class="doc">Environment equivalence </div>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.Equiv">Equiv</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.Equiv.A">A</a></span> : <span class="kwd">Type</span>} (<span class="id"><a name="FEnv.FEnv.Equiv.R">R</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id">A</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.Equiv">Equiv</a></span> (<span class="id">env1</span> <span class="id">env2</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.Equiv.A">A</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, (<span class="id"><a href="Velus.Common.Common.html#orel">orel</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.Equiv.R">R</a></span>) (<span class="id">env1</span> <span class="id">x</span>) (<span class="id">env2</span> <span class="id">x</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="FEnv.Equiv_Reflexive">Equiv_Reflexive</a></span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.Equiv.A">A</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.Equiv.R">R</a></span>} : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">env</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="FEnv.Equiv_Transitive">Equiv_Transitive</a></span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.Equiv.A">A</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.Equiv.R">R</a></span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">env3</span> <span class="id">E12</span> <span class="id">E23</span> <span class="id">x</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="FEnv.Equiv_Symmetric">Equiv_Symmetric</a></span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Symmetric">Symmetric</a></span> _ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.Equiv.R">R</a></span>} : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Symmetric">Symmetric</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">E</span> <span class="id">x</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">symmetry</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Relation</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Equivalence">Equivalence</a></span> _ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.Equiv.R">R</a></span>} : (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.Equiv.A">A</a></span>) <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv_Reflexive">Equiv_Reflexive</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv_Symmetric">Equiv_Symmetric</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">transitivity</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv_Transitive">Equiv_Transitive</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">Equivalence_Equiv</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> --&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> --&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">Equiv_In</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * ? * <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> (?&amp;<span class="id">Hfind</span>); <span class="id">subst</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Heq</span> <span class="id">x</span>); <span class="id">rewrite</span> <span class="id">Hfind</span> <span class="kwd">in</span> <span class="id">Heq</span>; <span class="id">inv</span> <span class="id">Heq</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">esplit</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.Equiv">Equiv</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Existing</span> <span class="kwd">Instance</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equivalence_Equiv">Equivalence_Equiv</a></span>.<br/>
+<br/>
+<div class="doc">Environment inclusion </div>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.refines">refines</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.refines.A">A</a></span> : <span class="kwd">Type</span>} (<span class="id"><a name="FEnv.FEnv.refines.R">R</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id">A</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.refines">refines</a></span> (<span class="id">env1</span> <span class="id">env2</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.refines.A">A</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">v</span>, <span class="id">env1</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">v'</span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.refines.R">R</a></span> <span class="id">v</span> <span class="id">v'</span> /\ <span class="id">env2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v'</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Equivalence">Equivalence</a></span> _ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.refines.R">R</a></span>} : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.refines.R">R</a></span> ==&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.refines.R">R</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">refines_Equiv</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">mA</span> <span class="id">mA'</span> <span class="id">EA</span> <span class="id">mB</span> <span class="id">mB'</span> <span class="id">EB</span> <span class="id">Href</span> ?? <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">EA</span> <span class="id">x</span>). <span class="id">rewrite</span> <span class="id">Hfind</span> <span class="kwd">in</span> <span class="id">EA</span>; <span class="id">inv</span> <span class="id">EA</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span> <span class="kwd">in</span> <span class="id">H0</span>. <span class="id">apply</span> <span class="id">Href</span> <span class="kwd">in</span> <span class="id">H0</span> <span class="kwd">as</span> (?&amp;<span class="id">HR</span>&amp;<span class="id">Hfind'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">EB</span> <span class="id">x</span>). <span class="id">rewrite</span> <span class="id">Hfind'</span> <span class="kwd">in</span> <span class="id">EB</span>; <span class="id">inv</span> <span class="id">EB</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> 2 <span class="id">esplit</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">etransitivity</span>; [|<span class="id">eauto</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span>. <span class="id">etransitivity</span>; [|<span class="id">eauto</span>]. <span class="id">now</span> <span class="id">symmetry</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.In_refines">In_refines</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">env1</span> <span class="id">env2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env1</span> -&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env2</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Href</span> * (?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Href</span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> (?&amp;?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">esplit</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.refines_None">refines_None</a></span> : <span class="kwd">forall</span> <span class="id">m1</span> <span class="id">m2</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">m1</span> <span class="id">m2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">m2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">m1</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Href</span> <span class="id">Hm2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.not_find_In">not_find_In</a></span> <span class="kwd">in</span> *. <span class="id">contradict</span> <span class="id">Hm2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In_refines">In_refines</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.refines_refl">refines_refl</a></span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.refines.R">R</a></span>} : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#reflexive">reflexive</a></span> _ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">env</span> <span class="id">x</span> <span class="id">v</span> -&gt;; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.refines_trans">refines_trans</a></span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> _ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.refines.R">R</a></span>} : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#transitive">transitive</a></span> _ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">env3</span> <span class="id">H1</span> <span class="id">H2</span> <span class="id">x</span> <span class="id">v</span> <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">H1</span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> (? &amp; ? &amp; <span class="id">Hfind</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">H2</span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> (? &amp; ? &amp; -&gt;).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Relation</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.refines.R">R</a></span>} `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> _ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.refines.R">R</a></span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: _ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines_refl">refines_refl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">transitivity</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines_trans">refines_trans</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">env_refines_preorder</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.refines">refines</a></span>.<br/>
+<br/>
+<div class="doc">Domain of environments </div>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.dom">dom</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.dom.A">A</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.dom">dom</a></span> (<span class="id">env</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.dom.A">A</a></span>) (<span class="id">xs</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.K">K</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env</span> &lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">x</span> <span class="id">xs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.dom">dom</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.dom_ub">dom_ub</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.dom_ub.A">A</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.dom_ub">dom_ub</a></span> (<span class="id">env</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.dom_ub.A">A</a></span>) (<span class="id">xs</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.K">K</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">x</span> <span class="id">xs</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.dom_ub_incl">dom_ub_incl</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs1</span> <span class="id">xs2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">List.incl</a></span> <span class="id">xs1</span> <span class="id">xs2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> <span class="id">env</span> <span class="id">xs1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> <span class="id">env</span> <span class="id">xs2</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hsub</span> <span class="id">Hdom</span> ? <span class="id">Hin</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.dom_ub_refines">dom_ub_refines</a></span> {<span class="id">R</span>} : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> <span class="id">env2</span> <span class="id">env1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> <span class="id">env1</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> <span class="id">env2</span> <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Href</span> <span class="id">Hdom</span> ? <span class="id">Hin</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In_refines">In_refines</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.dom_dom_ub">dom_dom_ub</a></span>: <span class="kwd">forall</span> <span class="id">H</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom">dom</a></span> <span class="id">H</span> <span class="id">d</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> <span class="id">H</span> <span class="id">d</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">DH</span> ?. <span class="id">apply</span> <span class="id">DH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.dom_ub">dom_ub</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.dom_lb">dom_lb</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.dom_lb.A">A</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.dom_lb">dom_lb</a></span> (<span class="id">env</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.dom_lb.A">A</a></span>) (<span class="id">xs</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.K">K</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">x</span> <span class="id">xs</span> -&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.dom_lb_incl">dom_lb_incl</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs1</span> <span class="id">xs2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">List.incl</a></span> <span class="id">xs2</span> <span class="id">xs1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> <span class="id">env</span> <span class="id">xs1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> <span class="id">env</span> <span class="id">xs2</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hsub</span> <span class="id">Hdom</span> ? <span class="id">Hin</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.dom_lb_refines">dom_lb_refines</a></span> {<span class="id">R</span>} : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> <span class="id">env1</span> <span class="id">env2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> <span class="id">env1</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> <span class="id">env2</span> <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Href</span> <span class="id">Hdom</span> ? <span class="id">Hin</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In_refines">In_refines</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.dom_dom_lb">dom_dom_lb</a></span>: <span class="kwd">forall</span> <span class="id">H</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom">dom</a></span> <span class="id">H</span> <span class="id">d</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> <span class="id">H</span> <span class="id">d</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">DH</span> ?. <span class="id">apply</span> <span class="id">DH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.dom_lb">dom_lb</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.restrict">restrict</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.restrict.A">A</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.restrict">restrict</a></span> (<span class="id">env</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.restrict.A">A</a></span>) (<span class="id">xs</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.K">K</a></span>) : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.restrict.A">A</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="kwd">if</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#existsb">List.existsb</a></span> (<span class="kwd">fun</span> <span class="id">y</span> =&gt; <span class="id">y</span> ==<span class="id">b</span> <span class="id">x</span>) <span class="id">xs</span> <span class="kwd">then</span> <span class="id">env</span> <span class="id">x</span> <span class="kwd">else</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.restrict_find">restrict_find</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs</span> <span class="id">x</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">x</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env</span> <span class="id">xs</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span> <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">replace</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#existsb">List.existsb</a></span> _ _) <span class="kwd">with</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span>. <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#existsb_exists">List.existsb_exists</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> 2 <span class="id">esplit</span>; <span class="id">eauto</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_refl">equiv_decb_refl</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.restrict_find_inv">restrict_find_inv</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs</span> <span class="id">x</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env</span> <span class="id">xs</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">x</span> <span class="id">xs</span> /\ <span class="id">env</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases_eqn</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Eq">Eq</a></span>; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#existsb_exists">List.existsb_exists</a></span> <span class="kwd">in</span> <span class="id">Eq</span>. <span class="id">simpl_Exists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">H0</span>. <span class="id">now</span> <span class="id">inv</span> <span class="id">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="FEnv.restrict_find_None1">restrict_find_None1</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">x</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env</span> <span class="id">xs</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> _ _ _) <span class="id">eqn</span>:<span class="id">Hres</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict_find_inv">restrict_find_inv</a></span> <span class="kwd">in</span> <span class="id">Hres</span> <span class="kwd">as</span> (?&amp;_); <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="FEnv.restrict_find_None2">restrict_find_None2</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env</span> <span class="id">xs</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> _ _ _) <span class="id">eqn</span>:<span class="id">Hres</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict_find_inv">restrict_find_inv</a></span> <span class="kwd">in</span> <span class="id">Hres</span> <span class="kwd">as</span> (_&amp;?); <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.restrict_find_None_inv">restrict_find_None_inv</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env</span> <span class="id">xs</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> \/ ~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">x</span> <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnin</span>. <span class="id">cases_eqn</span> <span class="id">Heq</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">right</span>. <span class="id">intro</span> <span class="id">contra</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#existsb_Forall">existsb_Forall</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">Heq</span>. <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_refl">equiv_decb_refl</a></span> <span class="kwd">in</span> <span class="id">Heq</span>. <span class="id">inv</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.restrict_refines">restrict_refines</a></span> : <span class="kwd">forall</span> <span class="id">R</span> <span class="id">xs</span> (<span class="id">env</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.restrict.A">A</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> <span class="id">R</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env</span> <span class="id">xs</span>) <span class="id">env</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hrefl</span> ?? <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict_find_inv">restrict_find_inv</a></span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> (?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> 2 <span class="id">esplit</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id">restrict_refines'</span> : <span class="kwd">forall</span> <span class="id">R</span> <span class="id">xs</span> <span class="id">env1</span> <span class="id">env2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> <span class="id">env1</span> <span class="id">env2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env1</span> <span class="id">xs</span>) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env2</span> <span class="id">xs</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Href</span> ?? <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict_find_inv">restrict_find_inv</a></span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> (<span class="id">Hin</span>&amp;<span class="id">Hfind</span>). <span class="id">apply</span> <span class="id">Href</span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> (?&amp;<span class="id">Heq</span>&amp;<span class="id">Hfind</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> 2 <span class="id">esplit</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict_find">restrict_find</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.incl_restrict_refines">incl_restrict_refines</a></span> <span class="id">R</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id">R</span>} : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">ys</span> (<span class="id">env</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.restrict.A">A</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">List.incl</a></span> <span class="id">xs</span> <span class="id">ys</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env</span> <span class="id">xs</span>) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env</span> <span class="id">ys</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hincl</span> ? <span class="id">v</span> <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">v</span>. <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict_find_inv">restrict_find_inv</a></span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> (?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict_find">restrict_find</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.restrict_In">restrict_In</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">env</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env</span> <span class="id">xs</span>) &lt;-&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env</span> /\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">x</span> <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [<span class="id">intros</span> (?&amp;<span class="id">Hfind</span>)|<span class="id">intros</span> ((?&amp;<span class="id">Henv</span>)&amp;<span class="id">Hfind</span>)].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict_find_inv">restrict_find_inv</a></span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> (?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span>. <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">econstructor</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict_find">restrict_find</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="FEnv.restrict_dom_ub">restrict_dom_ub</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env</span> <span class="id">xs</span>) <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * ? <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict_In">restrict_In</a></span> <span class="kwd">in</span> <span class="id">Hin</span> <span class="kwd">as</span> (?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.restrict_Equiv">restrict_Equiv</a></span> : <span class="kwd">forall</span> <span class="id">R</span> <span class="id">xs</span> <span class="id">env1</span> <span class="id">env2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R</span> <span class="id">env1</span> <span class="id">env2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env1</span> <span class="id">xs</span>) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env2</span> <span class="id">xs</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span>. <span class="id">specialize</span> (<span class="id">Heq</span> <span class="id">x</span>). <span class="id">inv</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">cases</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.restrict">restrict</a></span>.<br/>
+<br/>
+<div class="doc">Add an association to an environment </div>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.add">add</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.add.A">A</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.add">add</a></span> <span class="id">x</span> <span class="id">v</span> (<span class="id">env</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.add.A">A</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">y</span> =&gt; <span class="kwd">if</span> (<span class="id">y</span> ==<span class="id">b</span> <span class="id">x</span>) <span class="kwd">then</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> <span class="kwd">else</span> <span class="id">env</span> <span class="id">y</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.gss">gss</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">v</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">add</a></span> <span class="id">x</span> <span class="id">v</span> <span class="id">env</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">add</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_refl">equiv_decb_refl</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.gso">gso</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">v</span> <span class="id">env</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">y</span> &lt;&gt; <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">add</a></span> <span class="id">x</span> <span class="id">v</span> <span class="id">env</span>) <span class="id">y</span> = <span class="id">env</span> <span class="id">y</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">add</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hneq</span>. <span class="id">cases_eqn</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Eq">Eq</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">Eq</span>. <span class="id">inv</span> <span class="id">Eq</span>. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.add_In">add_In</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">x</span> <span class="id">v</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">y</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">add</a></span> <span class="id">x</span> <span class="id">v</span> <span class="id">env</span>) &lt;-&gt; <span class="id">x</span> = <span class="id">y</span> \/ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">y</span> <span class="id">env</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">add</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [<span class="id">intros</span> (?&amp;<span class="id">Hfind</span>)|<span class="id">intros</span> [?|(?&amp;<span class="id">Hfind</span>)]]; <span class="id">subst</span>; <span class="id">cases_eqn</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Eq">Eq</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">Eq</span>. <span class="id">inv</span> <span class="id">Eq</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">right</span>. <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">econstructor</span>. <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_refl">equiv_decb_refl</a></span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id">y</span> ==<span class="id">b</span> <span class="id">x</span>) <span class="id">eqn</span>:<span class="id">Heq</span>; <span class="id">econstructor</span>; <span class="id">rewrite</span> <span class="id">Heq</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.add_refines">add_refines</a></span> <span class="id">R</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id">R</span>} : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">x</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> <span class="id">env</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">add</a></span> <span class="id">x</span> <span class="id">v</span> <span class="id">env</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">add</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnin</span> ?? <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases_eqn</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Eq">Eq</a></span>; <span class="id">eauto</span>. <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">Eq</span>; <span class="id">inv</span> <span class="id">Eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exfalso</span>. <span class="id">apply</span> <span class="id">Hnin</span>. <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.add_dom">add_dom</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">x</span> <span class="id">v</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom">dom</a></span> <span class="id">env</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom">dom</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">add</a></span> <span class="id">x</span> <span class="id">v</span> <span class="id">env</span>) (<span class="id">x</span>::<span class="id">xs</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hdom</span> <span class="id">y</span>. <span class="id">specialize</span> (<span class="id">Hdom</span> <span class="id">y</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add_In">add_In</a></span>, <span class="id">Hdom</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.add_dom_ub">add_dom_ub</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">x</span> <span class="id">v</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> <span class="id">env</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">add</a></span> <span class="id">x</span> <span class="id">v</span> <span class="id">env</span>) (<span class="id">x</span>::<span class="id">xs</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hdom</span> <span class="id">y</span>. <span class="id">specialize</span> (<span class="id">Hdom</span> <span class="id">y</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add_In">add_In</a></span>. <span class="id">intros</span> [|]; <span class="id">subst</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">datatypes</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.add_dom_lb">add_dom_lb</a></span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">x</span> <span class="id">v</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> <span class="id">env</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add">add</a></span> <span class="id">x</span> <span class="id">v</span> <span class="id">env</span>) (<span class="id">x</span>::<span class="id">xs</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hdom</span> <span class="id">y</span>. <span class="id">specialize</span> (<span class="id">Hdom</span> <span class="id">y</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.add_In">add_In</a></span>. <span class="id">intros</span> [|]; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.add">add</a></span>.<br/>
+<br/>
+<div class="doc">Union of environments </div>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.union">union</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.union.A">A</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+<div class="doc">The union prioritises the new (right) environment </div>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.union">union</a></span> (<span class="id">env1</span> <span class="id">env2</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.union.A">A</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="kwd">match</span> <span class="id">env2</span> <span class="id">x</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id">env1</span> <span class="id">x</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union1">union1</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env1</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind1</span> <span class="id">Hfind2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span>. <span class="id">now</span> <span class="id">rewrite</span> <span class="id">Hfind2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union2">union2</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env1</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind1</span> <span class="id">Hfind2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span>. <span class="id">now</span> <span class="id">rewrite</span> <span class="id">Hfind2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union3">union3</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env1</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind1</span> <span class="id">Hfind2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span>. <span class="id">now</span> <span class="id">rewrite</span> <span class="id">Hfind2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id">union3'</span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span>. <span class="id">now</span> <span class="id">rewrite</span> <span class="id">Hfind1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union4">union4</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env1</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> \/ <span class="id">env2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">env2</span> <span class="id">x</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="FEnv.union_None">union_None</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> &lt;-&gt; <span class="id">env1</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> /\ <span class="id">env2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [<span class="id">intros</span>|<span class="id">intros</span> (?&amp;?)]; <span class="id">cases</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id">union4'</span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> \/ (<span class="id">env1</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> /\ <span class="id">env2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">env2</span> <span class="id">x</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union_In">union_In</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) &lt;-&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env1</span> \/ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env2</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [<span class="id">intros</span> (?&amp;<span class="id">Hfind</span>)|<span class="id">intros</span> [(?&amp;?)|(?&amp;<span class="id">Hfind2</span>)]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union4">union4</a></span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> [|]; [<span class="id">left</span>|<span class="id">right</span>]; <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id">env2</span> <span class="id">x</span>) <span class="id">eqn</span>:<span class="id">Hfind1</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union2">union2</a></span>, <span class="id">union3'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">econstructor</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id">union3'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> (<span class="id">R</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.union.A">A</a></span> -&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.union.A">A</a></span> -&gt; <span class="kwd">Prop</span>) : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R</span> ==&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R</span> ==&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">union_Equiv</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Heq1</span> * <span class="id">Heq2</span> ?.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Heq1</span> <span class="id">x1</span>); <span class="id">specialize</span> (<span class="id">Heq2</span> <span class="id">x1</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Heq1</span>; <span class="id">inv</span> <span class="id">Heq2</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union_dom_ub">union_dom_ub</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> <span class="id">env1</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> <span class="id">env2</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hdom1</span> <span class="id">Hdom2</span> ?.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union_In">union_In</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [|]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union_dom_lb">union_dom_lb</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">xs1</span> <span class="id">xs2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> <span class="id">env1</span> <span class="id">xs1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> <span class="id">env2</span> <span class="id">xs2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) (<span class="id">xs1</span> ++ <span class="id">xs2</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hdom1</span> <span class="id">Hdom2</span> ?.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">List.in_app_iff</a></span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union_In">union_In</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [|]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union_dom_lb1">union_dom_lb1</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> <span class="id">env1</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hdom1</span> ?.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union_In">union_In</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union_dom_lb2">union_dom_lb2</a></span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> <span class="id">env2</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>) <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hdom2</span> ?.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union_In">union_In</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union_refines1">union_refines1</a></span> <span class="id">R</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id">R</span>} : <span class="kwd">forall</span> <span class="id">m1</span> <span class="id">m1'</span> <span class="id">m2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> <span class="id">m1</span> <span class="id">m1'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">m1</span> <span class="id">m2</span>) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">m1'</span> <span class="id">m2</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Href</span> ?? <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">union4'</span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> [<span class="id">Hsome</span>|(<span class="id">Hsome</span>&amp;<span class="id">Hnone</span>)].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eauto</span> <span class="kwd">using</span> <span class="id">union3'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">Href</span> <span class="kwd">in</span> <span class="id">Hsome</span> <span class="kwd">as</span> (?&amp;<span class="id">Hr</span>&amp;<span class="id">Hsome</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union2">union2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id">union_refines4'</span> <span class="id">R</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id">R</span>} : <span class="kwd">forall</span> <span class="id">m1</span> <span class="id">m2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> <span class="id">m2</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">m1</span> <span class="id">m2</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * ?? <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">union3'</span> <span class="kwd">in</span> <span class="id">Hfind</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union_refines_inv">union_refines_inv</a></span> <span class="id">R</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id">R</span>} : <span class="kwd">forall</span> <span class="id">m1</span> <span class="id">m2</span> <span class="id">m'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">m1</span> <span class="id">m2</span>) <span class="id">m'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">m1</span> -&gt; ~<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">m2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">m2'</span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">m1</span> <span class="id">m2'</span>) <span class="id">m'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R</span> <span class="id">m2</span> <span class="id">m2'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ (<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">m2'</span> &lt;-&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">m'</span> /\ ~<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">m1</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Href</span> <span class="id">Hnd</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="kwd">match</span> <span class="id">m1</span> <span class="id">x</span> <span class="kwd">with</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> | <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id">m'</span> <span class="id">x</span> <span class="kwd">end</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [|<span class="id">split</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span>. <span class="id">intros</span> ?; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">m1</span> <span class="id">x</span>) <span class="id">eqn</span>:<span class="id">Hm1</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">assert</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">m1</span> <span class="id">m2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">a</span>) <span class="kwd">as</span> <span class="id">Hunion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union2">union2</a></span>; <span class="id">auto</span>. <span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.not_find_In">not_find_In</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">contra</span>. <span class="id">eapply</span> <span class="id">Hnd</span>; <span class="id">eauto</span>. <span class="id">econstructor</span>; <span class="id">eauto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Href</span> <span class="kwd">in</span> <span class="id">Hunion</span> <span class="kwd">as</span> (?&amp;<span class="id">HR</span>&amp;<span class="id">Hm'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hm'</span>. <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> (<span class="id">m'</span> <span class="id">x</span>); <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> ?? <span class="id">Hm2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">m1</span> <span class="id">m2</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>) <span class="kwd">as</span> <span class="id">Hunion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span>. <span class="id">now</span> <span class="id">rewrite</span> <span class="id">Hm2</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Href</span> <span class="kwd">in</span> <span class="id">Hunion</span> <span class="kwd">as</span> (?&amp;<span class="id">HR</span>&amp;<span class="id">Hm'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> 2 <span class="id">esplit</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">replace</span> (<span class="id">m1</span> <span class="id">x</span>) <span class="kwd">with</span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.union.A">A</a></span>); <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span>. <span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.not_find_In">not_find_In</a></span>. <span class="id">intro</span> <span class="id">contra</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Hnd</span>; <span class="id">eauto</span>. <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>; [<span class="id">intros</span> (?&amp;<span class="id">Hin</span>)|<span class="id">intros</span> ((?&amp;<span class="id">Hin</span>)&amp;<span class="id">Hnin</span>)]; <span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> (<span class="id">m1</span> <span class="id">x</span>); <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">eauto</span>. <span class="id">intros</span> <span class="id">contra</span>; <span class="id">destruct_conjs</span>; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> (<span class="id">m1</span> <span class="id">x</span>); [<span class="id">exfalso</span>; <span class="id">eauto</span>|<span class="id">eauto</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union_assoc">union_assoc</a></span> <span class="id">R</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id">R</span>} : <span class="kwd">forall</span> <span class="id">m1</span> <span class="id">m2</span> <span class="id">m3</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">m1</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">m2</span> <span class="id">m3</span>)) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">m1</span> <span class="id">m2</span>) <span class="id">m3</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * ?. <span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases_eqn</span> <span class="id">Heq</span>; <span class="id">try</span> <span class="id">congruence</span>; <span class="id">try</span> <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">inv</span> <span class="id">Heq</span>; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FEnv.union_empty">union_empty</a></span> <span class="id">R</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id">R</span>} : <span class="kwd">forall</span> <span class="id">m</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.empty">empty</a></span> _) <span class="id">m</span>) <span class="id">m</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.empty">empty</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * ?. <span class="id">destruct</span> (<span class="id">m</span> <span class="id">x</span>); <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.union">union</a></span>.<br/>
+<br/>
+<div class="doc">Mapping on an environment </div>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.map">map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.map.A">A</a></span> <span class="id"><a name="FEnv.FEnv.map.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.map">map</a></span> (<span class="id">f</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.map.A">A</a></span> -&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.map.B">B</a></span>) (<span class="id">env</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.map.A">A</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="id">f</span> (<span class="id">env</span> <span class="id">x</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.map_in_iff">map_in_iff</a></span> <span class="id">f</span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> <span class="id">env</span>) &lt;-&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> (?&amp;<span class="id">Heq</span>); <span class="id">inv_equalities</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Heq</span>; <span class="id">simpl</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.dom_map">dom_map</a></span> <span class="id">f</span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom">dom</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> <span class="id">env</span>) <span class="id">xs</span> &lt;-&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom">dom</a></span> <span class="id">env</span> <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom">dom</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map_in_iff">map_in_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.dom_ub_map">dom_ub_map</a></span> <span class="id">f</span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> <span class="id">env</span>) <span class="id">xs</span> &lt;-&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span> <span class="id">env</span> <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_ub">dom_ub</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map_in_iff">map_in_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.dom_lb_map">dom_lb_map</a></span> <span class="id">f</span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> <span class="id">env</span>) <span class="id">xs</span> &lt;-&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span> <span class="id">env</span> <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.dom_lb">dom_lb</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map_in_iff">map_in_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.map_Equiv">map_Equiv</a></span> (<span class="id">R1</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.map.A">A</a></span>) (<span class="id">R2</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.map.B">B</a></span>) <span class="id">f</span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span> <span class="id">y</span>, <span class="id">R1</span> <span class="id">x</span> <span class="id">y</span> -&gt; <span class="id">R2</span> (<span class="id">f</span> <span class="id">x</span>) (<span class="id">f</span> <span class="id">y</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R1</span> <span class="id">env1</span> <span class="id">env2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R2</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> <span class="id">env1</span>) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> <span class="id">env2</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hrel</span> <span class="id">Heq</span> <span class="id">x</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Heq</span> <span class="id">x</span>); <span class="id">inv</span> <span class="id">Heq</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.refines_map">refines_map</a></span> (<span class="id">R1</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.map.A">A</a></span>) (<span class="id">R2</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.map.B">B</a></span>) <span class="id">f</span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span> <span class="id">y</span>, <span class="id">R1</span> <span class="id">x</span> <span class="id">y</span> -&gt; <span class="id">R2</span> (<span class="id">f</span> <span class="id">x</span>) (<span class="id">f</span> <span class="id">y</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R1</span> <span class="id">env1</span> <span class="id">env2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.refines">refines</a></span> <span class="id">R2</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> <span class="id">env1</span>) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> <span class="id">env2</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hrel</span> <span class="id">Href</span> ?? <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv_equalities</span>. <span class="id">apply</span> <span class="id">Href</span> <span class="kwd">in</span> <span class="id">Hf</span> <span class="kwd">as</span> (?&amp;?&amp;<span class="id">Hfind</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hfind</span>. <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.restrict_map">restrict_map</a></span> <span class="id">R</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id">R</span>} <span class="id">f</span> : <span class="kwd">forall</span> <span class="id">env</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> <span class="id">env</span>) <span class="id">xs</span>) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span> <span class="id">env</span> <span class="id">xs</span>)).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.restrict">restrict</a></span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * ?. <span class="id">cases</span>; <span class="id">simpl</span>; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.union_map">union_map</a></span> <span class="id">R</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id">R</span>} <span class="id">f</span> : <span class="kwd">forall</span> <span class="id">env1</span> <span class="id">env2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> <span class="id">env1</span> <span class="id">env2</span>)) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> <span class="id">env1</span>) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f</span> <span class="id">env2</span>)).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.union">union</a></span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * ?. <span class="id">destruct</span> (<span class="id">env2</span> _); <span class="id">simpl</span>; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.map">map</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.map_map">map_map</a></span> {<span class="id">A</span> <span class="id">B</span> <span class="id">C</span>} <span class="id">R</span> `{<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id">R</span>} : <span class="kwd">forall</span> <span class="id">env</span> (<span class="id">f1</span> : <span class="id">A</span> -&gt; <span class="id">B</span>) (<span class="id">f2</span> : <span class="id">B</span> -&gt; <span class="id">C</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.Equiv">Equiv</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f2</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> <span class="id">f1</span> <span class="id">env</span>)) (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id">f2</span> (<span class="id">f1</span> <span class="id">x</span>)) <span class="id">env</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * ?. <span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.map">map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">env</span> <span class="id">x</span>); <span class="id">simpl</span>; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.mapi">mapi</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.mapi.A">A</a></span> <span class="id"><a name="FEnv.FEnv.mapi.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.mapi">mapi</a></span> (<span class="id">f</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.K">K</a></span> -&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.mapi.A">A</a></span> -&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.mapi.B">B</a></span>) (<span class="id">env</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.mapi.A">A</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> (<span class="id">f</span> <span class="id">x</span>) (<span class="id">env</span> <span class="id">x</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.mapi_in_iff">mapi_in_iff</a></span> <span class="id">f</span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.mapi">mapi</a></span> <span class="id">f</span> <span class="id">env</span>) &lt;-&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> <span class="id">env</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span>, <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.mapi">mapi</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> (?&amp;<span class="id">Heq</span>); <span class="id">inv_equalities</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Heq</span>; <span class="id">simpl</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.mapi">mapi</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FEnv.FEnv.of_list">of_list</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FEnv.FEnv.of_list.A">A</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FEnv.of_list">of_list</a></span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.K">K</a></span> * <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.of_list.A">A</a></span>)) : <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.t">t</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.of_list.A">A</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#find">List.find</a></span> (<span class="kwd">fun</span> <span class="id">y</span> =&gt; <span class="id">x</span> ==<span class="id">b</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">y</span>) <span class="id">l</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.of_list_find_In">of_list_find_In</a></span> : <span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span> <span class="id">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.of_list">of_list</a></span> <span class="id">l</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">a</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> (<span class="id">x</span>, <span class="id">a</span>) <span class="id">l</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.of_list">of_list</a></span>; <span class="id">intros</span>. <span class="id">inv_equalities</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#find_some">List.find_some</a></span> <span class="kwd">in</span> <span class="id">Hf</span> <span class="kwd">as</span> (<span class="id">Hin</span>&amp;<span class="id">Heq</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">Heq</span>. <span class="id">now</span> <span class="id">inv</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id">find_some'</span> : <span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">xs</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.K">K</a></span> * <span class="id">A</span>)) <span class="id">x</span> <span class="id">v</span> ,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> (<span class="id">x</span>, <span class="id">v</span>) <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#find">List.find</a></span> (<span class="kwd">fun</span> <span class="id">xtc</span> =&gt; <span class="id">x</span> ==<span class="id">b</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xtc</span>) <span class="id">xs</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">x</span>, <span class="id">v</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">intros</span> * <span class="id">Hndup</span> <span class="id">Hin</span>; <span class="id">inv</span> <span class="id">Hin</span>; <span class="id">inv</span> <span class="id">Hndup</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_refl">equiv_decb_refl</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases_eqn</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Eq">Eq</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">Eq</span>. <span class="id">inv</span> <span class="id">Eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#In_InMembers">In_InMembers</a></span> <span class="kwd">in</span> <span class="id">H</span>. <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.of_list_In_find">of_list_In_find</a></span> : <span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span> <span class="id">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> (<span class="id">x</span>, <span class="id">a</span>) <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.of_list">of_list</a></span> <span class="id">l</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">a</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.of_list">of_list</a></span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id">find_some'</span>; <span class="id">eauto</span>. <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.of_list_In">of_list_In</a></span> : <span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.In">In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.of_list">of_list</a></span> <span class="id">l</span>) &lt;-&gt; <span class="id"><a href="Velus.Common.CommonList.html#InMembers">InMembers</a></span> <span class="id">x</span> <span class="id">l</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.of_list">of_list</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [<span class="id">intros</span> (?&amp;<span class="id">Hfind</span>)|<span class="id">intros</span> <span class="id">Hin</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv_equalities</span>. <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#find_some">List.find_some</a></span> <span class="kwd">in</span> <span class="id">Hf</span> <span class="kwd">as</span> (<span class="id">In</span>&amp;<span class="id">Eq</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">Eq</span>; <span class="id">inv</span> <span class="id">Eq</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonList.html#In_InMembers">In_InMembers</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#InMembers_In">InMembers_In</a></span> <span class="kwd">in</span> <span class="id">Hin</span> <span class="kwd">as</span> (?&amp;<span class="id">Hin</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#find">List.find</a></span> (<span class="kwd">fun</span> <span class="id">y</span> =&gt; <span class="id">x</span> ==<span class="id">b</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">y</span>) <span class="id">l</span>) <span class="id">eqn</span>:<span class="id">Hass</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">esplit</span>; <span class="id">eauto</span>. <span class="id">now</span> <span class="id">rewrite</span> <span class="id">Hass</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">exfalso</span>. <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#find_none">List.find_none</a></span> <span class="kwd">in</span> <span class="id">Hass</span>; [|<span class="id">eauto</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_refl">equiv_decb_refl</a></span> <span class="kwd">in</span> <span class="id">Hass</span>; <span class="id">inv</span> <span class="id">Hass</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FEnv.of_list_None">of_list_None</a></span> : <span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.of_list">of_list</a></span> <span class="id">l</span>) <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> &lt;-&gt; ~<span class="id"><a href="Velus.Common.CommonList.html#InMembers">InMembers</a></span> <span class="id">x</span> <span class="id">l</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> <span class="id">contra</span>. <span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.of_list_In">of_list_In</a></span> <span class="kwd">in</span> <span class="id">contra</span> <span class="kwd">as</span> (?&amp;?); <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.of_list">of_list</a></span> _ _) <span class="id">eqn</span>:<span class="id">Hofl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.of_list_find_In">of_list_find_In</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#In_InMembers">In_InMembers</a></span> <span class="kwd">in</span> <span class="id">Hofl</span>. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv.of_list">of_list</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv.FEnv">FEnv</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#FEnv">FEnv</a></span>.<br/>
+<br/>
+<div class="doc">Hints </div>
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">FEnv.refines_refl</span> : <span class="id">fenv</span>.<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Unfold</span> <span class="id"><a href="Velus.FunctionalEnvironment.html#map">FEnv.map</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#mapi">FEnv.mapi</a></span> : <span class="id">fenv</span>.<br/>
+<br/>
+<div class="doc">Simplification tactic </div>
+<br/>
+<span class="kwd">Ltac</span> <span class="id">simpl_fenv</span> :=<br/>
+&nbsp;&nbsp;<span class="id">autounfold</span> <span class="kwd">with</span> <span class="id">fenv</span> <span class="kwd">in</span> *;<br/>
+&nbsp;&nbsp;<span class="id">inv_equalities</span>.<br/>
+<br/>
+<div class="doc">Notations </div>
+<br/>
+<span class="id">Declare</span> <span class="kwd">Scope</span> <span class="id">fenv_scope</span>.<br/>
+<span class="kwd">Infix</span> <span class="string">"+"</span> := <span class="id"><a href="Velus.FunctionalEnvironment.html#union">FEnv.union</a></span> (<span class="id">left</span> <span class="id">associativity</span>, <span class="kwd">at</span> <span class="id">level</span> 50) : <span class="id">fenv_scope</span>.<br/>
+<span class="id">Delimit</span> <span class="kwd">Scope</span> <span class="id">fenv_scope</span> <span class="kwd">with</span> <span class="id">fenv</span>.<br/>
+<br/>
+<span class="kwd">Inductive</span> <span class="id"><a name="var_last">var_last</a></span> : <span class="kwd">Type</span> := <span class="id"><a name="Var">Var</a></span> (<span class="id">x</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) | <span class="id"><a name="Last">Last</a></span> (<span class="id">x</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>).<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="var_last_is_ident">var_last_is_ident</a></span> : <span class="kwd">forall</span> (<span class="id">y</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#var_last">var_last</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">x</span>, <span class="id">y</span> = <span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span> \/ <span class="id">y</span> = <span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">x</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">intros</span> []; <span class="id">eauto</span>. Qed.</div></details>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="var_last_ident">var_last_ident</a></span> (<span class="id">x</span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#var_last">var_last</a></span>) :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">x</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">x</span> =&gt; <span class="id">x</span><br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="id">Global</span> <span class="id">Program</span> <span class="kwd">Instance</span> <span class="id"><a name="var_eq_dec">var_eq_dec</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#var_last">var_last</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span>.<br/>
+<details>
+<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span>, <span class="id">y</span>.<br/>
+&nbsp;&nbsp;2,3:<span class="id">right</span>; <span class="id">intros</span> <span class="id">Eq</span>; <span class="id">inv</span> <span class="id">Eq</span>.<br/>
+&nbsp;&nbsp;1,2:(<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">x</span> <span class="id">x0</span>); <span class="id">subst</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id">left</span>;<span class="id">reflexivity</span>|<span class="id">right</span>; <span class="id">intros</span> <span class="id">Eq</span>; <span class="id">inv</span> <span class="id">Eq</span>; <span class="id">congruence</span>]).<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="id">Program</span> <span class="kwd">Instance</span> <span class="id"><a name="var_fenv_key">var_fenv_key</a></span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#fenv_key">FEnv.fenv_key</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html#var_last">var_last</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

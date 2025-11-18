@@ -1,0 +1,1070 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module AcyGraph</title>
+<meta name="description" content="Documentation of Coq module AcyGraph" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module AcyGraph</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.String.html">String</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html">RelationClasses</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Operators.html">Coq.Relations.Relation_Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.Arith.html">Arith.Arith</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Setoids.Setoid.html">Setoid</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Environment.html">Environment</a></span>.<br/>
+<br/>
+<br/>
+<h2> Vertices and edges </h2>
+<br/>
+<div class="doc">Vertices </div>
+<span class="kwd">Definition</span> <span class="id"><a name="V_set">V_set</a></span> : <span class="kwd">Type</span> := <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>.<br/>
+<br/>
+<div class="doc">Edges </div>
+<span class="kwd">Definition</span> <span class="id"><a name="E_set">E_set</a></span> : <span class="kwd">Type</span> := <span class="id"><a href="Velus.Environment.html#Env.t">Env.t</a></span> <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="empty_edge_set">empty_edge_set</a></span> : <span class="id"><a href="Velus.AcyGraph.html#E_set">E_set</a></span> := <span class="id"><a href="Velus.Environment.html#Env.empty">Env.empty</a></span> _.<br/>
+<br/>
+<div class="doc">There is an edge between x and y in the edge set </div>
+<span class="kwd">Definition</span> <span class="id"><a name="has_edge">has_edge</a></span> (<span class="id">e</span> : <span class="id"><a href="Velus.AcyGraph.html#E_set">E_set</a></span>) (<span class="id">x</span> <span class="id">y</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) :=<br/>
+&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">s</span>, <span class="id"><a href="Velus.Environment.html#Env.MapsTo">Env.MapsTo</a></span> <span class="id">x</span> <span class="id">s</span> <span class="id">e</span> /\ <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">y</span> <span class="id">s</span>.<br/>
+<br/>
+<div class="doc">Decision procedure to find if an edge exists </div>
+<span class="kwd">Definition</span> <span class="id"><a name="has_edgeb">has_edgeb</a></span> (<span class="id">e</span> : <span class="id"><a href="Velus.AcyGraph.html#E_set">E_set</a></span>) (<span class="id">x</span> <span class="id">y</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> (<span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">x</span> <span class="id">e</span>) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">s</span> =&gt; <span class="id"><a href="Velus.Common.Common.html#PS.mem">PS.mem</a></span> <span class="id">y</span> <span class="id">s</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span><br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="has_edgeb_spec">has_edgeb_spec</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_edgeb">has_edgeb</a></span> <span class="id">a</span> <span class="id">x</span> <span class="id">y</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> &lt;-&gt; <span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> <span class="id">a</span> <span class="id">x</span> <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> <span class="id">a</span> <span class="id">x</span> <span class="id">y</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.AcyGraph.html#has_edgeb">has_edgeb</a></span>, <span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">split</span>; [<span class="id">intros</span> <span class="id">H</span>|<span class="id">intros</span> (?&amp;<span class="id">Hmap</span>&amp;<span class="id">Hin</span>)]; <span class="id">destruct</span> (<span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> _ _) <span class="id">eqn</span>:<span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;- <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id">Hmap</span> <span class="kwd">in</span> <span class="id">Hfind</span>. <span class="id">inv</span> <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.mem_1">PSF.mem_1</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id">Hmap</span> <span class="kwd">in</span> <span class="id">Hfind</span>. <span class="id">inv</span> <span class="id">Hfind</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="nhas_edge_empty">nhas_edge_empty</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> <span class="id"><a href="Velus.AcyGraph.html#empty_edge_set">empty_edge_set</a></span> <span class="id">x</span> <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * (?&amp;<span class="id">Hmap</span>&amp;_).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.empty_mapsto_iff">Env.Props.P.F.empty_mapsto_iff</a></span> <span class="kwd">in</span> <span class="id">Hmap</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">Add a single edge </div>
+<span class="kwd">Definition</span> <span class="id"><a name="add_edge">add_edge</a></span> (<span class="id">x</span> <span class="id">y</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">a</span> : <span class="id"><a href="Velus.AcyGraph.html#E_set">E_set</a></span>) :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> (<span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">x</span> <span class="id">a</span>) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">s</span> =&gt; <span class="id"><a href="Velus.Environment.html#Env.add">Env.add</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id">y</span> <span class="id">s</span>) <span class="id">a</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id"><a href="Velus.Environment.html#Env.add">Env.add</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Common.Common.html#PS.singleton">PS.singleton</a></span> <span class="id">y</span>) <span class="id">a</span><br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="add_edge_spec">add_edge_spec</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">x</span> <span class="id">y</span> <span class="id">x'</span> <span class="id">y'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> (<span class="id"><a href="Velus.AcyGraph.html#add_edge">add_edge</a></span> <span class="id">x</span> <span class="id">y</span> <span class="id">a</span>) <span class="id">x'</span> <span class="id">y'</span> &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> <span class="id">a</span> <span class="id">x'</span> <span class="id">y'</span> \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x</span> = <span class="id">x'</span> /\ <span class="id">y</span> = <span class="id">y'</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> *. <span class="id">unfold</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge">add_edge</a></span>, <span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span>, <span class="id"><a href="Velus.Environment.html#Env.MapsTo">Env.MapsTo</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> <span class="id">H</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[(<span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> (<span class="id">s</span>&amp;<span class="id">Hm</span>&amp;<span class="id">Hin</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">x</span> <span class="id">x'</span>), (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">y</span> <span class="id">y'</span>); <span class="id">subst</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> _ <span class="id">a</span>) <span class="id">eqn</span>:<span class="id">Hfind</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|(<span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> [(?&amp;?&amp;?)|(?&amp;?)]; <span class="id">destruct</span> (<span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">x</span> <span class="id">a</span>) <span class="id">eqn</span>:<span class="id">Hfind</span>; <span class="id">subst</span>)].<br/>
+&nbsp;&nbsp;1-2:<span class="id">right</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;1-6:<span class="id">left</span>.<br/>
+&nbsp;&nbsp;1-2:<span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gss">Env.gss</a></span> <span class="kwd">in</span> <span class="id">Hm</span>; <span class="id">inv</span> <span class="id">Hm</span>.<br/>
+&nbsp;&nbsp;3-6:<span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gso">Env.gso</a></span> <span class="kwd">in</span> <span class="id">Hm</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;3,4:<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">x</span> <span class="id">x'</span>), (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">y</span> <span class="id">y'</span>); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;1-12:<span class="id">try</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gss">Env.gss</a></span>; <span class="id">try</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gso">Env.gso</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;3-8:<span class="id">eexists</span>; <span class="id">split</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;3,7:<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_1">PSF.add_1</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;4,6:<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.singleton_2">PSF.singleton_2</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_neq_iff">PSF.add_neq_iff</a></span> <span class="kwd">in</span> <span class="id">Hin</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.singleton_1">PSF.singleton_1</a></span> <span class="kwd">in</span> <span class="id">Hin</span>. <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id">H</span> <span class="kwd">in</span> <span class="id">Hfind</span>. <span class="id">inv</span> <span class="id">Hfind</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_2">PSF.add_2</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id">H</span> <span class="kwd">in</span> <span class="id">Hfind</span>. <span class="id">congruence</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="has_trans_edge">has_trans_edge</a></span> <span class="id">a</span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Operators.html#clos_trans_n1">clos_trans_n1</a></span> _ (<span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> <span class="id">a</span>).<br/>
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.AcyGraph.html#clos_trans_n1">clos_trans_n1</a></span> : <span class="id">acygraph</span>.<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Unfold</span> <span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> : <span class="id">acygraph</span>.<br/>
+<br/>
+<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="has_trans_edge_Transitive">has_trans_edge_Transitive</a></span> : <span class="kwd">forall</span> <span class="id">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> (<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> <span class="id">a</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> ? ??? <span class="id">Ha1</span> <span class="id">Ha2</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Ha2</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">acygraph</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="nhas_trans_edge_empty">nhas_trans_edge_empty</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> <span class="id"><a href="Velus.AcyGraph.html#empty_edge_set">empty_edge_set</a></span> <span class="id">x</span> <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">contra</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">contra</span>; <span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#nhas_edge_empty">nhas_edge_empty</a></span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Fact</span> <span class="id"><a name="add_edge_has_trans_edge1">add_edge_has_trans_edge1</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> (<span class="id"><a href="Velus.AcyGraph.html#add_edge">add_edge</a></span> <span class="id">x</span> <span class="id">y</span> <span class="id">a</span>) <span class="id">x</span> <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">left</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec">add_edge_spec</a></span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Fact</span> <span class="id"><a name="add_edge_has_trans_edge2">add_edge_has_trans_edge2</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">x</span> <span class="id">y</span> <span class="id">x'</span> <span class="id">y'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> <span class="id">a</span> <span class="id">x'</span> <span class="id">y'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> (<span class="id"><a href="Velus.AcyGraph.html#add_edge">add_edge</a></span> <span class="id">x</span> <span class="id">y</span> <span class="id">a</span>) <span class="id">x'</span> <span class="id">y'</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ha</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Ha</span>.<br/>
+&nbsp;&nbsp;- <span class="id">left</span>. <span class="id">rewrite</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec">add_edge_spec</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Operators.html#tn1_trans">tn1_trans</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec">add_edge_spec</a></span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">add_edge_has_trans_edge1</span> <span class="id">add_edge_has_trans_edge2</span> : <span class="id">acygraph</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="add_edge_spec2">add_edge_spec2</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">x</span> <span class="id">y</span> <span class="id">x'</span> <span class="id">y'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> (<span class="id"><a href="Velus.AcyGraph.html#add_edge">add_edge</a></span> <span class="id">x</span> <span class="id">y</span> <span class="id">a</span>) <span class="id">x'</span> <span class="id">y'</span> &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> <span class="id">a</span> <span class="id">x'</span> <span class="id">y'</span> \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x</span> = <span class="id">x'</span> /\ <span class="id">y</span> = <span class="id">y'</span>) \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x</span> = <span class="id">x'</span> /\ <span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> <span class="id">a</span> <span class="id">y</span> <span class="id">y'</span>) \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> <span class="id">a</span> <span class="id">x'</span> <span class="id">x</span> /\ <span class="id">y</span> = <span class="id">y'</span>) \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> <span class="id">a</span> <span class="id">x'</span> <span class="id">x</span> /\ <span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> <span class="id">a</span> <span class="id">y</span> <span class="id">y'</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> *; <span class="id">split</span>; <span class="id">intros</span> <span class="id">Ha</span>.<br/>
+&nbsp;&nbsp;- <span class="id">induction</span> <span class="id">Ha</span>; <span class="id">try</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec">add_edge_spec</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> [?|(?&amp;?)]; <span class="id">subst</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">acygraph</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> [?|(?&amp;?)];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">IHHa</span> <span class="kwd">as</span> [?|[(?&amp;?)|[(?&amp;?)|[(?&amp;?)|(?&amp;?)]]]];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">subst</span>; <span class="id">eauto</span> 10 <span class="kwd">with</span> <span class="id">acygraph</span>.<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">Ha</span> <span class="kwd">as</span> [?|[(?&amp;?)|[(?&amp;?)|[(?&amp;?)|(?&amp;?)]]]]; <span class="id">subst</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">acygraph</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">etransitivity</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">acygraph</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">etransitivity</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">acygraph</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">repeat</span> (<span class="id">etransitivity</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">acygraph</span>).<br/>
+Qed.</div></details>
+<br/>
+<h2> Acyclic graph </h2>
+<br/>
+<div class="doc">Transitive, Directed Acyclic Graph </div>
+<span class="kwd">Inductive</span> <span class="id"><a name="AcyGraph">AcyGraph</a></span> : <span class="id"><a href="Velus.AcyGraph.html#V_set">V_set</a></span> -&gt; <span class="id"><a href="Velus.AcyGraph.html#E_set">E_set</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+| <span class="id"><a name="AGempty">AGempty</a></span> : <span class="id">AcyGraph</span> <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span> <span class="id"><a href="Velus.AcyGraph.html#empty_edge_set">empty_edge_set</a></span><br/>
+| <span class="id"><a name="AGaddv">AGaddv</a></span> : <span class="kwd">forall</span> <span class="id">v</span> <span class="id">e</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">AcyGraph</span> <span class="id">v</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">AcyGraph</span> (<span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id">x</span> <span class="id">v</span>) <span class="id">e</span><br/>
+| <span class="id"><a name="AGadda">AGadda</a></span> : <span class="kwd">forall</span> <span class="id">v</span> <span class="id">e</span> <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">AcyGraph</span> <span class="id">v</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x</span> &lt;&gt; <span class="id">y</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">y</span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> <span class="id">e</span> <span class="id">y</span> <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">AcyGraph</span> <span class="id">v</span> (<span class="id"><a href="Velus.AcyGraph.html#add_edge">add_edge</a></span> <span class="id">x</span> <span class="id">y</span> <span class="id">e</span>).<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> : <span class="id">acygraph</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="vertices">vertices</a></span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) : <span class="id"><a href="Velus.AcyGraph.html#V_set">V_set</a></span> := <span class="id">v</span>.<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="edges">edges</a></span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) : <span class="id"><a href="Velus.AcyGraph.html#E_set">E_set</a></span> := <span class="id">e</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="is_vertex">is_vertex</a></span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) (<span class="id">x</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> <span class="id">v</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="is_edge">is_edge</a></span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">x</span> <span class="id">y</span> : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> <span class="id">e</span> <span class="id">x</span> <span class="id">y</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="nis_edge_Gempty">nis_edge_Gempty</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;~<span class="id"><a href="Velus.AcyGraph.html#is_edge">is_edge</a></span> <span class="id"><a href="Velus.AcyGraph.html#AGempty">AGempty</a></span> <span class="id">x</span> <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * (?&amp;<span class="id">contra</span>&amp;_).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.empty_mapsto_iff">Env.Props.P.F.empty_mapsto_iff</a></span> <span class="kwd">in</span> <span class="id">contra</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="is_trans_edge">is_trans_edge</a></span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">x</span> <span class="id">y</span> : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> <span class="id">e</span> <span class="id">x</span> <span class="id">y</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="nis_trans_edge_Gempty">nis_trans_edge_Gempty</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id"><a href="Velus.AcyGraph.html#AGempty">AGempty</a></span> <span class="id">x</span> <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">contra</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">contra</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#nhas_trans_edge_empty">nhas_trans_edge_empty</a></span> <span class="kwd">in</span> <span class="id">contra</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<h2> Major properties of is_edge : transitivity, irreflexivity, asymmetry </h2>
+<br/>
+<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="is_trans_edge_Transitive">is_trans_edge_Transitive</a></span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> (<span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#has_trans_edge_Transitive">has_trans_edge_Transitive</a></span>; <span class="id">eauto</span>. Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="has_edge_irrefl">has_edge_irrefl</a></span> : <span class="kwd">forall</span> <span class="id">v</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Irreflexive">Irreflexive</a></span> (<span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> <span class="id">e</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="kwd">fix</span> <span class="id">irrefl</span> 3.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">g</span>. <span class="id">destruct</span> <span class="id">g</span>.<br/>
+&nbsp;&nbsp;- <span class="id">intros</span> ? <span class="id">Ha</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#nis_edge_Gempty">nis_edge_Gempty</a></span> <span class="kwd">in</span> <span class="id">Ha</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">irrefl</span> _ _ <span class="id">g</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">irrefl</span> _ _ <span class="id">g</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x'</span> <span class="id">Hedge</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec">add_edge_spec</a></span> <span class="kwd">in</span> <span class="id">Hedge</span> <span class="kwd">as</span> [?|(?&amp;?)]; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">irrefl</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">congruence</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="is_edge_Irreflexive">is_edge_Irreflexive</a></span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Irreflexive">Irreflexive</a></span> (<span class="id"><a href="Velus.AcyGraph.html#is_edge">is_edge</a></span> <span class="id">g</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#has_edge_irrefl">has_edge_irrefl</a></span>; <span class="id">eauto</span>. Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="is_trans_edge_Asymmetric">is_trans_edge_Asymmetric</a></span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Asymmetric">Asymmetric</a></span> (<span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">revert</span> <span class="id">v</span> <span class="id">e</span> <span class="id">g</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">fix</span> <span class="id">trans</span> 3.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> *. <span class="id">destruct</span> <span class="id">g</span>.<br/>
+&nbsp;&nbsp;- <span class="id">intros</span> ? ? ? <span class="id">Ha1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exfalso</span>. <span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#nhas_trans_edge_empty">nhas_trans_edge_empty</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">trans</span> _ _ <span class="id">g</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">trans</span> _ _ <span class="id">g</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x'</span> <span class="id">y'</span> <span class="id">Hedge1</span> <span class="id">Hedge2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec2">add_edge_spec2</a></span> <span class="kwd">in</span> <span class="id">Hedge1</span>; <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec2">add_edge_spec2</a></span> <span class="kwd">in</span> <span class="id">Hedge2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Hedge1</span> <span class="kwd">as</span> [?|[(?&amp;?)|[(?&amp;?)|[(?&amp;?)|(?&amp;?)]]]];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Hedge2</span> <span class="kwd">as</span> [?|[(?&amp;?)|[(?&amp;?)|[(?&amp;?)|(?&amp;?)]]]]; <span class="id">subst</span>; <span class="id">eauto</span> 10.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1-7:<span class="id">eapply</span> <span class="id">n0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1-7:<span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="is_trans_edge_Irreflexive">is_trans_edge_Irreflexive</a></span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) :<br/>
+&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Irreflexive">Irreflexive</a></span> (<span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">revert</span> <span class="id">v</span> <span class="id">e</span> <span class="id">g</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">fix</span> <span class="id">irrefl</span> 3.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">x</span>. <span class="id">destruct</span> <span class="id">g</span>.<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#nis_trans_edge_Gempty">nis_trans_edge_Gempty</a></span>.<br/>
+&nbsp;&nbsp;- <span class="id">eapply</span> (<span class="id">irrefl</span> _ _ <span class="id">g</span>).<br/>
+&nbsp;&nbsp;- <span class="id">intros</span> <span class="id">contra</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">irrefl</span> _ _ <span class="id">g</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec2">add_edge_spec2</a></span> <span class="kwd">in</span> <span class="id">contra</span> <span class="kwd">as</span> [?|[(?&amp;?)|[(?&amp;?)|[(?&amp;?)|(?&amp;?)]]]]; <span class="id">subst</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">irrefl</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">n0</span>. <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="is_edge_is_vertex">is_edge_is_vertex</a></span> : <span class="kwd">forall</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#is_edge">is_edge</a></span> <span class="id">g</span> <span class="id">x</span> <span class="id">y</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#is_vertex">is_vertex</a></span> <span class="id">g</span> <span class="id">x</span> /\ <span class="id"><a href="Velus.AcyGraph.html#is_vertex">is_vertex</a></span> <span class="id">g</span> <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="kwd">fix</span> <span class="id">is_edge_is_vertex</span> 3.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hisedge</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">g</span>; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;- <span class="id">exfalso</span>. <span class="id">destruct</span> <span class="id">Hisedge</span> <span class="kwd">as</span> (?&amp;<span class="id">contra</span>&amp;_).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.empty_mapsto_iff">Env.Props.P.F.empty_mapsto_iff</a></span> <span class="kwd">in</span> <span class="id">contra</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">is_edge_is_vertex</span> _ _ <span class="id">g</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">is_edge_is_vertex</span> <span class="kwd">in</span> <span class="id">Hisedge</span> <span class="kwd">as</span> (<span class="id">Hvx</span>&amp;<span class="id">Hvy</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_2">PSF.add_2</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">is_edge_is_vertex</span> _ _ <span class="id">g</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.AcyGraph.html#is_edge">is_edge</a></span> <span class="kwd">in</span> <span class="id">Hisedge</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec">add_edge_spec</a></span> <span class="kwd">in</span> <span class="id">Hisedge</span> <span class="kwd">as</span> [?|(?&amp;?)]; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">is_edge_is_vertex</span> <span class="kwd">in</span> <span class="id">H</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Corollary</span> <span class="id"><a name="is_trans_edge_is_vertex">is_trans_edge_is_vertex</a></span> : <span class="kwd">forall</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span> <span class="id">x</span> <span class="id">y</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#is_vertex">is_vertex</a></span> <span class="id">g</span> <span class="id">x</span> /\ <span class="id"><a href="Velus.AcyGraph.html#is_vertex">is_vertex</a></span> <span class="id">g</span> <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ha</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Ha</span>.<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#is_edge_is_vertex">is_edge_is_vertex</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">IHHa</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#is_edge_is_vertex">is_edge_is_vertex</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> (_&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="is_trans_edge_neq">is_trans_edge_neq</a></span> : <span class="kwd">forall</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span> <span class="id">x</span> <span class="id">y</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x</span> &lt;&gt; <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ha</span> <span class="id">contra</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#is_trans_edge_Irreflexive">is_trans_edge_Irreflexive</a></span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Local</span> <span class="kwd">Ltac</span> <span class="id">destruct_conj_disj</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span> : _ /\ _ |- _ =&gt; <span class="id">destruct</span> <span class="id">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span> : _ \/ _ |- _ =&gt; <span class="id">destruct</span> <span class="id">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>; <span class="id">subst</span>.<br/>
+<br/>
+<div class="doc">is_trans_edge is decidable ! </div>
+<span class="kwd">Lemma</span> <span class="id"><a name="is_trans_edge_dec">is_trans_edge_dec</a></span> : <span class="kwd">forall</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">y</span>, (<span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span> <span class="id">x</span> <span class="id">y</span>) \/ (~ <span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span> <span class="id">x</span> <span class="id">y</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="kwd">fix</span> <span class="id">is_trans_edge_dec</span> 3.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> *. <span class="id">destruct</span> <span class="id">g</span>.<br/>
+&nbsp;&nbsp;- <span class="id">right</span>. <span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#nis_trans_edge_Gempty">nis_trans_edge_Gempty</a></span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">is_trans_edge_dec</span> _ _ <span class="id">g</span> <span class="id">x</span> <span class="id">y</span>) <span class="kwd">as</span> [?|?]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">is_trans_edge_dec</span> _ _ <span class="id">g</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">is_trans_edge_dec</span> <span class="id">x</span> <span class="id">y</span>), (<span class="id">is_trans_edge_dec</span> <span class="id">x</span> <span class="id">x0</span>), (<span class="id">is_trans_edge_dec</span> <span class="id">y0</span> <span class="id">y</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">y</span> <span class="id">y0</span>), (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">x</span> <span class="id">x0</span>); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1-32: <span class="id">try</span> <span class="id">solve</span> [<span class="id">left</span>; <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec2">add_edge_spec2</a></span>; <span class="id">auto</span> 10].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1-7:(<span class="id">right</span>; <span class="id">intro</span> <span class="id">contra</span>; <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec2">add_edge_spec2</a></span> <span class="kwd">in</span> <span class="id">contra</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">destruct_conj_disj</span>; <span class="id">auto</span>).<br/>
+Qed.</div></details>
+<br/>
+<h2> Building an acyclic graph </h2>
+<div class="doc">We can try to build an acyclic graph from any graph
+    (defined as a mapping from vertices to their direct predecessors)
+    We iterate through the list of vertices, trying to add some that are
+    not already in the graph, and which predecessors are all already in the graph.
+    This algorithm only succeeds if the graph is indeed acyclic, and produces a witness of that fact.
+ </div>
+<br/>
+<span class="kwd">From</span> <span class="id">compcert</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html">common.Errors</a></span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="add_after">add_after</a></span> (<span class="id">preds</span> : <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>) (<span class="id">x</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">a</span> : <span class="id"><a href="Velus.AcyGraph.html#E_set">E_set</a></span>) : <span class="id"><a href="Velus.AcyGraph.html#E_set">E_set</a></span> :=<br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.fold">PS.fold</a></span> (<span class="kwd">fun</span> <span class="id">p</span> <span class="id">a</span> =&gt; <span class="id"><a href="Velus.AcyGraph.html#add_edge">add_edge</a></span> <span class="id">p</span> <span class="id">x</span> <span class="id">a</span>) <span class="id">preds</span> <span class="id">a</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="add_after_spec">add_after_spec</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">preds</span> <span class="id">y</span> <span class="id">x'</span> <span class="id">y'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> (<span class="id"><a href="Velus.AcyGraph.html#add_after">add_after</a></span> <span class="id">preds</span> <span class="id">y</span> <span class="id">a</span>) <span class="id">x'</span> <span class="id">y'</span> &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> <span class="id">a</span> <span class="id">x'</span> <span class="id">y'</span> \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x'</span> <span class="id">preds</span> /\ <span class="id">y</span> = <span class="id">y'</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">Local</span> <span class="kwd">Ltac</span> <span class="id">simpl_ps_add</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.Common.html#PSP.Add">PSP.Add</a></span> <span class="kwd">in</span> *;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">Hadd</span>: (<span class="kwd">forall</span> <span class="id">y</span>, <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">y</span> ?<span class="id">s2</span> &lt;-&gt; ?<span class="id">p</span> = <span class="id">y</span> \/ <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">y</span> ?<span class="id">s1</span>), <span class="id">Hin</span>: <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> ?<span class="id">x</span> ?<span class="id">s1</span> |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#or_intror">or_intror</a></span> <span class="kwd">in</span> <span class="id">Hin</span>; <span class="id">erewrite</span> &lt;- <span class="id">Hadd</span> <span class="kwd">in</span> <span class="id">Hin</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">Hadd</span>: (<span class="kwd">forall</span> <span class="id">y</span>, <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">y</span> ?<span class="id">s2</span> &lt;-&gt; ?<span class="id">x</span> = <span class="id">y</span> \/ <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">y</span> ?<span class="id">s1</span>) |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Hadd</span> <span class="id">x</span>) <span class="kwd">as</span> (_&amp;?)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id">idtac</span><br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> <span class="id">preds</span> <span class="id">a</span> <span class="id">y</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.AcyGraph.html#add_after">add_after</a></span>. <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSP.fold_rec">PSP.fold_rec</a></span>.<br/>
+&nbsp;&nbsp;- <span class="id">intros</span> * <span class="id">Hemp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [?|(<span class="id">Hin</span>&amp;?)]; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">Hemp</span> _ <span class="id">Hin</span>).<br/>
+&nbsp;&nbsp;- <span class="id">intros</span> <span class="id">p</span> * <span class="id">Hin</span> <span class="id">Hnin</span> <span class="id">Hadd</span> <span class="id">Hrec</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec">add_edge_spec</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> [?|(?&amp;?)]; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id">Hrec</span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> [?|(?&amp;?)]; <span class="id">subst</span>; <span class="id">auto</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.Common.Common.html#PS.Exists">PS.Exists</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">simpl_ps_add</span>; <span class="id">eauto</span> 10.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">repeat</span> <span class="id">simpl_ps_add</span>; <span class="id">eauto</span> 10.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id">Hrec</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">p</span> <span class="id">x'</span>); <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Hrec</span> <span class="id">x'</span> <span class="id">y'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">left</span>. <span class="id">rewrite</span> <span class="id">Hrec</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">right</span>. <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Hadd</span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> [?|?]; <span class="id">auto</span>. <span class="id">congruence</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Corollary</span> <span class="id"><a name="add_after_has_edge1">add_after_has_edge1</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">x</span> <span class="id">y</span> <span class="id">x'</span> <span class="id">preds</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> <span class="id">a</span> <span class="id">x</span> <span class="id">y</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> (<span class="id"><a href="Velus.AcyGraph.html#add_after">add_after</a></span> <span class="id">preds</span> <span class="id">x'</span> <span class="id">a</span>) <span class="id">x</span> <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ha</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.AcyGraph.html#add_after_spec">add_after_spec</a></span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Corollary</span> <span class="id"><a name="add_after_has_edge2">add_after_has_edge2</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">x</span> <span class="id">y</span> <span class="id">preds</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">y</span> <span class="id">preds</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> (<span class="id"><a href="Velus.AcyGraph.html#add_after">add_after</a></span> <span class="id">preds</span> <span class="id">x</span> <span class="id">a</span>) <span class="id">y</span> <span class="id">x</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.AcyGraph.html#add_after_spec">add_after_spec</a></span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="add_after_AcyGraph">add_after_AcyGraph</a></span> : <span class="kwd">forall</span> <span class="id">v</span> <span class="id">e</span> <span class="id">x</span> <span class="id">preds</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> <span class="id">preds</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.For_all">PS.For_all</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> <span class="id">v</span>) <span class="id">preds</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.For_all">PS.For_all</a></span> (<span class="kwd">fun</span> <span class="id">p</span> =&gt; ~<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> <span class="id">e</span> <span class="id">x</span> <span class="id">p</span>) <span class="id">preds</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> (<span class="id"><a href="Velus.AcyGraph.html#add_after">add_after</a></span> <span class="id">preds</span> <span class="id">x</span> <span class="id">e</span>) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.For_all">PS.For_all</a></span> (<span class="kwd">fun</span> <span class="id">p</span> =&gt; ~<span class="id"><a href="Velus.AcyGraph.html#has_trans_edge">has_trans_edge</a></span> (<span class="id"><a href="Velus.AcyGraph.html#add_after">add_after</a></span> <span class="id">preds</span> <span class="id">x</span> <span class="id">e</span>) <span class="id">x</span> <span class="id">p</span>) <span class="id">preds</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin1</span> <span class="id">Hnin2</span> <span class="id">Hpreds</span> <span class="id">Hna</span> <span class="id">Hacy</span>.<br/>
+&nbsp;&nbsp;<span class="id">revert</span> <span class="id">Hacy</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.AcyGraph.html#add_after">add_after</a></span>. <span class="id">eapply</span> <span class="id"><a href="Velus.Common.Common.html#PSP.fold_rec_nodep">PSP.fold_rec_nodep</a></span>.<br/>
+&nbsp;&nbsp;- <span class="id">intros</span> * <span class="id">Hacy</span>; <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">intros</span> * <span class="id">Hin'</span> <span class="id">Hrec</span> <span class="id">Hacy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Hrec</span> <span class="id">Hacy</span>) <span class="kwd">as</span> (<span class="id">Hacy'</span>&amp;<span class="id">Hna'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#AGadda">AGadda</a></span>|]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intro</span> <span class="id">contra</span>; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> ? <span class="id">Hin</span> <span class="id">contra</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Hna'</span> <span class="kwd">in</span> <span class="id">Hin</span>. <span class="id">apply</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec2">add_edge_spec2</a></span> <span class="kwd">in</span> <span class="id">contra</span>. <span class="id">repeat</span> <span class="id">destruct_conj_disj</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">exfalso</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">exfalso</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Hna'</span> <span class="kwd">in</span> <span class="id">Hin'</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="acgraph_of_graph">acgraph_of_graph</a></span> <span class="id">g</span> <span class="id">v</span> <span class="id">e</span> :=<br/>
+&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Environment.html#Env.In">Env.In</a></span> <span class="id">x</span> <span class="id">g</span> &lt;-&gt; <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> <span class="id">v</span>) /\<br/>
+&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span> <span class="id">y</span>, (<span class="kwd">exists</span> <span class="id">xs</span>, <span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">y</span> <span class="id">g</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">xs</span> /\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">xs</span>) -&gt; <span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> <span class="id">e</span> <span class="id">x</span> <span class="id">y</span>).<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="Dfs">Dfs</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="Dfs.graph">graph</a></span> : <span class="id"><a href="Velus.Environment.html#Env.t">Env.t</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#positive">positive</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="dfs_state">dfs_state</a></span> := { <span class="id">p</span> | <span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> <span class="id">p</span> -&gt; <span class="id"><a href="Velus.Environment.html#Env.In">Env.In</a></span> <span class="id">x</span> <span class="id"><a href="Velus.AcyGraph.html#Dfs.graph">graph</a></span> }.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="proj1_dfs_state">proj1_dfs_state</a></span> (<span class="id">s</span> : <span class="id"><a href="Velus.AcyGraph.html#dfs_state">dfs_state</a></span>) := <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> <span class="id">s</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Coercion</span> <span class="id">proj1_dfs_state</span> : <span class="id">dfs_state</span> &gt;-&gt; <span class="id">PS.t</span>.<br/>
+&nbsp;&nbsp;<span class="id">Extraction</span> <span class="id">Inline</span> <span class="id">proj1_dfs_state</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Program</span> <span class="kwd">Definition</span> <span class="id"><a name="empty_dfs_state">empty_dfs_state</a></span> : <span class="id"><a href="Velus.AcyGraph.html#dfs_state">dfs_state</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#exist">exist</a></span> _ <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span> _.<br/>
+&nbsp;&nbsp;<span class="id">Extraction</span> <span class="id">Inline</span> <span class="id">empty_dfs_state</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="cardinals_in_progress_le_graph">cardinals_in_progress_le_graph</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">a</span> : <span class="id"><a href="Velus.AcyGraph.html#dfs_state">dfs_state</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.cardinal">PS.cardinal</a></span> <span class="id">a</span> &lt;= <span class="id"><a href="Velus.Environment.html#Env.cardinal">Env.cardinal</a></span> <span class="id"><a href="Velus.AcyGraph.html#Dfs.graph">graph</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [<span class="id">p</span> <span class="id">Hag</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.cardinal_1">Env.cardinal_1</a></span>, <span class="id"><a href="Velus.Common.Common.html#PS.cardinal_spec">PS.cardinal_spec</a></span>. <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-(<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> (<span class="id"><a href="Velus.Common.Common.html#PS.elements">PS.elements</a></span> <span class="id">p</span>)) <span class="kwd">as</span> <span class="id">Hnds</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">by</span> (<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDup_NoDupA">NoDup_NoDupA</a></span>; <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PS.elements_spec2w">PS.elements_spec2w</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> (<span class="id"><a href="Velus.Environment.html#Env.elements">Env.elements</a></span> <span class="id"><a href="Velus.AcyGraph.html#Dfs.graph">graph</a></span>)) <span class="kwd">as</span> <span class="id">Hndg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">by</span> (<span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.NoDupMembers_elements">Env.NoDupMembers_elements</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#fst_NoDupMembers">fst_NoDupMembers</a></span> <span class="kwd">in</span> <span class="id">Hndg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.Common.html#PSF.elements_iff">PSF.elements_iff</a></span> <span class="kwd">in</span> <span class="id">Hag</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.In_Members">Env.In_Members</a></span> <span class="kwd">in</span> <span class="id">Hag</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#fst_InMembers">fst_InMembers</a></span> <span class="kwd">in</span> <span class="id">Hag</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">revert</span> <span class="id">Hag</span> <span class="id">Hnds</span> <span class="id">Hndg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">generalize</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Environment.html#Env.elements">Env.elements</a></span> <span class="id"><a href="Velus.AcyGraph.html#Dfs.graph">graph</a></span>)) <span class="kwd">as</span> <span class="id">g</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">generalize</span> (<span class="id"><a href="Velus.Common.Common.html#PS.elements">PS.elements</a></span> <span class="id">p</span>) <span class="kwd">as</span> <span class="id">n</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span> <span class="kwd">as</span> [|<span class="id">x</span> <span class="id">n</span> <span class="id">IH</span>]; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.le_0_l">Nat.le_0_l</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">g</span> <span class="id">Hin</span> <span class="id">NDn</span> <span class="id">NDg</span>. <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">NDn</span> <span class="kwd">as</span> [|?? <span class="id">Hnx</span> <span class="id">NDn'</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">g</span>) <span class="kwd">as</span> <span class="id">Hxg</span> <span class="kwd">by</span> <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_split">in_split</a></span> <span class="kwd">in</span> <span class="id">Hxg</span> <span class="kwd">as</span> (<span class="id">g1</span> &amp; <span class="id">g2</span> &amp; <span class="id">Hg</span>); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_middle">Permutation.Permutation_middle</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Peano.html#le_n_S">le_n_S</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_middle">Permutation.Permutation_middle</a></span> <span class="kwd">in</span> <span class="id">NDg</span>; <span class="id">inv</span> <span class="id">NDg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IH</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">y</span> <span class="id">Hyi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> (<span class="id"><a href="Velus.Common.CommonList.html#In_weaken_cons">In_weaken_cons</a></span> <span class="id">x</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_middle">Permutation.Permutation_middle</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>; <span class="id">subst</span>. <span class="id">apply</span> <span class="id">Hnx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.SetoidList.html#InA_alt">SetoidList.InA_alt</a></span> <span class="kwd">in</span> <span class="id">Hyi</span> <span class="kwd">as</span> (<span class="id">y</span> &amp; <span class="id">Heq</span> &amp; <span class="id">Hyin</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="num_remaining">num_remaining</a></span> (<span class="id">s</span> : <span class="id"><a href="Velus.AcyGraph.html#dfs_state">dfs_state</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Environment.html#Env.cardinal">Env.cardinal</a></span> <span class="id"><a href="Velus.AcyGraph.html#Dfs.graph">graph</a></span> - <span class="id"><a href="Velus.Common.Common.html#PS.cardinal">PS.cardinal</a></span> <span class="id">s</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="deeper">deeper</a></span> : <span class="id"><a href="Velus.AcyGraph.html#dfs_state">dfs_state</a></span> -&gt; <span class="id"><a href="Velus.AcyGraph.html#dfs_state">dfs_state</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.Wf_nat.html#ltof">ltof</a></span> _ <span class="id"><a href="Velus.AcyGraph.html#num_remaining">num_remaining</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="add_deeper">add_deeper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> (<span class="id">s</span> : <span class="id"><a href="Velus.AcyGraph.html#dfs_state">dfs_state</a></span>) <span class="id">P</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> <span class="id">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#deeper">deeper</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#exist">exist</a></span> _ (<span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id">x</span> <span class="id">s</span>) <span class="id">P</span>) <span class="id">s</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.AcyGraph.html#deeper">deeper</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.Wf_nat.html#ltof">ltof</a></span>, <span class="id"><a href="Velus.AcyGraph.html#num_remaining">num_remaining</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> <span class="id">s</span> <span class="id">Hprog</span> <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.AcyGraph.html#cardinals_in_progress_le_graph">cardinals_in_progress_le_graph</a></span> <span class="id">s</span>) <span class="kwd">as</span> <span class="id">Hag</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.AcyGraph.html#cardinals_in_progress_le_graph">cardinals_in_progress_le_graph</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#exist">exist</a></span> _ (<span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id">x</span> <span class="id">s</span>) <span class="id">Hprog</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#PSP.add_cardinal_2">PSP.add_cardinal_2</a></span> <span class="kwd">with</span> (1:=<span class="id">Hnin</span>) <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">lia</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="visited">visited</a></span> (<span class="id">p</span> : <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>) (<span class="id">v</span> : <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> <span class="id">p</span> -&gt; ~<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> <span class="id">v</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="kwd">exists</span> <span class="id">e</span>, <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ (<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">zs</span>, <span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">x</span> <span class="id"><a href="Velus.AcyGraph.html#Dfs.graph">graph</a></span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">zs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ (<span class="kwd">forall</span> <span class="id">y</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">y</span> <span class="id">zs</span> -&gt; <span class="id"><a href="Velus.AcyGraph.html#has_edge">has_edge</a></span> <span class="id">e</span> <span class="id">y</span> <span class="id">x</span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="none_visited">none_visited</a></span> : { <span class="id">v</span> | <span class="id"><a href="Velus.AcyGraph.html#visited">visited</a></span> <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span> <span class="id">v</span> }.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonPS.html#not_In_empty">not_In_empty</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id"><a href="Velus.AcyGraph.html#empty_edge_set">empty_edge_set</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonPS.html#not_In_empty">not_In_empty</a></span> <span class="kwd">with</span> <span class="id">acygraph</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span>. <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonPS.html#not_In_empty">not_In_empty</a></span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;Defined.</div></details>
+&nbsp;&nbsp;<span class="id">Extraction</span> <span class="id">Inline</span> <span class="id">none_visited</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="pre_visited_add">pre_visited_add</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">inp</span>} <span class="id">x</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">v</span> : { <span class="id">v</span> | <span class="id"><a href="Velus.AcyGraph.html#visited">visited</a></span> <span class="id">inp</span> <span class="id">v</span> }),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> <span class="id">v</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">v'</span> | <span class="id"><a href="Velus.AcyGraph.html#visited">visited</a></span> (<span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id">x</span> <span class="id">inp</span>) <span class="id">v'</span> &amp; <span class="id">v'</span> = (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> <span class="id">v</span>) }.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">inp</span> <span class="id">x</span> (<span class="id">v</span>, (<span class="id">Pv1</span> &amp; <span class="id">Pv2</span>)) <span class="id">Hnxp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *. <span class="kwd">exists</span> <span class="id">v</span>; <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">y</span> <span class="id">Hyp</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PS.add_spec">PS.add_spec</a></span> <span class="kwd">in</span> <span class="id">Hyp</span> <span class="kwd">as</span> [<span class="id">HH</span>|<span class="id">HH</span>]; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Defined.</div></details>
+&nbsp;&nbsp;<span class="id">Extraction</span> <span class="id">Inline</span> <span class="id">pre_visited_add</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="fold_dfs_props">fold_dfs_props</a></span> : <span class="kwd">forall</span> <span class="id">zs</span> <span class="id">p</span> (<span class="id">v</span>: {<span class="id">v</span> | <span class="id"><a href="Velus.AcyGraph.html#visited">visited</a></span> <span class="id">p</span> <span class="id">v</span>}) <span class="id">v'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">dfs</span> : <span class="kwd">forall</span> (<span class="id">x</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#positive">positive</a></span>) (<span class="id">v</span> : {<span class="id">v</span> | <span class="id"><a href="Velus.AcyGraph.html#visited">visited</a></span> <span class="id">p</span> <span class="id">v</span>}), <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#res">res</a></span> {<span class="id">v'</span> | <span class="id"><a href="Velus.AcyGraph.html#visited">visited</a></span> <span class="id">p</span> <span class="id">v'</span> &amp; <span class="id"><a href="Velus.Common.CommonPS.html#In_ps">In_ps</a></span> [<span class="id">x</span>] <span class="id">v'</span> /\ <span class="id"><a href="Velus.Common.Common.html#PS.Subset">PS.Subset</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> <span class="id">v</span>) <span class="id">v'</span>}),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left">fold_left</a></span> (<span class="kwd">fun</span> <span class="id">v</span> <span class="id">w</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#bind">Errors.bind</a></span> <span class="id">v</span> (<span class="kwd">fun</span> <span class="id">v</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#bind">Errors.bind</a></span> (<span class="id">dfs</span> <span class="id">w</span> <span class="id">v</span>) (<span class="kwd">fun</span> <span class="id">v'</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#sig_of_sig2">sig_of_sig2</a></span> <span class="id">v'</span>)))) <span class="id">zs</span> (<span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> <span class="id">v</span>) = <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> <span class="id">v'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonPS.html#In_ps">In_ps</a></span> <span class="id">zs</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> <span class="id">v'</span>) /\ <span class="id"><a href="Velus.Common.Common.html#PS.Subset">PS.Subset</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> <span class="id">v</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> <span class="id">v'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfold</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.Common.Common.html#ofold_left">ofold_left</a></span>, <span class="id"><a href="Velus.Common.CommonPS.html#In_ps">In_ps</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-(<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#rev_involutive">List.rev_involutive</a></span> <span class="id">zs</span>), <span class="id"><a href="Velus.Common.CommonList.html#fold_right_rev_left">fold_right_rev_left</a></span> <span class="kwd">in</span> <span class="id">Hfold</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_rev">Forall_rev</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">revert</span> <span class="id">v</span> <span class="id">v'</span> <span class="id">dfs</span> <span class="id">Hfold</span>. <span class="id">induction</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#rev">rev</a></span> <span class="id">zs</span>); <span class="id">intros</span> * <span class="id">Heq</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Heq</span>. <span class="id">easy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#bind_inversion">bind_inversion</a></span> <span class="kwd">in</span> <span class="id">Heq</span> <span class="kwd">as</span> (?&amp;<span class="id">Heq1</span>&amp;<span class="id">Heq2</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">IHl</span> _ _ _ <span class="id">Heq1</span>) <span class="kwd">as</span> (?&amp;<span class="id">Hsub</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#bind_inversion">bind_inversion</a></span> <span class="kwd">in</span> <span class="id">Heq2</span> <span class="kwd">as</span> ([?? (?&amp;<span class="id">Hsub'</span>)]&amp;<span class="id">Hd</span>&amp;<span class="id">Heq</span>). <span class="id">inv</span> <span class="id">Heq</span>. <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonPS.html#In_ps_singleton">In_ps_singleton</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">simpl_Forall</span>. <span class="id">eapply</span> <span class="id">Hsub'</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="Dfs.msg_of">msg_of</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="Dfs.msg_of.msgs">msgs</a></span> : <span class="id"><a href="Velus.Environment.html#Env.t">Env.t</a></span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#errmsg">errmsg</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="msg_of_label">msg_of_label</a></span> (<span class="id">x</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">x</span> <span class="id"><a href="Velus.AcyGraph.html#Dfs.msg_of.msgs">msgs</a></span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">msg</span> =&gt; <span class="id">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#msg">msg</a></span> <span class="string">"?"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id">msg_of_cycle'</span> (<span class="id">stop</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">s</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">s</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; []<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">x</span>::<span class="id">tl</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> <span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">x</span> <span class="id">stop</span> <span class="kwd">then</span> <span class="id"><a href="Velus.AcyGraph.html#msg_of_label">msg_of_label</a></span> <span class="id">x</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">else</span> (<span class="id"><a href="Velus.AcyGraph.html#msg_of_label">msg_of_label</a></span> <span class="id">x</span> ++ <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#MSG">MSG</a></span> <span class="string">" -&gt; "</span> :: <span class="id">msg_of_cycle'</span> <span class="id">stop</span> <span class="id">tl</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="msg_of_cycle">msg_of_cycle</a></span> (<span class="id">s</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">s</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; []<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">x</span>::<span class="id">tl</span> =&gt; <span class="id"><a href="Velus.AcyGraph.html#msg_of_label">msg_of_label</a></span> <span class="id">x</span> ++ <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#MSG">MSG</a></span> <span class="string">" -&gt; "</span> :: <span class="id">msg_of_cycle'</span> <span class="id">x</span> <span class="id">tl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.AcyGraph.html#Dfs.msg_of">msg_of</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="Dfs.get_msgs">get_msgs</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#unit">unit</a></span> -&gt; <span class="id"><a href="Velus.Environment.html#Env.t">Env.t</a></span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#errmsg">errmsg</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Program</span> <span class="kwd">Fixpoint</span> <span class="id">dfs'</span> (<span class="id">s</span> : <span class="id"><a href="Velus.AcyGraph.html#dfs_state">dfs_state</a></span>) (<span class="id">stack</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#positive">positive</a></span>) (<span class="id">x</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#positive">positive</a></span>) (<span class="id">v</span> : { <span class="id">v</span> | <span class="id"><a href="Velus.AcyGraph.html#visited">visited</a></span> <span class="id">s</span> <span class="id">v</span> })<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{<span class="id">measure</span> (<span class="id"><a href="Velus.AcyGraph.html#num_remaining">num_remaining</a></span> <span class="id">s</span>)} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#res">res</a></span> { <span class="id">v'</span> | <span class="id"><a href="Velus.AcyGraph.html#visited">visited</a></span> <span class="id">s</span> <span class="id">v'</span> &amp; <span class="id"><a href="Velus.Common.CommonPS.html#In_ps">In_ps</a></span> [<span class="id">x</span>] <span class="id">v'</span> /\ <span class="id"><a href="Velus.Common.Common.html#PS.Subset">PS.Subset</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> <span class="id">v</span>) <span class="id">v'</span> } :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id"><a href="Velus.Common.Common.html#PS.mem">PS.mem</a></span> <span class="id">x</span> <span class="id">s</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#Error">Error</a></span> (<span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#MSG">MSG</a></span> <span class="string">"dependency cycle : "</span> :: <span class="id"><a href="Velus.AcyGraph.html#msg_of_cycle">msg_of_cycle</a></span> (<span class="id"><a href="Velus.AcyGraph.html#Dfs.get_msgs">get_msgs</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#tt">tt</a></span>) <span class="id">stack</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id"><a href="Velus.Common.Common.html#PS.mem">PS.mem</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> <span class="id">v</span>) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> (<span class="id"><a href="Velus.Common.Common.html#sig2_of_sig">sig2_of_sig</a></span> <span class="id">v</span> _)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> (<span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">x</span> <span class="id"><a href="Velus.AcyGraph.html#Dfs.graph">graph</a></span>) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#Error">Error</a></span> (<span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#CTX">CTX</a></span> <span class="id">x</span> :: <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#msg">msg</a></span> <span class="string">" not found"</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">zs</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">s'</span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#exist">exist</a></span> _ (<span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id">x</span> <span class="id">s</span>) _ <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left">fold_left</a></span> (<span class="kwd">fun</span> <span class="id">v</span> <span class="id">w</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#bind">Errors.bind</a></span> <span class="id">v</span> (<span class="kwd">fun</span> <span class="id">v</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#bind">Errors.bind</a></span> (<span class="id">dfs'</span> <span class="id">s'</span> (<span class="id">w</span>::<span class="id">stack</span>) <span class="id">w</span> <span class="id">v</span>) (<span class="kwd">fun</span> <span class="id">v'</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#sig_of_sig2">sig_of_sig2</a></span> <span class="id">v'</span>)))) <span class="id">zs</span> (<span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> <span class="id">v</span>) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#Error">Error</a></span> <span class="id">msg</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#Error">Error</a></span> <span class="id">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#exist">exist</a></span> _ <span class="id">v'</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#conj">conj</a></span> <span class="id">P1</span> _)) =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#exist2">exist2</a></span> _ _ (<span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id">x</span> <span class="id">v'</span>) _ _)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [|<span class="id">reflexivity</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.mem_2">PSF.mem_2</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Defined.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_iff">PSF.add_iff</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> [|<span class="id">Hin</span>]; <span class="id">subst</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Environment.html#Env.find_In">Env.find_In</a></span>. <span class="id">apply</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj2_sig">proj2_sig</a></span> <span class="id">s</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Defined.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#add_deeper">add_deeper</a></span>, <span class="id"><a href="Velus.Common.Common.html#PSE.mem_4">PSE.mem_4</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Defined.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span> = <span class="id"><a href="Velus.Common.Common.html#PS.mem">PS.mem</a></span> <span class="id">x</span> <span class="id">v</span>) <span class="id">and</span> (<span class="id">symmetry</span> <span class="kwd">in</span> <span class="id">it</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSE.mem_4">PSE.mem_4</a></span> <span class="kwd">in</span> <span class="id">it</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.AcyGraph.html#pre_visited_add">pre_visited_add</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#exist">exist</a></span> _ <span class="id">v</span> <span class="id">H</span>) <span class="id">it</span>) <span class="kwd">as</span> (<span class="id">v'</span>, <span class="id">V'</span>, <span class="id">Qv'</span>); <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Defined.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span> <span class="kwd">in</span> <span class="id">Heq_anonymous</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Common.CommonPS.html#In_ps">In_ps</a></span> <span class="id">zs</span> <span class="id">v'</span> /\ (<span class="id"><a href="Velus.Common.Common.html#PS.Subset">PS.Subset</a></span> <span class="id">v</span> <span class="id">v'</span>)) <span class="kwd">as</span> (<span class="id">Hins</span>&amp;<span class="id">Hsub</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#fold_dfs_props">fold_dfs_props</a></span> <span class="kwd">in</span> <span class="id">Heq_anonymous</span>. <span class="id">auto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *. <span class="id">clear</span> <span class="id">Heq_anonymous</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> <span class="id">y</span> <span class="id">Hyin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.Common.html#PS.add_spec">PS.add_spec</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">not_or'</span>. <span class="id">split</span>; [<span class="id">intro</span>; <span class="id">subst</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">clear</span> - <span class="id">Heq_anonymous0</span> <span class="id">Hyin</span>. <span class="id">eapply</span> <span class="id"><a href="Velus.Common.Common.html#PSE.mem_4">PSE.mem_4</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id">P1</span>. <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_2">PSF.add_2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rename</span> <span class="id">a</span> <span class="id">into</span> <span class="id">P2</span>. <span class="id">rename</span> <span class="id">e</span> <span class="id">into</span> <span class="id">P3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id"><a href="Velus.AcyGraph.html#add_after">add_after</a></span> (<span class="id"><a href="Velus.Common.Common.html#PSP.of_list">PSP.of_list</a></span> <span class="id">zs</span>) <span class="id">x</span> <span class="id">wildcard'</span>); <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#add_after_AcyGraph">add_after_AcyGraph</a></span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_1">PSF.add_1</a></span> <span class="kwd">with</span> <span class="id">acygraph</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonPS.html#ps_of_list_In">ps_of_list_In</a></span>. <span class="id">intro</span> <span class="id">contra</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonPS.html#In_ps">In_ps</a></span> <span class="kwd">in</span> *. <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">P1</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_1">PSF.add_1</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">intros</span> ? <span class="id">Hin</span>. <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonPS.html#ps_of_list_In">ps_of_list_In</a></span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_2">PSF.add_2</a></span>. <span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonPS.html#In_ps">In_ps</a></span> <span class="kwd">in</span> *. <span class="id">simpl_Forall</span>. <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">intros</span> ? _ <span class="id">HasEdge</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#is_trans_edge_is_vertex">is_trans_edge_is_vertex</a></span> <span class="kwd">with</span> (<span class="id">g</span>:=<span class="id">P2</span>) <span class="kwd">in</span> <span class="id">HasEdge</span> <span class="kwd">as</span> (<span class="id">Ver</span>&amp;_); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">P1</span> <span class="kwd">in</span> <span class="id">Ver</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_1">PSF.add_1</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> <span class="id">y</span> <span class="id">Hyin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PS.add_spec">PS.add_spec</a></span> <span class="kwd">in</span> <span class="id">Hyin</span> <span class="kwd">as</span> [<span class="id">HH</span>|<span class="id">HH</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">subst</span>. <span class="kwd">exists</span> <span class="id">zs</span>; <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">z</span> <span class="id">HH</span>. <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#add_after_has_edge2">add_after_has_edge2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonPS.html#ps_of_list_In">ps_of_list_In</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">destruct</span> (<span class="id">P3</span> _ <span class="id">HH</span>) <span class="kwd">as</span> (? &amp; ? &amp; ?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">x0</span>. <span class="id">split</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.AcyGraph.html#add_after_has_edge1">add_after_has_edge1</a></span>.<br/>
+&nbsp;&nbsp;Defined.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *. <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">repeat</span> <span class="id">constructor</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_1">PSF.add_1</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">symmetry</span> <span class="kwd">in</span> <span class="id">Heq_anonymous</span>. <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#fold_dfs_props">fold_dfs_props</a></span> <span class="kwd">in</span> <span class="id">Heq_anonymous</span> <span class="kwd">as</span> (?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.Common.html#PSP.subset_add_2">PSP.subset_add_2</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Defined.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="dfs">dfs</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="kwd">forall</span> <span class="id">x</span> (<span class="id">v</span> : { <span class="id">v</span> | <span class="id"><a href="Velus.AcyGraph.html#visited">visited</a></span> <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span> <span class="id">v</span> }),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#res">res</a></span> { <span class="id">v'</span> | <span class="id"><a href="Velus.AcyGraph.html#visited">visited</a></span> <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span> <span class="id">v'</span> &amp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.CommonPS.html#In_ps">In_ps</a></span> [<span class="id">x</span>] <span class="id">v'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.Common.Common.html#PS.Subset">PS.Subset</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> <span class="id">v</span>) <span class="id">v'</span>) }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;:= <span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id">dfs'</span> <span class="id"><a href="Velus.AcyGraph.html#empty_dfs_state">empty_dfs_state</a></span> [<span class="id">x</span>] <span class="id">x</span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.AcyGraph.html#Dfs">Dfs</a></span>.<br/>
+<br/>
+<span class="id">Program</span> <span class="kwd">Definition</span> <span class="id"><a name="build_acyclic_graph">build_acyclic_graph</a></span> (<span class="id">graph</span> : <span class="id"><a href="Velus.Environment.html#Env.t">Env.t</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#positive">positive</a></span>)) (<span class="id">get_msgs</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#unit">unit</a></span> -&gt; <span class="id"><a href="Velus.Environment.html#Env.t">Env.t</a></span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#errmsg">errmsg</a></span>) : <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#res">res</a></span> <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span> :=<br/>
+&nbsp;&nbsp;<span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#bind">bind</a></span> (<span class="id"><a href="Velus.Environment.html#Env.fold">Env.fold</a></span> (<span class="kwd">fun</span> <span class="id">x</span> _ <span class="id">vo</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#bind">bind</a></span> <span class="id">vo</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">fun</span> <span class="id">v</span> =&gt; <span class="kwd">match</span> <span class="id"><a href="Velus.AcyGraph.html#dfs">dfs</a></span> <span class="id">graph</span> <span class="id">get_msgs</span> <span class="id">x</span> <span class="id">v</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#Error">Error</a></span> <span class="id">msg</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#Error">Error</a></span> <span class="id">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> <span class="id">v</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#sig_of_sig2">sig_of_sig2</a></span> <span class="id">v</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">graph</span> (<span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> (<span class="id"><a href="Velus.AcyGraph.html#none_visited">none_visited</a></span> <span class="id">graph</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">fun</span> <span class="id">v</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> _).<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="build_acyclic_graph_spec">build_acyclic_graph_spec</a></span> : <span class="kwd">forall</span> <span class="id">graph</span> <span class="id">msgs</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#build_acyclic_graph">build_acyclic_graph</a></span> <span class="id">graph</span> <span class="id">msgs</span> = <span class="id"><a href="../../CompCert/doc/html/compcert.common.Errors.html#OK">OK</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">e</span>, <span class="id"><a href="Velus.AcyGraph.html#acgraph_of_graph">acgraph_of_graph</a></span> <span class="id">graph</span> <span class="id">v</span> <span class="id">e</span> /\ <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.AcyGraph.html#build_acyclic_graph">build_acyclic_graph</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hcheck</span>.<br/>
+&nbsp;&nbsp;<span class="id">monadInv</span> <span class="id">Hcheck</span>. <span class="id">rename</span> <span class="id">EQ</span> <span class="id">into</span> <span class="id">Hfold</span>.<br/>
+&nbsp;&nbsp;<span class="id">rename</span> <span class="id">x</span> <span class="id">into</span> <span class="id">v'</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.fold_1">Env.fold_1</a></span> <span class="kwd">in</span> <span class="id">Hfold</span>.<br/>
+&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Common.Common.html#PS.Equal">PS.Equal</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> <span class="id">v'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.CommonPS.html#ps_adds">ps_adds</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Environment.html#Env.elements">Env.elements</a></span> <span class="id">graph</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> (<span class="id"><a href="Velus.AcyGraph.html#none_visited">none_visited</a></span> <span class="id">graph</span>)))) <span class="kwd">as</span> <span class="id">Hveq</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSP.double_inclusion">PSP.double_inclusion</a></span>; <span class="id">split</span>|].<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">v'</span> <span class="kwd">as</span> (<span class="id">v'</span> &amp; <span class="id">Pv'1</span> &amp; <span class="id">a</span> &amp; <span class="id">Pv'2</span> &amp; <span class="id">Pv'3</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>. <span class="id">intros</span> <span class="id">x</span> <span class="id">Hx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Pv'3</span> <span class="kwd">in</span> <span class="id">Hx</span> <span class="kwd">as</span> (<span class="id">zs</span> &amp; <span class="id">Hx</span> &amp; <span class="id">Hsuc</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.elements_correct">Env.elements_correct</a></span> <span class="kwd">in</span> <span class="id">Hx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonPS.html#ps_adds_spec">ps_adds_spec</a></span>; <span class="id">left</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">solve_In</span>.<br/>
+&nbsp;&nbsp;- <span class="id">revert</span> <span class="id">Hfold</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">revert</span> <span class="id">v'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">generalize</span> (<span class="id"><a href="Velus.AcyGraph.html#none_visited">none_visited</a></span> <span class="id">graph</span>) <span class="kwd">as</span> <span class="id">acc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">generalize</span> (<span class="id"><a href="Velus.Environment.html#Env.elements">Env.elements</a></span> <span class="id">graph</span>) <span class="kwd">as</span> <span class="id">xs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span> <span class="kwd">as</span> [|<span class="id">x</span> <span class="id">xs</span> <span class="id">IH</span>]; [<span class="id">inversion</span> 1; <span class="id">reflexivity</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>. <span class="id">intros</span> <span class="id">acc</span> <span class="id">v'</span> <span class="comment">(*&nbsp;Hacc&nbsp;*)</span> <span class="id">Hfold</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.AcyGraph.html#dfs">dfs</a></span> <span class="id">graph</span> <span class="id">msgs</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">x</span>) <span class="id">acc</span>) <span class="kwd">as</span> [<span class="id">acc'</span>|] <span class="id">eqn</span>:<span class="id">Hacc'</span>; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id">IH</span> <span class="kwd">in</span> <span class="id">Hfold</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">Hfold</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonPS.html#Subset_ps_adds">Subset_ps_adds</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">acc'</span> <span class="kwd">as</span> (<span class="id">acc'</span>, <span class="id">Vacc'</span>, (<span class="id">H1acc'</span> &amp; <span class="id">H2acc'</span>)); <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSP.subset_add_3">PSP.subset_add_3</a></span>; <span class="id">auto</span>. <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonPS.html#In_ps_singleton">In_ps_singleton</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">clear</span> - <span class="id">Hfold</span>. <span class="id">exfalso</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="id">clear</span> <span class="id">Hfold</span>. <span class="id">destruct</span> <span class="id">v'</span> <span class="kwd">as</span> (<span class="id">v</span> &amp; <span class="id">Pv1</span> &amp; <span class="id">a</span> &amp; <span class="id">Pv2</span> &amp; <span class="id">Pv3</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">a</span>. <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> <span class="id">x</span>. <span class="id">rewrite</span> <span class="id">Hveq</span>, <span class="id"><a href="Velus.Common.CommonPS.html#ps_adds_of_list">ps_adds_of_list</a></span>, <span class="id"><a href="Velus.Common.CommonPS.html#ps_of_list_In">ps_of_list_In</a></span>, <span class="id"><a href="Velus.Environment.html#Env.In_Members">Env.In_Members</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#fst_InMembers">fst_InMembers</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> ?? (?&amp;<span class="id">Find</span>&amp;<span class="id">In</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Pv3</span> <span class="id">y</span>). <span class="id">rewrite</span> <span class="id">Hveq</span>, <span class="id"><a href="Velus.Common.CommonPS.html#ps_adds_of_list">ps_adds_of_list</a></span>, <span class="id"><a href="Velus.Common.CommonPS.html#ps_of_list_In">ps_of_list_In</a></span> <span class="kwd">in</span> <span class="id">Pv3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id">Find'</span>:=<span class="id">Find</span>). <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.elements_correct">Env.elements_correct</a></span> <span class="kwd">in</span> <span class="id">Find'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map">in_map</a></span> <span class="kwd">with</span> (<span class="id">f</span>:=<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span>), <span class="id">Pv3</span> <span class="kwd">in</span> <span class="id">Find'</span> <span class="kwd">as</span> (?&amp;<span class="id">Find'</span>&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id">Find</span> <span class="kwd">in</span> <span class="id">Find'</span>; <span class="id">inv</span> <span class="id">Find'</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<h2> Extracting a prefix </h2>
+<div class="doc">In order to build an induction principle over the graph, we need to linearize it.
+    We want to extract a Topological Order (<span class="bracket"><span class="id">TopoOrder</span></span>) from the graph,
+    which is simply encoded as a list, with the head variable only depending on the tail ones.
+ </div>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="TopoOrder">TopoOrder</a></span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) (<span class="id">xs</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) :=<br/>
+&nbsp;&nbsp;<span class="id">Forall'</span> (<span class="kwd">fun</span> <span class="id">xs</span> <span class="id">x</span> =&gt; ~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">xs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.AcyGraph.html#is_vertex">is_vertex</a></span> <span class="id">g</span> <span class="id">x</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ (<span class="kwd">forall</span> <span class="id">y</span>, <span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span> <span class="id">y</span> <span class="id">x</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">y</span> <span class="id">xs</span>)) <span class="id">xs</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id">TopoOrder'</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) (<span class="id">xs</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) :=<br/>
+&nbsp;&nbsp;<span class="id">Forall'</span> (<span class="kwd">fun</span> <span class="id">xs</span> <span class="id">x</span> =&gt; ~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">xs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.AcyGraph.html#is_vertex">is_vertex</a></span> <span class="id">g</span> <span class="id">x</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ (<span class="kwd">forall</span> <span class="id">y</span>, <span class="id"><a href="Velus.AcyGraph.html#is_edge">is_edge</a></span> <span class="id">g</span> <span class="id">y</span> <span class="id">x</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">y</span> <span class="id">xs</span>)) <span class="id">xs</span>.<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Unfold</span> <span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> : <span class="id">acygraph</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="TopoOrder_weaken">TopoOrder_weaken</a></span> : <span class="kwd">forall</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="kwd">forall</span> <span class="id">y</span>, <span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span> <span class="id">y</span> <span class="id">x</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">y</span> <span class="id">xs</span>) <span class="id">xs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hpref</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hpref</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> (<span class="id">Hnin</span>&amp;<span class="id">Hv</span>&amp;<span class="id">Ha</span>).<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_impl">Forall_impl</a></span>; [|<span class="id">eauto</span>].<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * ? ? ?. <span class="id">right</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="TopoOrder_equiv">TopoOrder_equiv</a></span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) : <span class="kwd">forall</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> <span class="id">xs</span> &lt;-&gt; <span class="id">TopoOrder'</span> <span class="id">g</span> <span class="id">xs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> <span class="id">Top</span>.<br/>
+&nbsp;&nbsp;- <span class="id">induction</span> <span class="id">Top</span>; <span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct_conjs</span>. <span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Edge</span>. <span class="id">apply</span> <span class="id">H1</span>. <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">induction</span> <span class="id">Top</span>; <span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct_conjs</span>. <span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Trans</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Trans</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">H1</span> _ <span class="id">H2</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#TopoOrder_weaken">TopoOrder_weaken</a></span> <span class="kwd">in</span> <span class="id">IHTop</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>. <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="TopoOrder_NoDup">TopoOrder_NoDup</a></span> : <span class="kwd">forall</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> <span class="id">xs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hpref</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hpref</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">H</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Fact</span> <span class="id"><a name="TopoOrder_AGaddv">TopoOrder_AGaddv</a></span> : <span class="kwd">forall</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">x</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> (<span class="id"><a href="Velus.AcyGraph.html#AGaddv">AGaddv</a></span> <span class="id">v</span> <span class="id">e</span> <span class="id">x</span> <span class="id">g</span>) <span class="id">xs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">intros</span> * <span class="id">Hpre</span>; <span class="id">inv</span> <span class="id">Hpre</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">acygraph</span> <span class="id">datatypes</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">H1</span> <span class="kwd">as</span> (?&amp;?&amp;?).<br/>
+&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">IHxs</span> <span class="id">H2</span>).<br/>
+&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_2">PSF.add_2</a></span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="TopoOrder_insert">TopoOrder_insert</a></span> : <span class="kwd">forall</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">xs1</span> <span class="id">xs2</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#is_vertex">is_vertex</a></span> <span class="id">g</span> <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> (<span class="id">xs1</span>++<span class="id">xs2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">y</span>, <span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span> <span class="id">y</span> <span class="id">x</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">y</span> <span class="id">xs2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> (<span class="id">xs1</span> ++ <span class="id">xs2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> (<span class="id">xs1</span> ++ <span class="id">x</span> :: <span class="id">xs2</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs1</span>; <span class="id">intros</span> * <span class="id">Hver</span> <span class="id">Hnin</span> <span class="id">Ha</span> <span class="id">Hpre</span>; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>; <span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">inversion_clear</span> <span class="id">Hpre</span> <span class="kwd">as</span> [|?? (<span class="id">Hnin'</span>&amp;<span class="id">Hver'</span>&amp;<span class="id">Ha'</span>) <span class="id">Hpre'</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">not_or'</span> <span class="kwd">in</span> <span class="id">Hnin</span> <span class="kwd">as</span> (<span class="id">Hneq</span>&amp;<span class="id">Hnin</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#not_In_app">not_In_app</a></span> <span class="kwd">in</span> <span class="id">Hnin'</span> <span class="kwd">as</span> (<span class="id">Hnin1</span>&amp;<span class="id">Hnin2</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#not_In_app">not_In_app</a></span>; <span class="id">simpl</span>; <span class="id">rewrite</span> <span class="id">not_or'</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> * <span class="id">Ha''</span>. <span class="id">specialize</span> (<span class="id">Ha'</span> _ <span class="id">Ha''</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span> <span class="kwd">in</span> *; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Ha'</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id">IHxs1</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">x is located before y in l </div>
+<span class="kwd">Definition</span> <span class="id"><a name="Before">Before</a></span> (<span class="id">x</span> <span class="id">y</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) <span class="id">l</span> :=<br/>
+&nbsp;&nbsp;<span class="id">Forall'</span> (<span class="kwd">fun</span> <span class="id">xs</span> <span class="id">x'</span> =&gt; <span class="id">x'</span> = <span class="id">y</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">xs</span>) <span class="id">l</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Before_middle">Before_middle</a></span> : <span class="kwd">forall</span> <span class="id">xs1</span> <span class="id">xs2</span> <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x</span> &lt;&gt; <span class="id">y</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">y</span> <span class="id">xs1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">y</span> <span class="id">xs2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#Before">Before</a></span> <span class="id">x</span> <span class="id">y</span> (<span class="id">xs1</span> ++ <span class="id">y</span> :: <span class="id">x</span> :: <span class="id">xs2</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs1</span>; <span class="id">intros</span> * <span class="id">Hneq</span> <span class="id">Hnin1</span> <span class="id">Hnin2</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>; [|<span class="id">constructor</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> _. <span class="id">left</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> <span class="id">contra</span>; <span class="id">subst</span>. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">induction</span> <span class="id">xs2</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">datatypes</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#not_in_cons">not_in_cons</a></span> <span class="kwd">in</span> <span class="id">Hnin2</span> <span class="kwd">as</span> (<span class="id">Hneq'</span>&amp;<span class="id">Hnin2</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">contra</span>; <span class="id">subst</span>. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#not_in_cons">not_in_cons</a></span> <span class="kwd">in</span> <span class="id">Hnin1</span> <span class="kwd">as</span> (<span class="id">Hneq'</span>&amp;<span class="id">Hnin1</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> <span class="id">contra</span>; <span class="id">subst</span>. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id">IHxs1</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Before_In">Before_In</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#Before">Before</a></span> <span class="id">x</span> <span class="id">y</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">y</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">xs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">intros</span> * <span class="id">Hbef</span> <span class="id">Hin</span>; <span class="id">inv</span> <span class="id">Hbef</span>; <span class="id">inv</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;1,2:<span class="id">right</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html">Permutation</a></span>.<br/>
+<br/>
+<div class="doc">Given a prefix of the form xs1 ++ y :: xs2, we can split xs1
+    into two list: xs1l depends on y and xs1r doesnt </div>
+<span class="kwd">Fact</span> <span class="id"><a name="TopoOrder_Partition_split">TopoOrder_Partition_split</a></span> : <span class="kwd">forall</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">xs1</span> <span class="id">xs2</span> <span class="id">xs1l</span> <span class="id">xs1r</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#Partition">Partition</a></span> (<span class="kwd">fun</span> <span class="id">z</span> =&gt; <span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span> <span class="id">y</span> <span class="id">z</span>) <span class="id">xs1</span> <span class="id">xs1l</span> <span class="id">xs1r</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> (<span class="id">xs1</span> ++ <span class="id">y</span> :: <span class="id">xs2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> (<span class="id">xs1l</span> ++ <span class="id">y</span> :: <span class="id">xs1r</span> ++ <span class="id">xs2</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs1</span>; <span class="id">intros</span> * <span class="id">Hpart</span> <span class="id">Hpre</span>; <span class="id">inv</span> <span class="id">Hpart</span>; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;- <span class="id">assumption</span>.<br/>
+&nbsp;&nbsp;- <span class="id">inversion_clear</span> <span class="id">Hpre</span> <span class="kwd">as</span> [|?? (<span class="id">Hnin</span>&amp;<span class="id">Hver</span>&amp;<span class="id">Ha</span>) <span class="id">Hf</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">erewrite</span> (<span class="id"><a href="Velus.Common.CommonList.html#Partition_Permutation">Partition_Permutation</a></span> _ <span class="id">xs1</span>), &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span>, &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_middle">Permutation_middle</a></span> <span class="kwd">in</span> <span class="id">Hnin</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> * <span class="id">Ha'</span>. <span class="id">specialize</span> (<span class="id">Ha</span> _ <span class="id">Ha'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> (<span class="id"><a href="Velus.Common.CommonList.html#Partition_Permutation">Partition_Permutation</a></span> _ <span class="id">xs1</span>), &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span>, &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_middle">Permutation_middle</a></span> <span class="kwd">in</span> <span class="id">Ha</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id">IHxs1</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">inversion_clear</span> <span class="id">Hpre</span> <span class="kwd">as</span> [|?? (<span class="id">Hnin</span>&amp;<span class="id">Hver</span>&amp;<span class="id">Ha</span>) <span class="id">Hf</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#cons_is_app">cons_is_app</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#TopoOrder_insert">TopoOrder_insert</a></span>; <span class="id">auto</span>; <span class="id">try</span> <span class="id">rewrite</span> &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span>, &lt;- <span class="id"><a href="Velus.Common.CommonList.html#cons_is_app">cons_is_app</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">erewrite</span> (<span class="id"><a href="Velus.Common.CommonList.html#Partition_Permutation">Partition_Permutation</a></span> _ <span class="id">xs1</span>), &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span>, &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_middle">Permutation_middle</a></span> <span class="kwd">in</span> <span class="id">Hnin</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> * <span class="id">Ha'</span>. <span class="id">specialize</span> (<span class="id">Ha</span> _ <span class="id">Ha'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> (<span class="id"><a href="Velus.Common.CommonList.html#Partition_Permutation">Partition_Permutation</a></span> _ <span class="id">xs1</span>), &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span> <span class="kwd">in</span> <span class="id">Ha</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> (<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span> <span class="kwd">in</span> *; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">idtac</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Ha</span> <span class="kwd">as</span> [<span class="id">Hin</span>|[?|[?|?]]]; <span class="id">subst</span>; <span class="id">auto</span>. 2:<span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exfalso</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Partition_Forall1">Partition_Forall1</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">H1</span>; [|<span class="id">eauto</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H4</span>; <span class="id">eauto</span>. <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id">IHxs1</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="TopoOrder_reorganize">TopoOrder_reorganize</a></span> : <span class="kwd">forall</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">xs</span> <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x</span> &lt;&gt; <span class="id">y</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">y</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span> <span class="id">y</span> <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">xs'</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> <span class="id">xs'</span> <span class="id">xs</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> <span class="id">xs'</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#Before">Before</a></span> <span class="id">x</span> <span class="id">y</span> <span class="id">xs'</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">intros</span> * <span class="id">Hneq</span> <span class="id">Hin1</span> <span class="id">Hin2</span> <span class="id">Hpref</span> <span class="id">Hna</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hin1</span>; <span class="id">inv</span> <span class="id">Hin2</span>; <span class="id">inversion_clear</span> <span class="id">Hpref</span> <span class="kwd">as</span> [|?? (<span class="id">Hnin</span>&amp;<span class="id">Hv</span>&amp;<span class="id">Ha</span>)]; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;- <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;- <span class="id">clear</span> <span class="id">IHxs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_split">in_split</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> (<span class="id">xs1</span>&amp;<span class="id">xs2</span>&amp;?); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Partition&nbsp;the&nbsp;xs1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No&nbsp;xs1&nbsp;depends&nbsp;on&nbsp;x&nbsp;(because&nbsp;(xs1&nbsp;++&nbsp;y&nbsp;::&nbsp;xs2)&nbsp;is&nbsp;a&nbsp;prefix).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;the&nbsp;xs1l&nbsp;depend&nbsp;on&nbsp;y,&nbsp;and&nbsp;therefore&nbsp;x&nbsp;does&nbsp;not&nbsp;depend&nbsp;on&nbsp;them.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;the&nbsp;xs1r&nbsp;do&nbsp;not&nbsp;depend&nbsp;on&nbsp;y<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We&nbsp;produce&nbsp;a&nbsp;new&nbsp;list&nbsp;of&nbsp;the&nbsp;form&nbsp;xs1l&nbsp;++&nbsp;y&nbsp;::&nbsp;x&nbsp;::&nbsp;xs1r&nbsp;++&nbsp;xs2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="kwd">exists</span> <span class="id">xs1l</span> <span class="id">xs1r</span>, <span class="id"><a href="Velus.Common.CommonList.html#Partition">Partition</a></span> (<span class="kwd">fun</span> <span class="id">z</span> =&gt; <span class="id"><a href="Velus.AcyGraph.html#is_trans_edge">is_trans_edge</a></span> <span class="id">g</span> <span class="id">y</span> <span class="id">z</span>) <span class="id">xs1</span> <span class="id">xs1l</span> <span class="id">xs1r</span>) <span class="kwd">as</span> (<span class="id">xs1l</span>&amp;<span class="id">xs1r</span>&amp;<span class="id">Hpart</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#dec_Partition">dec_Partition</a></span>, <span class="id"><a href="Velus.AcyGraph.html#is_trans_edge_dec">is_trans_edge_dec</a></span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id">xs1l</span> ++ <span class="id">y</span> :: <span class="id">x</span> :: <span class="id">xs1r</span> ++ <span class="id">xs2</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> <span class="id">xs1</span> (<span class="id">xs1l</span> ++ <span class="id">xs1r</span>)) <span class="kwd">as</span> <span class="id">Hperm</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Partition_Permutation">Partition_Permutation</a></span>; <span class="id">eauto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">repeat</span> <span class="id">rewrite</span> &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_middle">Permutation_middle</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span>, &lt;- <span class="id">Hperm</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#perm_swap">perm_swap</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#TopoOrder_Partition_split">TopoOrder_Partition_split</a></span> <span class="kwd">in</span> <span class="id">H0</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#cons_is_app">cons_is_app</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#TopoOrder_insert">TopoOrder_insert</a></span>; <span class="id">try</span> <span class="id">rewrite</span> &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span>, &lt;- <span class="id"><a href="Velus.Common.CommonList.html#cons_is_app">cons_is_app</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">rewrite</span> <span class="id">Hperm</span>, &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span>, &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_middle">Permutation_middle</a></span> <span class="kwd">in</span> <span class="id">Hnin</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">intros</span> ? <span class="id">Ha'</span>. <span class="id">specialize</span> (<span class="id">Ha</span> _ <span class="id">Ha'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hperm</span>, &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span> <span class="kwd">in</span> <span class="id">Ha</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> (<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span> <span class="kwd">in</span> *; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">idtac</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Ha</span> <span class="kwd">as</span> [?|[?|[?|?]]]; <span class="id">subst</span>; <span class="id">auto</span>. 2:<span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exfalso</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Partition_Forall1">Partition_Forall1</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hpart</span>; [|<span class="id">eauto</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Hna</span>. <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">assert</span> (~ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">y</span> (<span class="id">xs1</span> ++ <span class="id">xs2</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#TopoOrder_NoDup">TopoOrder_NoDup</a></span> <span class="kwd">in</span> <span class="id">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_middle">Permutation_middle</a></span> <span class="kwd">in</span> <span class="id">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">H0</span>; <span class="id">auto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hperm</span>, &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#not_In_app">not_In_app</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> (?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#Before_middle">Before_middle</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="kwd">exists</span> (<span class="id">y</span>::<span class="id">xs</span>). <span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">acygraph</span> <span class="id">datatypes</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> - <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; [<span class="id">constructor</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#not_in_cons">not_in_cons</a></span> <span class="kwd">in</span> <span class="id">Hnin</span> <span class="kwd">as</span> (<span class="id">Hneq</span>&amp;<span class="id">Hnin</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">contra</span>; <span class="id">subst</span>; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">IHxs</span> _ _ <span class="id">Hneq</span> <span class="id">H</span> <span class="id">H0</span> <span class="id">H1</span> <span class="id">Hna</span>) <span class="kwd">as</span> (<span class="id">xs'</span>&amp;<span class="id">Hperm</span>&amp;<span class="id">Hpre</span>&amp;<span class="id">Hbef</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id">a</span>::<span class="id">xs'</span>); <span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">repeat</span> <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:<span class="id">intros</span> ? <span class="id">Ha'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">rewrite</span> <span class="id">Hperm</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hperm</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="TopoOrder_AGadda">TopoOrder_AGadda</a></span> : <span class="kwd">forall</span> {<span class="id">v</span> <span class="id">e</span>} (<span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>) <span class="id">xs</span> <span class="id">x</span> <span class="id">y</span> <span class="id">Hneq</span> <span class="id">Hin1</span> <span class="id">Hin2</span> <span class="id">Hna</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#Before">Before</a></span> <span class="id">x</span> <span class="id">y</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> (<span class="id"><a href="Velus.AcyGraph.html#AGadda">AGadda</a></span> _ _ <span class="id">x</span> <span class="id">y</span> <span class="id">g</span> <span class="id">Hneq</span> <span class="id">Hin1</span> <span class="id">Hin2</span> <span class="id">Hna</span>) <span class="id">xs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">intros</span> * <span class="id">Hbef</span> <span class="id">Hpre</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">acygraph</span> <span class="id">datatypes</span>.<br/>
+&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hbef</span>. <span class="id">inversion_clear</span> <span class="id">Hpre</span> <span class="kwd">as</span> [|?? (?&amp;?&amp;?) <span class="id">Hf</span>].<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>. 2:<span class="id">eapply</span> <span class="id">IHxs</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> ? <span class="id">Ha</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#add_edge_spec2">add_edge_spec2</a></span> <span class="kwd">in</span> <span class="id">Ha</span> <span class="kwd">as</span> [?|[(?&amp;?)|[(?&amp;?)|[(?&amp;?)|(?&amp;?)]]]]; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">H3</span> <span class="kwd">in</span> <span class="id">H5</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#Before_In">Before_In</a></span> <span class="kwd">in</span> <span class="id">H2</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">H1</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq_refl">eq_refl</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#TopoOrder_weaken">TopoOrder_weaken</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hf</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">H3</span> _ <span class="id">H5</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#Before_In">Before_In</a></span> <span class="kwd">in</span> <span class="id">H2</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#TopoOrder_weaken">TopoOrder_weaken</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hf</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">Every Directed Acyclic Graph has at least one complete TopoOrder </div>
+<span class="kwd">Lemma</span> <span class="id"><a name="has_TopoOrder">has_TopoOrder</a></span> {<span class="id">v</span> <span class="id">e</span>} :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">g</span> : <span class="id"><a href="Velus.AcyGraph.html#AcyGraph">AcyGraph</a></span> <span class="id">v</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.Equal">PS.Equal</a></span> (<span class="id"><a href="Velus.AcyGraph.html#vertices">vertices</a></span> <span class="id">g</span>) (<span class="id"><a href="Velus.Common.Common.html#PSP.of_list">PSP.of_list</a></span> <span class="id">xs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.AcyGraph.html#TopoOrder">TopoOrder</a></span> <span class="id">g</span> <span class="id">xs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">revert</span> <span class="id">v</span> <span class="id">e</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">fix</span> <span class="id">has_TopoOrder</span> 3.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> *.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">g</span>.<br/>
+&nbsp;&nbsp;- <span class="kwd">exists</span> []; <span class="id">simpl</span>. <span class="id">split</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">acygraph</span> <span class="id">datatypes</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">has_TopoOrder</span> _ _ <span class="id">g</span>) <span class="kwd">as</span> (<span class="id">xs</span>&amp;<span class="id">Heq</span>&amp;<span class="id">Hp</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#PSP.In_dec">PSP.In_dec</a></span> <span class="id">x</span> <span class="id">v</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="kwd">exists</span> <span class="id">xs</span>; <span class="id">simpl</span>; <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">rewrite</span> &lt;- <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?. <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_iff">PSF.add_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [<span class="id">intros</span> [?|?]| <span class="id">intros</span> ?]; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#TopoOrder_AGaddv">TopoOrder_AGaddv</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="kwd">exists</span> (<span class="id">x</span>::<span class="id">xs</span>); <span class="id">simpl</span>; <span class="id">split</span>; [|<span class="id">constructor</span>;<span class="id">repeat</span> <span class="id">split</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">unfold</span> <span class="id"><a href="Velus.AcyGraph.html#vertices">vertices</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Heq</span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">rewrite</span> <span class="id">Heq</span>, &lt;- <span class="id"><a href="Velus.Common.CommonPS.html#ps_from_list_ps_of_list">ps_from_list_ps_of_list</a></span>, <span class="id"><a href="Velus.Common.CommonPS.html#ps_from_list_In">ps_from_list_In</a></span> <span class="kwd">in</span> <span class="id">n</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_1">PSF.add_1</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">intros</span> <span class="id">y</span> <span class="id">Hisedge</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id">Hneq</span>:=<span class="id">Hisedge</span>). <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#is_trans_edge_neq">is_trans_edge_neq</a></span> <span class="kwd">in</span> <span class="id">Hneq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#is_trans_edge_is_vertex">is_trans_edge_is_vertex</a></span> <span class="kwd">in</span> <span class="id">Hisedge</span> <span class="kwd">as</span> (?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PSF.add_3">PSF.add_3</a></span> <span class="kwd">in</span> <span class="id">H</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id"><a href="Velus.Common.CommonPS.html#ps_from_list_ps_of_list">ps_from_list_ps_of_list</a></span> <span class="kwd">in</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id"><a href="Velus.Common.CommonPS.html#ps_from_list_In">ps_from_list_In</a></span>, &lt;- <span class="id">Heq</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">apply</span> <span class="id"><a href="Velus.AcyGraph.html#TopoOrder_AGaddv">TopoOrder_AGaddv</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">has_TopoOrder</span> _ _ <span class="id">g</span>) <span class="kwd">as</span> (<span class="id">xs</span>&amp;<span class="id">Heq</span>&amp;<span class="id">Hp</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id"><a href="Velus.AcyGraph.html#TopoOrder_reorganize">TopoOrder_reorganize</a></span> <span class="id">g</span> <span class="id">xs</span> <span class="id">x</span> <span class="id">y</span>) <span class="kwd">as</span> (<span class="id">xs'</span>&amp;?&amp;<span class="id">Hp'</span>&amp;<span class="id">Hbef</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id">Heq</span>, &lt;- <span class="id"><a href="Velus.Common.CommonPS.html#ps_from_list_ps_of_list">ps_from_list_ps_of_list</a></span>, <span class="id"><a href="Velus.Common.CommonPS.html#ps_from_list_In">ps_from_list_In</a></span> <span class="kwd">in</span> <span class="id">i</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id">Heq</span>, &lt;- <span class="id"><a href="Velus.Common.CommonPS.html#ps_from_list_ps_of_list">ps_from_list_ps_of_list</a></span>, <span class="id"><a href="Velus.Common.CommonPS.html#ps_from_list_In">ps_from_list_In</a></span> <span class="kwd">in</span> <span class="id">i0</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="kwd">exists</span> <span class="id">xs'</span>; <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">rewrite</span> &lt;- <span class="id"><a href="Velus.Common.CommonPS.html#ps_from_list_ps_of_list">ps_from_list_ps_of_list</a></span>, <span class="id">H</span>, <span class="id"><a href="Velus.Common.CommonPS.html#ps_from_list_ps_of_list">ps_from_list_ps_of_list</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assumption</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">eapply</span> <span class="id"><a href="Velus.AcyGraph.html#TopoOrder_AGadda">TopoOrder_AGadda</a></span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

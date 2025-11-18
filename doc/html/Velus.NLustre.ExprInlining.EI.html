@@ -1,0 +1,402 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module EI</title>
+<meta name="description" content="Documentation of Coq module EI" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module EI</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.funind.Recdef.html">Recdef</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.CommonProgram.html">CommonProgram</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Environment.html">Environment</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html">CoreExpr.CESyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.NLustre.NLSyntax.html">NLustre.NLSyntax</a></span>.<br/>
+<br/>
+<div class="doc">Remove duplicate registers in an NLustre program </div>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="EI">EI</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span>   <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>      <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>    <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Syn</span>   : <span class="id"><a href="Velus.NLustre.NLSyntax.html#NLSYNTAX">NLSYNTAX</a></span>    <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn">CESyn</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="EI.inline_exp">inline_exp</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="EI.inline_exp.x">x</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="EI.inline_exp.ex">ex</a></span> : <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.exp">exp</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="EI.inline_in_exp">inline_in_exp</a></span> <span class="id">e</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">e</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Evar">Evar</a></span> <span class="id">x'</span> _ =&gt; <span class="kwd">if</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_exp.x">x</a></span> ==<span class="id">b</span> <span class="id">x'</span> <span class="kwd">then</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_exp.ex">ex</a></span> <span class="kwd">else</span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ewhen">Ewhen</a></span> <span class="id">e</span> <span class="id">xt</span> <span class="id">k</span> =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ewhen">Ewhen</a></span> (<span class="id">inline_in_exp</span> <span class="id">e</span>) <span class="id">xt</span> <span class="id">k</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eunop">Eunop</a></span> <span class="id">op</span> <span class="id">e1</span> <span class="id">ty</span> =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eunop">Eunop</a></span> <span class="id">op</span> (<span class="id">inline_in_exp</span> <span class="id">e1</span>) <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ebinop">Ebinop</a></span> <span class="id">op</span> <span class="id">e1</span> <span class="id">e2</span> <span class="id">ty</span> =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ebinop">Ebinop</a></span> <span class="id">op</span> (<span class="id">inline_in_exp</span> <span class="id">e1</span>) (<span class="id">inline_in_exp</span> <span class="id">e2</span>) <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_exp">inline_exp</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="EI.inline_cexp">inline_cexp</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="EI.inline_cexp.x">x</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="EI.inline_cexp.ex">ex</a></span> : <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.cexp">cexp</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.try_inline_in_exp">try_inline_in_exp</a></span> <span class="id">e</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_cexp.ex">ex</a></span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eexp">Eexp</a></span> <span class="id">ex</span> =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_in_exp">inline_in_exp</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_cexp.x">x</a></span> <span class="id">ex</span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="EI.inline_in_cexp">inline_in_cexp</a></span> <span class="id">e</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">e</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Emerge">Emerge</a></span> <span class="id">xt</span> <span class="id">es</span> <span class="id">ty</span> =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Emerge">Emerge</a></span> <span class="id">xt</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id">inline_in_cexp</span> <span class="id">es</span>) <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ecase">Ecase</a></span> <span class="id">e</span> <span class="id">es</span> <span class="id">d</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ecase">Ecase</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.try_inline_in_exp">try_inline_in_exp</a></span> <span class="id">e</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="id">inline_in_cexp</span>) <span class="id">es</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">inline_in_cexp</span> <span class="id">d</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eexp">Eexp</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Evar">Evar</a></span> <span class="id">x'</span> _) =&gt; <span class="kwd">if</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_cexp.x">x</a></span> ==<span class="id">b</span> <span class="id">x'</span> <span class="kwd">then</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_cexp.ex">ex</a></span> <span class="kwd">else</span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eexp">Eexp</a></span> <span class="id">e</span> =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eexp">Eexp</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.try_inline_in_exp">try_inline_in_exp</a></span> <span class="id">e</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.inline_in_equation">inline_in_equation</a></span> <span class="id">equ</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">equ</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqDef">EqDef</a></span> <span class="id">x'</span> <span class="id">ck</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ecexp">Ecexp</a></span> <span class="id">e</span>) =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqDef">EqDef</a></span> <span class="id">x'</span> <span class="id">ck</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ecexp">Ecexp</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_in_cexp">inline_in_cexp</a></span> <span class="id">e</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqDef">EqDef</a></span> <span class="id">x'</span> <span class="id">ck</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eextcall">Eextcall</a></span> <span class="id">f</span> <span class="id">es</span> <span class="id">cty</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqDef">EqDef</a></span> <span class="id">x'</span> <span class="id">ck</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eextcall">Eextcall</a></span> <span class="id">f</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.try_inline_in_exp">try_inline_in_exp</a></span> <span class="id">es</span>) <span class="id">cty</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id">equ</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.inline_in_equations">inline_in_equations</a></span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_in_equation">inline_in_equation</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_cexp">inline_cexp</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="EI.nb_usage">nb_usage</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="EI.nb_usage.x">x</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="EI.nb_usage_in_exp">nb_usage_in_exp</a></span> <span class="id">e</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">e</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Evar">Evar</a></span> <span class="id">x'</span> _ =&gt; <span class="kwd">if</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.nb_usage.x">x</a></span> ==<span class="id">b</span> <span class="id">x'</span>) <span class="kwd">then</span> 1 <span class="kwd">else</span> 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ewhen">Ewhen</a></span> <span class="id">e</span> (<span class="id">x'</span>, _) _ =&gt; <span class="id">nb_usage_in_exp</span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eunop">Eunop</a></span> _ <span class="id">e1</span> _ =&gt; <span class="id">nb_usage_in_exp</span> <span class="id">e1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ebinop">Ebinop</a></span> _ <span class="id">e1</span> <span class="id">e2</span> _ =&gt; <span class="id">nb_usage_in_exp</span> <span class="id">e1</span> + <span class="id">nb_usage_in_exp</span> <span class="id">e2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="EI.nb_usage_in_cexp">nb_usage_in_cexp</a></span> <span class="id">e</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">e</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Emerge">Emerge</a></span> (<span class="id">x'</span>, _) <span class="id">es</span> _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left">fold_left</a></span> (<span class="kwd">fun</span> <span class="id">n</span> <span class="id">e</span> =&gt; <span class="id">n</span> + <span class="id">nb_usage_in_cexp</span> <span class="id">e</span>) <span class="id">es</span> 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ecase">Ecase</a></span> <span class="id">e</span> <span class="id">es</span> <span class="id">d</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.nb_usage_in_exp">nb_usage_in_exp</a></span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left">fold_left</a></span> (<span class="kwd">fun</span> <span class="id">n</span> <span class="id">e</span> =&gt; <span class="id">n</span> + <span class="id"><a href="Velus.Common.Common.html#or_default_with">or_default_with</a></span> 0 <span class="id">nb_usage_in_cexp</span> <span class="id">e</span>) <span class="id">es</span> 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">nb_usage_in_cexp</span> <span class="id">d</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eexp">Eexp</a></span> <span class="id">e</span> =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.nb_usage_in_exp">nb_usage_in_exp</a></span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.nb_usage_in_equation">nb_usage_in_equation</a></span> <span class="id">eq</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">eq</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqDef">EqDef</a></span> _ _ (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eextcall">Eextcall</a></span> _ <span class="id">es</span> _) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left">fold_left</a></span> (<span class="kwd">fun</span> <span class="id">n</span> <span class="id">e</span> =&gt; <span class="id">n</span> + <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.nb_usage_in_exp">nb_usage_in_exp</a></span> <span class="id">e</span>) <span class="id">es</span> 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqDef">EqDef</a></span> _ _ (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ecexp">Ecexp</a></span> <span class="id">ce</span>) =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.nb_usage_in_cexp">nb_usage_in_cexp</a></span> <span class="id">ce</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqApp">EqApp</a></span> <span class="id">xs</span> _ _ <span class="id">es</span> <span class="id">xr</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left">fold_left</a></span> (<span class="kwd">fun</span> <span class="id">n</span> <span class="id">e</span> =&gt; <span class="id">n</span> + <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.nb_usage_in_exp">nb_usage_in_exp</a></span> <span class="id">e</span>) <span class="id">es</span> 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqFby">EqFby</a></span> _ _ _ _ _<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqLast">EqLast</a></span> _ _ _ _ _ =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.nb_usage_in_equations">nb_usage_in_equations</a></span> <span class="id">eqs</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left">fold_left</a></span> (<span class="kwd">fun</span> <span class="id">n</span> <span class="id">e</span> =&gt; <span class="id">n</span> + <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.nb_usage_in_equation">nb_usage_in_equation</a></span> <span class="id">e</span>) <span class="id">eqs</span> 0.<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.nb_usage">nb_usage</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="EI.always_inline">always_inline</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="EI.always_inline.x">x</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="EI.always_inline_exp">always_inline_exp</a></span> <span class="id">e</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">e</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Evar">Evar</a></span> _ _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ewhen">Ewhen</a></span> <span class="id">e</span> _ _ =&gt; <span class="id">always_inline_exp</span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.always_inline_cexp">always_inline_cexp</a></span> <span class="id">ce</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">ce</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eexp">Eexp</a></span> <span class="id">e</span> =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.always_inline_exp">always_inline_exp</a></span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.always_inline_rhs">always_inline_rhs</a></span> <span class="id">e</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">e</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ecexp">Ecexp</a></span> <span class="id">ce</span> =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.always_inline_cexp">always_inline_cexp</a></span> <span class="id">ce</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.always_inline_eq">always_inline_eq</a></span> <span class="id">eq</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">eq</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqDef">EqDef</a></span> <span class="id">x'</span> _ <span class="id">e</span> =&gt; (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id">x'</span> ==<span class="id">b</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.always_inline.x">x</a></span>)) || (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.always_inline_rhs">always_inline_rhs</a></span> <span class="id">e</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.always_inline">always_inline</a></span> <span class="id">eqs</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.always_inline_eq">always_inline_eq</a></span> <span class="id">eqs</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.always_inline">always_inline</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="EI.inlinable">inlinable</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="EI.inlinable.x">x</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="EI.inlinable_in_exp">inlinable_in_exp</a></span> <span class="id">e</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">e</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Elast">Elast</a></span> <span class="id">x'</span> _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable.x">x</a></span> ==<span class="id">b</span> <span class="id">x'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ewhen">Ewhen</a></span> <span class="id">e</span> (<span class="id">x'</span>, _) _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable.x">x</a></span> ==<span class="id">b</span> <span class="id">x'</span>) &amp;&amp; <span class="id">inlinable_in_exp</span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eunop">Eunop</a></span> _ <span class="id">e1</span> _ =&gt; <span class="id">inlinable_in_exp</span> <span class="id">e1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ebinop">Ebinop</a></span> _ <span class="id">e1</span> <span class="id">e2</span> _ =&gt; <span class="id">inlinable_in_exp</span> <span class="id">e1</span> &amp;&amp; <span class="id">inlinable_in_exp</span> <span class="id">e2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="EI.inlinable_in_cexp">inlinable_in_cexp</a></span> <span class="id">e</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">e</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Emerge">Emerge</a></span> (<span class="id">x'</span>, _) <span class="id">es</span> _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable.x">x</a></span> ==<span class="id">b</span> <span class="id">x'</span>) &amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id">inlinable_in_cexp</span> <span class="id">es</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ecase">Ecase</a></span> <span class="id">e</span> <span class="id">es</span> <span class="id">d</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable_in_exp">inlinable_in_exp</a></span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> (<span class="id"><a href="Velus.Common.Common.html#or_default_with">or_default_with</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> <span class="id">inlinable_in_cexp</span>) <span class="id">es</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp; <span class="id">inlinable_in_cexp</span> <span class="id">d</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Eexp">Eexp</a></span> <span class="id">e</span> =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable_in_exp">inlinable_in_exp</a></span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.inlinable_in_equation">inlinable_in_equation</a></span> <span class="id">eq</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">eq</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqDef">EqDef</a></span> _ _ (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ecexp">Ecexp</a></span> <span class="id">ce</span>) =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable_in_cexp">inlinable_in_cexp</a></span> <span class="id">ce</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqDef">EqDef</a></span> <span class="id">x'</span> _ _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable.x">x</a></span> ==<span class="id">b</span> <span class="id">x'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqApp">EqApp</a></span> <span class="id">xs</span> _ _ <span class="id">es</span> <span class="id">xr</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id"><a href="Velus.Common.Common.html#mem_ident">mem_ident</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable.x">x</a></span> <span class="id">xs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable_in_exp">inlinable_in_exp</a></span> <span class="id">es</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id"><a href="Velus.Common.Common.html#mem_assoc_ident">mem_assoc_ident</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable.x">x</a></span> <span class="id">xr</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqFby">EqFby</a></span> <span class="id">x'</span> _ _ <span class="id">e</span> <span class="id">xr</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable.x">x</a></span> ==<span class="id">b</span> <span class="id">x'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp; (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.nb_usage_in_exp">nb_usage_in_exp</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable.x">x</a></span> <span class="id">e</span> =? 0)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id"><a href="Velus.Common.Common.html#mem_assoc_ident">mem_assoc_ident</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable.x">x</a></span> <span class="id">xr</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqLast">EqLast</a></span> <span class="id">x'</span> _ _ _ <span class="id">xr</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable.x">x</a></span> ==<span class="id">b</span> <span class="id">x'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id"><a href="Velus.Common.Common.html#mem_assoc_ident">mem_assoc_ident</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable.x">x</a></span> <span class="id">xr</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.inlinable_in_equations">inlinable_in_equations</a></span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable_in_equation">inlinable_in_equation</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable">inlinable</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.inlinable">inlinable</a></span> <span class="id">vars</span> (<span class="id">eqs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.equation">equation</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.cexp">cexp</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">vars'</span> := <span class="id"><a href="Velus.Common.Common.html#PSP.of_list">PSP.of_list</a></span> (<span class="id"><a href="Velus.Common.CommonList.html#map_filter">map_filter</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>, (_, <span class="id">islast</span>)) =&gt; <span class="kwd">if</span> (<span class="id">islast</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>) <span class="kwd">then</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> <span class="kwd">else</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">x</span>) <span class="id">vars</span>) <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">inl</span> := <span class="id"><a href="Velus.Common.CommonList.html#map_filter">map_filter</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">fun</span> <span class="id">equ</span> =&gt; <span class="kwd">match</span> <span class="id">equ</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.EqDef">EqDef</a></span> <span class="id">x</span> _ (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn.Ecexp">Ecexp</a></span> <span class="id">ce</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> <span class="id"><a href="Velus.Common.Common.html#PS.mem">PS.mem</a></span> <span class="id">x</span> <span class="id">vars'</span> <span class="kwd">then</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">x</span>, <span class="id">ce</span>) <span class="kwd">else</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>) <span class="id">eqs</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#filter">filter</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">fun</span> '(<span class="id">x</span>, <span class="id">e</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable_in_equations">inlinable_in_equations</a></span> <span class="id">x</span> <span class="id">eqs</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp; ((<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.nb_usage_in_equations">nb_usage_in_equations</a></span> <span class="id">x</span> <span class="id">eqs</span> =? 1) || (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.always_inline">always_inline</a></span> <span class="id">x</span> <span class="id">eqs</span>)) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> (<span class="kwd">fun</span> '(_, (<span class="id">ck</span>, <span class="id">islast</span>)) =&gt; <span class="kwd">if</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Cks.Is_free_in_clock_dec">Is_free_in_clock_dec</a></span> <span class="id">x</span> <span class="id">ck</span>) <span class="kwd">then</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span> <span class="kwd">else</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>) <span class="id">vars</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inl</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.inline_all_possible">inline_all_possible</a></span> <span class="id">vars</span> <span class="id">eqs</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">toinline</span> := <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inlinable">inlinable</a></span> <span class="id">vars</span> <span class="id">eqs</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left">List.fold_left</a></span> (<span class="kwd">fun</span> <span class="id">eqs</span> '(<span class="id">x</span>, <span class="id">ce</span>) =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_in_equations">inline_in_equations</a></span> <span class="id">x</span> <span class="id">ce</span> <span class="id">eqs</span>) <span class="id">toinline</span> <span class="id">eqs</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="EI.inline_all_possible_vars">inline_all_possible_vars</a></span> : <span class="kwd">forall</span> <span class="id">vars</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.vars_defined">vars_defined</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible">inline_all_possible</a></span> <span class="id">vars</span> <span class="id">eqs</span>) = <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.vars_defined">vars_defined</a></span> <span class="id">eqs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible">inline_all_possible</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left_rev_right">fold_left_rev_right</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#rev">rev</a></span> _) <span class="kwd">as</span> [|(?&amp;?)]; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_in_equations">inline_in_equations</a></span>, <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.vars_defined">vars_defined</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">IHl</span>, 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#flat_map_concat_map">flat_map_concat_map</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>. <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_ext">map_ext</a></span>. <span class="id">intros</span> [??[]| | |]; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="EI.inline_all_possible_vars_fby">inline_all_possible_vars_fby</a></span> : <span class="kwd">forall</span> <span class="id">vars</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.vars_defined">vars_defined</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#filter">filter</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.is_fby">is_fby</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible">inline_all_possible</a></span> <span class="id">vars</span> <span class="id">eqs</span>)) = <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.vars_defined">vars_defined</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#filter">filter</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.is_fby">is_fby</a></span> <span class="id">eqs</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible">inline_all_possible</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left_rev_right">fold_left_rev_right</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#rev">rev</a></span> _) <span class="kwd">as</span> [|(?&amp;?)]; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_in_equations">inline_in_equations</a></span>, <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.vars_defined">vars_defined</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">IHl</span>, 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#flat_map_concat_map">flat_map_concat_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> - <span class="id">i</span>. <span class="id">induction</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_right">fold_right</a></span> _ _ _); <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">a</span> <span class="kwd">as</span> [??[]| | |]; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="EI.inline_all_possible_vars_def_cexp">inline_all_possible_vars_def_cexp</a></span> : <span class="kwd">forall</span> <span class="id">vars</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.vars_defined">vars_defined</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#filter">filter</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.is_def_cexp">is_def_cexp</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible">inline_all_possible</a></span> <span class="id">vars</span> <span class="id">eqs</span>)) = <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.vars_defined">vars_defined</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#filter">filter</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.is_def_cexp">is_def_cexp</a></span> <span class="id">eqs</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible">inline_all_possible</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left_rev_right">fold_left_rev_right</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#rev">rev</a></span> _) <span class="kwd">as</span> [|(?&amp;?)]; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_in_equations">inline_in_equations</a></span>, <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.vars_defined">vars_defined</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">IHl</span>, 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#flat_map_concat_map">flat_map_concat_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> - <span class="id">i</span>. <span class="id">induction</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_right">fold_right</a></span> _ _ _); <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">a</span> <span class="kwd">as</span> [??[]| | |]; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="EI.inline_all_possible_lasts">inline_all_possible_lasts</a></span> : <span class="kwd">forall</span> <span class="id">lasts</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.lasts_defined">lasts_defined</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible">inline_all_possible</a></span> <span class="id">lasts</span> <span class="id">eqs</span>) = <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.lasts_defined">lasts_defined</a></span> <span class="id">eqs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible">inline_all_possible</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left_rev_right">fold_left_rev_right</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#rev">rev</a></span> _) <span class="kwd">as</span> [|(?&amp;?)]; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_in_equations">inline_in_equations</a></span>, <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.lasts_defined">lasts_defined</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">IHl</span>, 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#flat_map_concat_map">flat_map_concat_map</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>. <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_ext">map_ext</a></span>. <span class="id">intros</span> [??[]| | |]; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Transformation of the node and global </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id">inline_all_possible'</span> <span class="id">vars</span> <span class="id">eqs</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">res</span> | <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible">inline_all_possible</a></span> <span class="id">vars</span> <span class="id">eqs</span> = <span class="id">res</span> }.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Defined.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.idck">idck</a></span> (<span class="id">vars</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Op.type">type</a></span> * <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Cks.clock">clock</a></span> * <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>))) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">x</span>, (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">x</span>)), <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">x</span>)))) <span class="id">vars</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Program</span> <span class="kwd">Definition</span> <span class="id"><a name="EI.exp_inlining_node">exp_inlining_node</a></span> (<span class="id">n</span> : <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.node">node</a></span>) : <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.node">node</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">eqs'</span> := <span class="id">inline_all_possible'</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.idck">idck</a></span> <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_vars">n_vars</a></span>)) <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_eqs">n_eqs</a></span>) <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_name">n_name</a></span> := <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_name">n_name</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_in">n_in</a></span> := <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_in">n_in</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_out">n_out</a></span> := <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_out">n_out</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_vars">n_vars</a></span> := <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_vars">n_vars</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_eqs">n_eqs</a></span> := <span class="id">eqs'</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|}.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+ <span class="id">exact</span> <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_ingt0">n_ingt0</a></span>). Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+ <span class="id">exact</span> <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_outgt0">n_outgt0</a></span>). Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible_vars">inline_all_possible_vars</a></span>. <span class="id">exact</span> <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_defd">n_defd</a></span>).<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible_lasts">inline_all_possible_lasts</a></span>. <span class="id">exact</span> <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_lastd1">n_lastd1</a></span>).<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible_vars_def_cexp">inline_all_possible_vars_def_cexp</a></span>. <span class="id">eapply</span> <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_lastd2">n_lastd2</a></span>); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.inline_all_possible_vars_fby">inline_all_possible_vars_fby</a></span>. <span class="id">eapply</span> <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_vout">n_vout</a></span>); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+ <span class="id">exact</span> <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_nodup">n_nodup</a></span>). Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+ <span class="id">exact</span> <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.n_good">n_good</a></span>). Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Local</span> <span class="id">Program</span> <span class="kwd">Instance</span> <span class="id"><a name="EI.exp_inlining_node_transform_unit">exp_inlining_node_transform_unit</a></span>: <span class="id"><a href="Velus.Common.CommonProgram.html#TransformUnit">TransformUnit</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.node">node</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.node">node</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> := <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.exp_inlining_node">exp_inlining_node</a></span> }.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Local</span> <span class="id">Program</span> <span class="kwd">Instance</span> <span class="id"><a name="EI.exp_inlining_without_units">exp_inlining_without_units</a></span>: <span class="id"><a href="Velus.Common.CommonProgram.html#TransformProgramWithoutUnits">TransformProgramWithoutUnits</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.global">global</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.global">global</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id"><a href="Velus.Common.CommonProgram.html#transform_program_without_units">transform_program_without_units</a></span> := <span class="kwd">fun</span> <span class="id">g</span> =&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.Global">Global</a></span> <span class="id">g</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.types">types</a></span>) <span class="id">g</span>.(<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.externs">externs</a></span>) [] }.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="EI.exp_inlining">exp_inlining</a></span> : <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.global">global</a></span> -&gt; <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.global">global</a></span> := <span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span>.<br/>
+<br/>
+<h3> Some properties </h3>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="EI.find_node_exp_inlining_forward">find_node_exp_inlining_forward</a></span> : <span class="kwd">forall</span> <span class="id">G</span> <span class="id">f</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.find_node">find_node</a></span> <span class="id">f</span> <span class="id">G</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.find_node">find_node</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.exp_inlining">exp_inlining</a></span> <span class="id">G</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.exp_inlining_node">exp_inlining_node</a></span> <span class="id">n</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.exp_inlining">exp_inlining</a></span>, <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.find_node">find_node</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTactics.html#option_map_inv">option_map_inv</a></span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> ((?&amp;?)&amp;<span class="id">Hfind</span>&amp;?); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_transform_units_forward">find_unit_transform_units_forward</a></span> <span class="kwd">in</span> <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hfind</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="EI.find_node_exp_inlining_backward">find_node_exp_inlining_backward</a></span> : <span class="kwd">forall</span> <span class="id">G</span> <span class="id">f</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.find_node">find_node</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.exp_inlining">exp_inlining</a></span> <span class="id">G</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">n0</span>, <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.find_node">find_node</a></span> <span class="id">f</span> <span class="id">G</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">n0</span> /\ <span class="id">n</span> = <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.exp_inlining_node">exp_inlining_node</a></span> <span class="id">n0</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.exp_inlining">exp_inlining</a></span>, <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.find_node">find_node</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTactics.html#option_map_inv">option_map_inv</a></span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> ((?&amp;?)&amp;<span class="id">Hfind</span>&amp;?); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_transform_units_backward">find_unit_transform_units_backward</a></span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> (?&amp;?&amp;<span class="id">Hfind</span>&amp;?&amp;?); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">x</span>. <span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hfind</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="EI.exp_inlining_iface_eq">exp_inlining_iface_eq</a></span> : <span class="kwd">forall</span> <span class="id">G</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.global_iface_eq">global_iface_eq</a></span> <span class="id">G</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.exp_inlining">exp_inlining</a></span> <span class="id">G</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">repeat</span> (<span class="id">split</span>; <span class="id">auto</span>). <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.find_node">find_node</a></span> _ _) <span class="id">eqn</span>:<span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">erewrite</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.find_node_exp_inlining_forward">find_node_exp_inlining_forward</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> (<span class="id">split</span>; <span class="id">auto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn.find_node">find_node</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.exp_inlining">exp_inlining</a></span> _)) <span class="id">eqn</span>:<span class="id">Hfind'</span>; <span class="id">try</span> <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exfalso</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI.find_node_exp_inlining_backward">find_node_exp_inlining_backward</a></span> <span class="kwd">in</span> <span class="id">Hfind'</span> <span class="kwd">as</span> (?&amp;?&amp;_); <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI">EI</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="EIFun">EIFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span>   <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>      <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>    <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Syn</span>   : <span class="id"><a href="Velus.NLustre.NLSyntax.html#NLSYNTAX">NLSYNTAX</a></span>    <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn">CESyn</a></span>)<br/>
+&lt;: <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI">EI</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn">Syn</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EI">EI</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#Syn">Syn</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.ExprInlining.EI.html#EIFun">EIFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

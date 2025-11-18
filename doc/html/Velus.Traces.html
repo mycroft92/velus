@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module Traces</title>
+<meta name="description" content="Documentation of Coq module Traces" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module Traces</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">compcert</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html">common.Events</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">compcert</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Values.html">common.Values</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">compcert</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Globalenvs.html">common.Globalenvs</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">compcert</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="../../CompCert/doc/html/compcert.cfrontend.Clight.html">cfrontend.Clight</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">compcert</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="../../CompCert/doc/html/compcert.lib.Integers.html">lib.Integers</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Ident.html">Ident</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html">ObcToClight.Interface</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#IStr">IStr</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#OpAux">OpAux</a></span>.<br/>
+<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Syn">Obc.Syn</a></span>.<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="finite_traces">finite_traces</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="finite_traces.p">p</a></span>: <span class="id"><a href="../../CompCert/doc/html/compcert.cfrontend.Clight.html#program">Clight.program</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="eventval_of_cvalue">eventval_of_cvalue</a></span> (<span class="id">v</span>: <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.cvalue">cvalue</a></span>): <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#eventval">eventval</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">v</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="../../CompCert/doc/html/compcert.common.Values.html#Vint">Vint</a></span> <span class="id">i</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#EVint">EVint</a></span> <span class="id">i</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="../../CompCert/doc/html/compcert.common.Values.html#Vlong">Vlong</a></span> <span class="id">i</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#EVlong">EVlong</a></span> <span class="id">i</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="../../CompCert/doc/html/compcert.common.Values.html#Vfloat">Vfloat</a></span> <span class="id">f</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#EVfloat">EVfloat</a></span> <span class="id">f</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="../../CompCert/doc/html/compcert.common.Values.html#Vsingle">Vsingle</a></span> <span class="id">f</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#EVsingle">EVsingle</a></span> <span class="id">f</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="../../CompCert/doc/html/compcert.common.Values.html#Vptr">Vptr</a></span> _ _ =&gt;  <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#EVint">EVint</a></span> <span class="id"><a href="../../CompCert/doc/html/compcert.lib.Integers.html#Int.zero">Int.zero</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="../../CompCert/doc/html/compcert.common.Values.html#Vundef">Vundef</a></span> =&gt;  <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#EVint">EVint</a></span> <span class="id"><a href="../../CompCert/doc/html/compcert.lib.Integers.html#Int.zero">Int.zero</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="eventval_of_value">eventval_of_value</a></span> (<span class="id">v</span>: <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.value">value</a></span>) : <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#eventval">eventval</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">v</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.Vscalar">Vscalar</a></span> <span class="id">v</span> =&gt; <span class="id"><a href="Velus.Traces.html#eventval_of_cvalue">eventval_of_cvalue</a></span> <span class="id">v</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.Venum">Venum</a></span> <span class="id">n</span> =&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#EVint">EVint</a></span> (<span class="id"><a href="Velus.ObcToClight.Interface.html#Op.enumtag_to_int">enumtag_to_int</a></span> <span class="id">n</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="eventval_of_cvalue_match">eventval_of_cvalue_match</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">v</span> <span class="id">t</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.ObcToClight.Interface.html#Op.wt_cvalue">wt_cvalue</a></span> <span class="id">v</span> <span class="id">t</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#eventval_match">eventval_match</a></span> (<span class="id"><a href="../../CompCert/doc/html/compcert.cfrontend.Clight.html#globalenv">globalenv</a></span> <span class="id"><a href="Velus.Traces.html#finite_traces.p">p</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Traces.html#eventval_of_cvalue">eventval_of_cvalue</a></span> <span class="id">v</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="../../CompCert/doc/html/compcert.common.AST.html#type_of_chunk">AST.type_of_chunk</a></span> (<span class="id"><a href="Velus.ObcToClight.Interface.html#Op.type_chunk">type_chunk</a></span> <span class="id">t</span>)) <span class="id">v</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">v</span>; <span class="id">intros</span> * <span class="id">Wt</span>; <span class="id">inv</span> <span class="id">Wt</span>; <span class="id">simpl</span>; <span class="id">try</span> <span class="id">econstructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">sz</span>; <span class="id">try</span> <span class="id">destruct</span> <span class="id">sg</span>; <span class="id">econstructor</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="eventval_of_value_match">eventval_of_value_match</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">v</span> <span class="id">t</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.ObcToClight.Interface.html#Op.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">t</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#eventval_match">eventval_match</a></span> (<span class="id"><a href="../../CompCert/doc/html/compcert.cfrontend.Clight.html#globalenv">globalenv</a></span> <span class="id"><a href="Velus.Traces.html#finite_traces.p">p</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Traces.html#eventval_of_value">eventval_of_value</a></span> <span class="id">v</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="../../CompCert/doc/html/compcert.common.AST.html#type_of_chunk">AST.type_of_chunk</a></span> (<span class="id"><a href="Velus.ObcToClight.Interface.html#Op.type_to_chunk">type_to_chunk</a></span> <span class="id">t</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.ObcToClight.Interface.html#value_to_cvalue">value_to_cvalue</a></span> <span class="id">v</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span> 1; <span class="id">subst</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Traces.html#eventval_of_cvalue_match">eventval_of_cvalue_match</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id"><a href="Velus.ObcToClight.Interface.html#Op.memory_chunk_of_enumtag_spec">memory_chunk_of_enumtag_spec</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">tn</span>)) <span class="kwd">as</span> [(<span class="id">Hn</span> &amp; <span class="id">E</span>)|[(<span class="id">Hn</span> &amp; <span class="id">E</span>)|(<span class="id">Hn</span> &amp; <span class="id">E</span>)]];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">E</span>; <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="load_event_of_value">load_event_of_value</a></span> (<span class="id">v</span>: <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.value">value</a></span>) (<span class="id">xt</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.type">type</a></span>): <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#event">event</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#Event_vload">Event_vload</a></span> (<span class="id"><a href="Velus.ObcToClight.Interface.html#Op.type_to_chunk">type_to_chunk</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">xt</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xt</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="../../CompCert/doc/html/compcert.lib.Integers.html#Ptrofs.zero">Ptrofs.zero</a></span> (<span class="id"><a href="Velus.Traces.html#eventval_of_value">eventval_of_value</a></span> <span class="id">v</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="store_event_of_value">store_event_of_value</a></span> (<span class="id">v</span>: <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.value">value</a></span>) (<span class="id">xt</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.type">type</a></span>): <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#event">event</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#Event_vstore">Event_vstore</a></span> (<span class="id"><a href="Velus.ObcToClight.Interface.html#Op.type_to_chunk">type_to_chunk</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">xt</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xt</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="../../CompCert/doc/html/compcert.lib.Integers.html#Ptrofs.zero">Ptrofs.zero</a></span> (<span class="id"><a href="Velus.Traces.html#eventval_of_value">eventval_of_value</a></span> <span class="id">v</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="load_events">load_events</a></span>  : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.value">value</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.type">type</a></span>) -&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#trace">trace</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#map2">CommonList.map2</a></span> <span class="id"><a href="Velus.Traces.html#load_event_of_value">load_event_of_value</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="store_events">store_events</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.value">value</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.type">type</a></span>) -&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#trace">trace</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#map2">CommonList.map2</a></span> <span class="id"><a href="Velus.Traces.html#store_event_of_value">store_event_of_value</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="load_events_nil">load_events_nil</a></span> : <span class="kwd">forall</span> <span class="id">vs</span>, <span class="id"><a href="Velus.Traces.html#load_events">load_events</a></span> <span class="id">vs</span> [] = [].<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#map2_nil_r">map2_nil_r</a></span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="load_events_cons">load_events_cons</a></span> : <span class="kwd">forall</span> <span class="id">v</span> <span class="id">vs</span> <span class="id">xt</span> <span class="id">xts</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Traces.html#load_events">load_events</a></span> (<span class="id">v</span> :: <span class="id">vs</span>) (<span class="id">xt</span> :: <span class="id">xts</span>) = [<span class="id"><a href="Velus.Traces.html#load_event_of_value">load_event_of_value</a></span> <span class="id">v</span> <span class="id">xt</span>] ++ <span class="id"><a href="Velus.Traces.html#load_events">load_events</a></span> <span class="id">vs</span> <span class="id">xts</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">auto</span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="store_events_nil">store_events_nil</a></span> : <span class="kwd">forall</span> <span class="id">vs</span>, <span class="id"><a href="Velus.Traces.html#store_events">store_events</a></span> <span class="id">vs</span> [] = [].<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#map2_nil_r">map2_nil_r</a></span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="store_events_cons">store_events_cons</a></span> : <span class="kwd">forall</span> <span class="id">v</span> <span class="id">vs</span> <span class="id">xt</span> <span class="id">xts</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Traces.html#store_events">store_events</a></span> (<span class="id">v</span> :: <span class="id">vs</span>) (<span class="id">xt</span> :: <span class="id">xts</span>) = [<span class="id"><a href="Velus.Traces.html#store_event_of_value">store_event_of_value</a></span> <span class="id">v</span> <span class="id">xt</span>] ++ <span class="id"><a href="Velus.Traces.html#store_events">store_events</a></span> <span class="id">vs</span> <span class="id">xts</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">auto</span>. Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Traces.html#finite_traces">finite_traces</a></span>.<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="infinite_traces">infinite_traces</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="infinite_traces.ins">ins</a></span>  : <span class="id"><a href="Velus.ObcToClight.Interface.html#IStr.stream">stream</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.value">value</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="infinite_traces.outs">outs</a></span> : <span class="id"><a href="Velus.ObcToClight.Interface.html#IStr.stream">stream</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.value">value</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="infinite_traces.xs">xs</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.type">type</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="infinite_traces.ys">ys</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.type">type</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="infinite_traces.xs_ys_spec">xs_ys_spec</a></span>: <span class="id"><a href="Velus.Traces.html#infinite_traces.xs">xs</a></span> &lt;&gt; [] \/ <span class="id"><a href="Velus.Traces.html#infinite_traces.ys">ys</a></span> &lt;&gt; [].<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="infinite_traces.Len_ins">Len_ins</a></span>: <span class="kwd">forall</span> <span class="id">n</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id"><a href="Velus.Traces.html#infinite_traces.ins">ins</a></span> <span class="id">n</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id"><a href="Velus.Traces.html#infinite_traces.xs">xs</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="infinite_traces.Len_outs">Len_outs</a></span>: <span class="kwd">forall</span> <span class="id">n</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id"><a href="Velus.Traces.html#infinite_traces.outs">outs</a></span> <span class="id">n</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id"><a href="Velus.Traces.html#infinite_traces.ys">ys</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="load_store_events_not_E0">load_store_events_not_E0</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Traces.html#load_events">load_events</a></span> (<span class="id"><a href="Velus.Traces.html#infinite_traces.ins">ins</a></span> <span class="id">n</span>) <span class="id"><a href="Velus.Traces.html#infinite_traces.xs">xs</a></span> &lt;&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#E0">E0</a></span> \/ <span class="id"><a href="Velus.Traces.html#store_events">store_events</a></span> (<span class="id"><a href="Velus.Traces.html#infinite_traces.outs">outs</a></span> <span class="id">n</span>) <span class="id"><a href="Velus.Traces.html#infinite_traces.ys">ys</a></span> &lt;&gt; <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#E0">E0</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">n</span>; <span class="id">specialize</span> (<span class="id"><a href="Velus.Traces.html#infinite_traces.Len_ins">Len_ins</a></span> <span class="id">n</span>); <span class="id">specialize</span> (<span class="id"><a href="Velus.Traces.html#infinite_traces.Len_outs">Len_outs</a></span> <span class="id">n</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.Traces.html#infinite_traces.xs_ys_spec">xs_ys_spec</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">left</span>; <span class="id">destruct</span> <span class="id"><a href="Velus.Traces.html#infinite_traces.xs">xs</a></span>, (<span class="id"><a href="Velus.Traces.html#infinite_traces.ins">ins</a></span> <span class="id">n</span>); <span class="id">auto</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Len_ins</span>; <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">right</span>; <span class="id">destruct</span> <span class="id"><a href="Velus.Traces.html#infinite_traces.ys">ys</a></span>, (<span class="id"><a href="Velus.Traces.html#infinite_traces.outs">outs</a></span> <span class="id">n</span>); <span class="id">auto</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Len_outs</span>; <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Program</span> <span class="kwd">CoFixpoint</span> <span class="id">mk_trace'</span> (<span class="id">n</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span>): <span class="id">traceinf'</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Econsinf'</span> (<span class="id"><a href="Velus.Traces.html#load_events">load_events</a></span> (<span class="id"><a href="Velus.Traces.html#infinite_traces.ins">ins</a></span> <span class="id">n</span>) <span class="id"><a href="Velus.Traces.html#infinite_traces.xs">xs</a></span> ** <span class="id"><a href="Velus.Traces.html#store_events">store_events</a></span> (<span class="id"><a href="Velus.Traces.html#infinite_traces.outs">outs</a></span> <span class="id">n</span>) <span class="id"><a href="Velus.Traces.html#infinite_traces.ys">ys</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">mk_trace'</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>)) _.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">E</span>; <span class="id">apply</span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#Eapp_E0_inv">Eapp_E0_inv</a></span> <span class="kwd">in</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.Traces.html#load_store_events_not_E0">load_store_events_not_E0</a></span> <span class="id">n</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="mk_trace">mk_trace</a></span> (<span class="id">n</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span>) : <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#traceinf">traceinf</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">traceinf_of_traceinf'</span> (<span class="id">mk_trace'</span> <span class="id">n</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="unfold_mk_trace">unfold_mk_trace</a></span>: <span class="kwd">forall</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Traces.html#mk_trace">mk_trace</a></span> <span class="id">n</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Traces.html#load_events">load_events</a></span> (<span class="id"><a href="Velus.Traces.html#infinite_traces.ins">ins</a></span> <span class="id">n</span>) <span class="id"><a href="Velus.Traces.html#infinite_traces.xs">xs</a></span> ** <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#E0">E0</a></span> ** <span class="id"><a href="Velus.Traces.html#store_events">store_events</a></span> (<span class="id"><a href="Velus.Traces.html#infinite_traces.outs">outs</a></span> <span class="id">n</span>) <span class="id"><a href="Velus.Traces.html#infinite_traces.ys">ys</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*** <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#E0">E0</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*** <span class="id"><a href="Velus.Traces.html#mk_trace">mk_trace</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Traces.html#mk_trace">mk_trace</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#E0_left">E0_left</a></span>, <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#E0_left_inf">E0_left_inf</a></span>, (<span class="id">unroll_traceinf'</span> (<span class="id">mk_trace'</span> <span class="id">n</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">traceinf_traceinf'_app</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Traces.html#infinite_traces">infinite_traces</a></span>.<br/>
+<br/>
+<div class="doc">The trace of an Obc method </div>
+<span class="kwd">Section</span> <span class="id"><a name="Obc">Obc</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> (<span class="id"><a name="Obc.m">m</a></span>: <span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Syn.method">method</a></span>) (<span class="id"><a name="Obc.ins">ins</a></span> <span class="id"><a name="Obc.outs">outs</a></span>: <span class="id"><a href="Velus.ObcToClight.Interface.html#IStr.stream">stream</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.value">value</a></span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="Obc.in_out_spec">in_out_spec</a></span> : <span class="id"><a href="Velus.Traces.html#Obc.m">m</a></span>.(<span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Syn.m_in">m_in</a></span>) &lt;&gt; [] \/ <span class="id"><a href="Velus.Traces.html#Obc.m">m</a></span>.(<span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Syn.m_out">m_out</a></span>) &lt;&gt; [].<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="Obc.Len_ins">Len_ins</a></span> : <span class="kwd">forall</span> <span class="id">n</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id"><a href="Velus.Traces.html#Obc.ins">ins</a></span> <span class="id">n</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id"><a href="Velus.Traces.html#Obc.m">m</a></span>.(<span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Syn.m_in">m_in</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="Obc.Len_outs">Len_outs</a></span>: <span class="kwd">forall</span> <span class="id">n</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id"><a href="Velus.Traces.html#Obc.outs">outs</a></span> <span class="id">n</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id"><a href="Velus.Traces.html#Obc.m">m</a></span>.(<span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Syn.m_out">m_out</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Program</span> <span class="kwd">Definition</span> <span class="id"><a name="trace_step">trace_step</a></span> (<span class="id">n</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span>): <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#traceinf">traceinf</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Traces.html#mk_trace">mk_trace</a></span> <span class="id"><a href="Velus.Traces.html#Obc.ins">ins</a></span> <span class="id"><a href="Velus.Traces.html#Obc.outs">outs</a></span> <span class="id"><a href="Velus.Traces.html#Obc.m">m</a></span>.(<span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Syn.m_in">m_in</a></span>) <span class="id"><a href="Velus.Traces.html#Obc.m">m</a></span>.(<span class="id"><a href="Velus.ObcToClight.Interface.html#Obc.Syn.m_out">m_out</a></span>) _ _ _ <span class="id">n</span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Traces.html#Obc">Obc</a></span>.<br/>
+<br/>
+<div class="doc">The trace of a Lustre node </div>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoindStreams.html">CoindStreams</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html">Instantiator</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#L">L</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="Velus.Instantiator.html#L.ClockSwitch.Correct.CIStr">CIStr</a></span>.<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="LTrace">LTrace</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="LTrace.PSyn">PSyn</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Instantiator.html#L.Syn.decl">decl</a></span> -&gt; <span class="id"><a href="Velus.Instantiator.html#L.Syn.block">block</a></span> -&gt; <span class="kwd">Prop</span>} {<span class="id"><a name="LTrace.prefs">prefs</a></span> : <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> (<span class="id"><a name="LTrace.node">node</a></span>: @<span class="id"><a href="Velus.Instantiator.html#L.Syn.node">node</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.PSyn">PSyn</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.prefs">prefs</a></span>) (<span class="id"><a name="LTrace.ins">ins</a></span> <span class="id"><a name="LTrace.outs">outs</a></span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.ObcToClight.Interface.html#Op.value">value</a></span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="LTrace.Len_ins">Len_ins</a></span>     : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">Datatypes.length</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.ins">ins</a></span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">Datatypes.length</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.node">node</a></span>.(<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="LTrace.Len_outs">Len_outs</a></span>    : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">Datatypes.length</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.outs">outs</a></span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">Datatypes.length</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.node">node</a></span>.(<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_out">n_out</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Program</span> <span class="kwd">Definition</span> <span class="id"><a name="trace_node">trace_node</a></span> (<span class="id">n</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span>): <span class="id"><a href="../../CompCert/doc/html/compcert.common.Events.html#traceinf">traceinf</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Traces.html#mk_trace">mk_trace</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.ClockSwitch.Correct.CIStr.CIStr.tr_Streams">tr_Streams</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.ins">ins</a></span>) (<span class="id"><a href="Velus.Instantiator.html#L.ClockSwitch.Correct.CIStr.CIStr.tr_Streams">tr_Streams</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.outs">outs</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.node">node</a></span>.(<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span>))) (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.node">node</a></span>.(<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_out">n_out</a></span>))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_ _ _ <span class="id">n</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">left</span>. <span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.Traces.html#LTrace.node">node</a></span>.(<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_ingt0">n_ingt0</a></span>)) <span class="kwd">as</span> <span class="id">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Traces.html#LTrace.node">node</a></span>.(<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span>)). <span class="id">now</span> <span class="id">inv</span> <span class="id">H0</span>. <span class="id">now</span> <span class="id">inversion</span> 1.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#L.ClockSwitch.Correct.CIStr.CIStr.tr_Streams">tr_Streams</a></span>, <span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span>; <span class="id">rewrite</span> 3 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Instantiator.html#L.ClockSwitch.Correct.CIStr.CIStr.tr_Streams">tr_Streams</a></span>, <span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span>; <span class="id">rewrite</span> 4 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="trace_node_step">trace_node_step</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span>, <span class="id"><a href="Velus.Traces.html#trace_node">trace_node</a></span> <span class="id">n</span> = (<span class="id"><a href="Velus.Traces.html#load_events">load_events</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.ClockSwitch.Correct.CIStr.CIStr.tr_Streams">tr_Streams</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.ins">ins</a></span> <span class="id">n</span>) (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.node">node</a></span>.(<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_in">n_in</a></span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id"><a href="Velus.Traces.html#store_events">store_events</a></span> (<span class="id"><a href="Velus.Instantiator.html#L.ClockSwitch.Correct.CIStr.CIStr.tr_Streams">tr_Streams</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.outs">outs</a></span> <span class="id">n</span>) (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> (<span class="id"><a href="Velus.Common.Common.html#idfst">idfst</a></span> <span class="id"><a href="Velus.Traces.html#LTrace.node">node</a></span>.(<span class="id"><a href="Velus.Instantiator.html#L.Syn.n_out">n_out</a></span>)))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*** (<span class="id"><a href="Velus.Traces.html#trace_node">trace_node</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>)).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Traces.html#trace_node">trace_node</a></span>, <span class="id"><a href="Velus.Traces.html#mk_trace">mk_trace</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">unroll_traceinf'</span> (<span class="id">mk_trace'</span> _ _ _ _ _ _ _ <span class="id">n</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>. <span class="id">rewrite</span> <span class="id">traceinf_traceinf'_app</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Traces.html#LTrace">LTrace</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

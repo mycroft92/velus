@@ -1,0 +1,528 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module VelusMemory</title>
+<meta name="description" content="Documentation of Coq module VelusMemory" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module VelusMemory</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Environment.html">Environment</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Setoids.Setoid.html">Setoid</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html">Morphisms</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<br/>
+<span class="kwd">Set</span> <span class="kwd">Implicit</span> <span class="kwd">Arguments</span>.<br/>
+<br/>
+<h1> VelusMemory </h1>
+<br/>
+<br/>
+<h2> Datatype </h2>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="env">env</a></span> := <span class="id"><a href="Velus.Environment.html#Env.t">Env.t</a></span>.<br/>
+<br/>
+<span class="kwd">Inductive</span> <span class="id"><a name="memory">memory</a></span> (<span class="id">V</span>: <span class="kwd">Type</span>) :=<br/>
+&nbsp;&nbsp;<span class="id">Mem</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="values">values</a></span>: <span class="id"><a href="Velus.VelusMemory.html#env">env</a></span> <span class="id">V</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="instances">instances</a></span>: <span class="id"><a href="Velus.VelusMemory.html#env">env</a></span> (<span class="id">memory</span> <span class="id">V</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}.<br/>
+<br/>
+<h2> Operations </h2>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="Operations">Operations</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="Operations.V">V</a></span> <span class="id"><a name="Operations.W">W</a></span>: <span class="kwd">Type</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="empty_memory">empty_memory</a></span> : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span> := <span class="id"><a href="Velus.VelusMemory.html#Mem">Mem</a></span> (<span class="id"><a href="Velus.Environment.html#Env.empty">Env.empty</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>) (<span class="id"><a href="Velus.Environment.html#Env.empty">Env.empty</a></span> (<span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="find_val">find_val</a></span> (<span class="id">x</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">m</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">m</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="find_inst">find_inst</a></span> (<span class="id">x</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">m</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> (<span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="add_val">add_val</a></span> (<span class="id">x</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">v</span>: <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>) (<span class="id">m</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>) : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Mem">Mem</a></span> (<span class="id"><a href="Velus.Environment.html#Env.add">Env.add</a></span> <span class="id">x</span> <span class="id">v</span> (<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">m</span>)) (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="add_inst">add_inst</a></span> (<span class="id">x</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">m'</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>) (<span class="id">m</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>) : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Mem">Mem</a></span> (<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">m</span>) (<span class="id"><a href="Velus.Environment.html#Env.add">Env.add</a></span> <span class="id">x</span> <span class="id">m'</span> (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m</span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="mmap">mmap</a></span> (<span class="id">f</span>: <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span> -&gt; <span class="id"><a href="Velus.VelusMemory.html#Operations.W">W</a></span>) (<span class="id">m</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>) : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.W">W</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Mem">Mem</a></span> (<span class="id"><a href="Velus.Environment.html#Env.map">Env.map</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">m</span>)) (<span class="id"><a href="Velus.Environment.html#Env.map">Env.map</a></span> (<span class="id">mmap</span> <span class="id">f</span>) (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m</span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="remove_inst">remove_inst</a></span> (<span class="id">x</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">m</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>) : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Mem">Mem</a></span> (<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">m</span>) (<span class="id"><a href="Velus.Environment.html#Env.remove">Env.remove</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m</span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="remove_val">remove_val</a></span> (<span class="id">x</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">m</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span>) : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Operations.V">V</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Mem">Mem</a></span> (<span class="id"><a href="Velus.Environment.html#Env.remove">Env.remove</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">m</span>)) (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m</span>).<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.VelusMemory.html#Operations">Operations</a></span>.<br/>
+<br/>
+<h2> Induction Scheme </h2>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="VelusMemoryInd">VelusMemoryInd</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="VelusMemoryInd.V">V</a></span>: <span class="kwd">Type</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="VelusMemoryInd.P">P</a></span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#VelusMemoryInd.V">V</a></span> -&gt; <span class="kwd">Prop</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="VelusMemoryInd.MemCase">MemCase</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">m</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">m'</span> <span class="id">x</span>, <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">x</span> <span class="id">m</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">m'</span> -&gt; <span class="id"><a href="Velus.VelusMemory.html#VelusMemoryInd.P">P</a></span> <span class="id">m'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#VelusMemoryInd.P">P</a></span> <span class="id">m</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id">memory_ind'</span> (<span class="id">m</span> : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#VelusMemoryInd.V">V</a></span>): <span class="id"><a href="Velus.VelusMemory.html#VelusMemoryInd.P">P</a></span> <span class="id">m</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="kwd">in</span> <span class="id">MemCase</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">m</span> <span class="kwd">as</span> [? <span class="id">xms</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusMemory.html#VelusMemoryInd.MemCase">MemCase</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xms</span>; <span class="id">intros</span> * <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gleaf">Env.gleaf</a></span> <span class="kwd">in</span> <span class="id">Find</span>; <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">x</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHxms2</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHxms1</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> <span class="id">o</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">symmetry</span> <span class="kwd">in</span> <span class="id">Find</span>; <span class="id">inv</span> <span class="id">Find</span>. <span class="id">apply</span> <span class="id">memory_ind'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.VelusMemory.html#VelusMemoryInd">VelusMemoryInd</a></span>.<br/>
+<br/>
+<span class="kwd">Inductive</span> <span class="id"><a name="equal_memory">equal_memory</a></span> {<span class="id">V</span>: <span class="kwd">Type</span>} : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id">V</span> -&gt; <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id">V</span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id"><a name="equal_memory_intro">equal_memory_intro</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">m</span> <span class="id">m'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Environment.html#Env.Equal">Env.Equal</a></span> (<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">m</span>) (<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">m'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Environment.html#Env.Equiv">Env.Equiv</a></span> <span class="id">equal_memory</span> (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m</span>) (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">equal_memory</span> <span class="id">m</span> <span class="id">m'</span>.<br/>
+<br/>
+<span class="kwd">Infix</span> <span class="string">"≋"</span> := <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span> (<span class="kwd">at</span> <span class="id">level</span> 70, <span class="id">no</span> <span class="id">associativity</span>).<br/>
+<span class="kwd">Infix</span> <span class="string">"⌈≋⌉"</span> := (<span class="id"><a href="Velus.Common.Common.html#orel">orel</a></span> <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span>) (<span class="kwd">at</span> <span class="id">level</span> 70, <span class="id">no</span> <span class="id">associativity</span>).<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="EqualVelusMemory">EqualVelusMemory</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="EqualVelusMemory.V">V</a></span>: <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="equal_memory_refl">equal_memory_refl</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">m</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#EqualVelusMemory.V">V</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">m</span> <span class="id">≋</span> <span class="id">m</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">m</span> <span class="kwd">as</span> [? <span class="id">IH</span>] <span class="kwd">using</span> <span class="id">memory_ind'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> * <span class="id">Find</span> ?.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.MapsTo_fun">Env.Props.P.F.MapsTo_fun</a></span> <span class="kwd">in</span> <span class="id">Find</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">Find</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="equal_memory_sym">equal_memory_sym</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">m</span> <span class="id">m'</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#EqualVelusMemory.V">V</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">m</span> <span class="id">≋</span> <span class="id">m'</span> -&gt; <span class="id">m'</span> <span class="id">≋</span> <span class="id">m</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">m</span> <span class="kwd">as</span> [? <span class="id">IH</span>] <span class="kwd">using</span> <span class="id">memory_ind'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1 <span class="kwd">as</span> [?? <span class="id">Vals</span> <span class="id">Insts</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">now</span> <span class="id">symmetry</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">Insts</span> <span class="kwd">as</span> (<span class="id">Insts1</span> &amp; <span class="id">Insts2</span>); <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">symmetry</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">k</span> <span class="id">e1</span> <span class="id">e2</span> <span class="id">M1</span> <span class="id">M2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Insts2</span> <span class="kwd">in</span> <span class="id">M1</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="equal_memory_trans">equal_memory_trans</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">m1</span> <span class="id">m2</span> <span class="id">m3</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#EqualVelusMemory.V">V</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">m1</span> <span class="id">≋</span> <span class="id">m2</span> -&gt; <span class="id">m2</span> <span class="id">≋</span> <span class="id">m3</span> -&gt; <span class="id">m1</span> <span class="id">≋</span> <span class="id">m3</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">m1</span> <span class="kwd">as</span> [? <span class="id">IH</span>] <span class="kwd">using</span> <span class="id">memory_ind'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1 <span class="kwd">as</span> [?? <span class="id">Vals12</span> <span class="id">Insts12</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1 <span class="kwd">as</span> [?? <span class="id">Vals23</span> <span class="id">Insts23</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">now</span> <span class="id">rewrite</span> <span class="id">Vals12</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">Insts12</span> <span class="kwd">as</span> (<span class="id">In12</span> &amp; <span class="id">HMapsTo12</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Insts23</span> <span class="kwd">as</span> (?&amp; <span class="id">HMapsTo23</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">now</span> <span class="id">setoid_rewrite</span> <span class="id">In12</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> * <span class="id">Find1</span> <span class="id">Find3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="kwd">exists</span> <span class="id">e''</span>, <span class="id"><a href="Velus.Environment.html#Env.MapsTo">Env.MapsTo</a></span> <span class="id">k</span> <span class="id">e''</span> (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m2</span>)) <span class="kwd">as</span> (<span class="id">e''</span> &amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.find_mapsto_iff">Env.Props.P.F.find_mapsto_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="Velus.Environment.html#Env.In_find">Env.In_find</a></span>, &lt;-<span class="id">In12</span>, <span class="id"><a href="Velus.Environment.html#Env.In_find">Env.In_find</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> &lt;-<span class="id"><a href="Velus.Environment.html#Env.Props.P.F.find_mapsto_iff">Env.Props.P.F.find_mapsto_iff</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> <span class="id">Find1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> (<span class="id">HMapsTo12</span> _ _ <span class="id">e''</span>) <span class="kwd">in</span> <span class="id">Find1</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> (<span class="id">HMapsTo23</span> _ <span class="id">e''</span>) <span class="kwd">in</span> <span class="id">Find3</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Relation</span> (<span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#EqualVelusMemory.V">V</a></span>) <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.VelusMemory.html#equal_memory_refl">equal_memory_refl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.VelusMemory.html#equal_memory_sym">equal_memory_sym</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">transitivity</span> <span class="id">proved</span> <span class="kwd">by</span> <span class="id"><a href="Velus.VelusMemory.html#equal_memory_trans">equal_memory_trans</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">equal_memory_rel</span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.VelusMemory.html#EqualVelusMemory">EqualVelusMemory</a></span>.<br/>
+<br/>
+<span class="id">Global</span> <span class="id">Existing</span> <span class="kwd">Instance</span> <span class="id"><a href="Velus.VelusMemory.html#equal_memory_rel">equal_memory_rel</a></span>.<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Immediate</span> <span class="id">equal_memory_rel_Reflexive</span> : <span class="id">memory</span>.<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Immediate</span> <span class="id">equal_memory_rel_Transitive</span> : <span class="id">memory</span>.<br/>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> <span class="id">V</span>: (@<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">V</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span> ==&gt; <span class="id"><a href="Velus.Environment.html#Env.Equal">Env.Equal</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">values_equal_memory</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E</span> <span class="id">x</span>.<br/>
+&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">E</span> <span class="kwd">as</span> [?? <span class="id">Vals</span>]; <span class="id">now</span> <span class="id">rewrite</span> <span class="id">Vals</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> <span class="id">V</span>: (@<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">V</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span> ==&gt; <span class="id"><a href="Velus.Environment.html#Env.Equiv">Env.Equiv</a></span> <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">instances_equal_memory</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E</span>.<br/>
+&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">E</span> <span class="kwd">as</span> [??? <span class="id">Insts</span>]; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> <span class="id">V</span> <span class="id">x</span>: (@<span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span> <span class="id">V</span> <span class="id">x</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span> ==&gt; <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span> ==&gt; <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">add_inst_equal_memory</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> ? ?  <span class="id">E1</span>  ? ? <span class="id">E2</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl</span>; <span class="id">rewrite</span> <span class="id">E2</span>.<br/>
+&nbsp;&nbsp;+ <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;+ <span class="id">now</span> <span class="id">rewrite</span> <span class="id">E1</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> <span class="id">V</span> <span class="id">x</span>: (@<span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id">V</span> <span class="id">x</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> ==&gt; <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span> ==&gt; <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">add_val_equal_memory</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl</span>; <span class="id">rewrite</span> <span class="id">E</span>; <span class="id">reflexivity</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> <span class="id">V</span> <span class="id">x</span>: (@<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id">V</span> <span class="id">x</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">find_val_equal_memory</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E</span>.<br/>
+&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">E</span> <span class="kwd">as</span> [?? <span class="id">Vals</span>].<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Vals</span>.<br/>
+Qed.</div></details>
+<br/>
+<h2> Properties </h2>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="Properties">Properties</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="Properties.V">V</a></span>: <span class="kwd">Type</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Variables</span> (<span class="id"><a name="Properties.x">x</a></span> <span class="id"><a name="Properties.y">y</a></span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Properties.v">v</a></span>: <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a name="Properties.m">m</a></span> <span class="id">m'</span>: <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_val_gss">find_val_gss</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.v">v</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.v">v</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span>, <span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.gss">Env.gss</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_val_gso">find_val_gso</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> &lt;&gt; <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.v">v</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span>, <span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.gso">Env.gso</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_inst_gss">find_inst_gss</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id">m'</span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">m'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span>, <span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.gss">Env.gss</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_inst_gso">find_inst_gso</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> &lt;&gt; <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> <span class="id">m'</span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span>, <span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.gso">Env.gso</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_val_add_inst">find_val_add_inst</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> <span class="id">m'</span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span>, <span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_inst_add_val">find_inst_add_val</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.v">v</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span>, <span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_val_mmap">find_val_mmap</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">W</span> (<span class="id">f</span>: <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span> -&gt; <span class="id">W</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#mmap">mmap</a></span> <span class="id">f</span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.map_o">Env.Props.P.F.map_o</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_inst_mmap">find_inst_mmap</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">W</span> (<span class="id">f</span>: <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span> -&gt; <span class="id">W</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#mmap">mmap</a></span> <span class="id">f</span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> (<span class="id"><a href="Velus.VelusMemory.html#mmap">mmap</a></span> <span class="id">f</span>) (<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.map_o">Env.Props.P.F.map_o</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="add_remove_inst_same">add_remove_inst_same</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">m'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span> <span class="id">≋</span> <span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id">m'</span> (<span class="id"><a href="Velus.VelusMemory.html#remove_inst">remove_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span>, <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span>; <span class="id">intros</span> * <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.add_in_iff">Env.Props.P.F.add_in_iff</a></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.remove_in_iff">Env.Props.P.F.remove_in_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id">k</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">destruct</span> <span class="id">Hin</span>; <span class="id">try</span> <span class="id">tauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">subst</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.In_find">Env.In_find</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> * <span class="id">HMapsTo</span> <span class="id">Hremove</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.add_mapsto_iff">Env.Props.P.F.add_mapsto_iff</a></span>, <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.remove_mapsto_iff">Env.Props.P.F.remove_mapsto_iff</a></span> <span class="kwd">in</span> <span class="id">Hremove</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Hremove</span> <span class="kwd">as</span> [(?&amp;?)|(?&amp;?&amp; <span class="id">HMapsTo'</span>)].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.find_1">Env.find_1</a></span> <span class="kwd">in</span> <span class="id">HMapsTo</span>; <span class="id">rewrite</span> <span class="id">HMapsTo</span> <span class="kwd">in</span> <span class="id">Find</span>; <span class="id">inv</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">eapply</span> <span class="id"><a href="Velus.Environment.html#Env.Props.P.F.MapsTo_fun">Env.Props.P.F.MapsTo_fun</a></span> <span class="kwd">in</span> <span class="id">HMapsTo</span> <span class="kwd">as</span> &lt;-; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_inst_grs">find_inst_grs</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#remove_inst">remove_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.grs">Env.grs</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_inst_gro">find_inst_gro</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> &lt;&gt; <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#remove_inst">remove_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.gro">Env.gro</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="add_remove_val_same">add_remove_val_same</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.v">v</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span> <span class="id">≋</span> <span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.v">v</a></span> (<span class="id"><a href="Velus.VelusMemory.html#remove_val">remove_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span>, <span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span>; <span class="id">intros</span> * <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intro</span> <span class="id">z</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">z</span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">subst</span>; <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gss">Env.gss</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gso">Env.gso</a></span>, <span class="id"><a href="Velus.Environment.html#Env.gro">Env.gro</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_val_grs">find_val_grs</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#remove_val">remove_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.grs">Env.grs</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_val_gro">find_val_gro</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> &lt;&gt; <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#remove_val">remove_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.gro">Env.gro</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_inst_gempty">find_inst_gempty</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#empty_memory">empty_memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.gempty">Env.gempty</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_val_gempty">find_val_gempty</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> (<span class="id"><a href="Velus.VelusMemory.html#empty_memory">empty_memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.gempty">Env.gempty</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="add_inst_val_comm">add_inst_val_comm</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id">m'</span> (<span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.v">v</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.v">v</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id">m'</span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Proof</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq_refl">eq_refl</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="add_val_comm">add_val_comm</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">w</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> &lt;&gt; <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.v">v</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> <span class="id">w</span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>) = <span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.y">y</a></span> <span class="id">w</span> (<span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.x">x</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.v">v</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.m">m</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.add_comm">Env.add_comm</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="In_find_inst">In_find_inst</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> (<span class="id">m</span> : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Environment.html#Env.In">Env.In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m</span>) -&gt; <span class="kwd">exists</span> <span class="id">v</span>, <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">x</span> <span class="id">m</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span>. <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.In_find">Env.In_find</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="find_inst_In">find_inst_In</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> (<span class="id">m</span> : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>) <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">x</span> <span class="id">m</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt; <span class="id"><a href="Velus.Environment.html#Env.In">Env.In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span>. <span class="id">intros</span> * <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.find_In">Env.find_In</a></span> <span class="kwd">in</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="MapsTo_find_inst">MapsTo_find_inst</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">i</span> (<span class="id">m</span> <span class="id">mi</span> : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Environment.html#Env.MapsTo">Env.MapsTo</a></span> <span class="id">i</span> <span class="id">mi</span> (<span class="id"><a href="Velus.VelusMemory.html#instances">instances</a></span> <span class="id">m</span>) &lt;-&gt; <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">i</span> <span class="id">m</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">mi</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span>. <span class="id">split</span>; <span class="id">intro</span> <span class="id">HH</span>; <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Environment.html#Env.find_1">Env.find_1</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<div class="doc">Combined with <span class="bracket"><span class="id">orel</span></span> </div>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="find_inst_Proper">find_inst_Proper</a></span> {<span class="id">A</span> : <span class="kwd">Type</span>}:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> ==&gt; <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span> ==&gt; <span class="id"><a href="Velus.Common.Common.html#orel">orel</a></span> <span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span>) (@<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">A</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">s</span> <span class="id">t</span> <span class="id">Exy</span> <span class="id">mm</span> <span class="id">mn</span> <span class="id">Emn</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusMemory.html#instances_equal_memory">instances_equal_memory</a></span> <span class="kwd">in</span> <span class="id">Emn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.Equiv_orel">Env.Equiv_orel</a></span> <span class="kwd">in</span> <span class="id">Emn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Emn</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="memory_equiv_orel_inst">memory_equiv_orel_inst</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">S</span> <span class="id">T</span> : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">S</span> <span class="id">≋</span> <span class="id">T</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">x</span> <span class="id">S</span> <span class="id">⌈≋⌉</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">x</span> <span class="id">T</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">EM</span>. <span class="id">now</span> <span class="id">setoid_rewrite</span> <span class="id">EM</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="memory_equiv_orel_val">memory_equiv_orel_val</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">S</span> <span class="id">T</span> : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">S</span> <span class="id">≋</span> <span class="id">T</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Common.Common.html#orel">orel</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> (<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id">x</span> <span class="id">S</span>) (<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id">x</span> <span class="id">T</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">EM</span>. <span class="id">now</span> <span class="id">setoid_rewrite</span> <span class="id">EM</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="equal_memory_find_inst">equal_memory_find_inst</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">M</span> : <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>) <span class="id">N</span> <span class="id">x</span> <span class="id">Mx</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">N</span> <span class="id">≋</span> <span class="id">M</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">x</span> <span class="id">M</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">Mx</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">Nx</span>, <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">x</span> <span class="id">N</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">Nx</span> /\ <span class="id">Nx</span> <span class="id">≋</span> <span class="id">Mx</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">NM</span> <span class="id">Fx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusMemory.html#memory_equiv_orel_inst">memory_equiv_orel_inst</a></span> <span class="kwd">with</span> (<span class="id">x</span>:=<span class="id">x0</span>) <span class="kwd">in</span> <span class="id">NM</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Fx</span> <span class="kwd">in</span> <span class="id">NM</span>. <span class="id">inv</span> <span class="id">NM</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="orel_find_inst_Some">orel_find_inst_Some</a></span> (<span class="id">R</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> (<span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>)):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">insts</span> <span class="id">x</span> <span class="id">m</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#orel">orel</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">x</span> <span class="id">insts</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">m</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">m'</span>, <span class="id">R</span> <span class="id">m'</span> <span class="id">m</span> /\ <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">x</span> <span class="id">insts</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">m'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span>. <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Environment.html#Env.orel_find_Some">Env.orel_find_Some</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="orel_find_val_Some">orel_find_val_Some</a></span> (<span class="id">R</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id"><a href="Velus.VelusMemory.html#Properties.V">V</a></span>):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">vals</span> <span class="id">x</span> <span class="id">m</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#orel">orel</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id">x</span> <span class="id">vals</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">m</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">m'</span>, <span class="id">R</span> <span class="id">m'</span> <span class="id">m</span> /\ <span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span> <span class="id">x</span> <span class="id">vals</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">m'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#find_val">find_val</a></span>. <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Environment.html#Env.orel_find_Some">Env.orel_find_Some</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.VelusMemory.html#Properties">Properties</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

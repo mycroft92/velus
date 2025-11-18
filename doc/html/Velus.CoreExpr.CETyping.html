@@ -1,0 +1,287 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module CETyping</title>
+<meta name="description" content="Documentation of Coq module CETyping" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module CETyping</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html">CoreExpr.CESyntax</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html">Morphisms</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="CETYPING">CETYPING</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>  : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>   : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span>: <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>  : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.CoreExpr.CETyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Syn</span>  : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>      <span class="id"><a href="Velus.CoreExpr.CETyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Cks">Cks</a></span>).<br/>
+<br/>
+<h2> Clocks </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="CETYPING.WellTyped">WellTyped</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="CETYPING.WellTyped.types">types</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.type">type</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="CETYPING.WellTyped.externs">externs</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.ctype">ctype</a></span> * <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.ctype">ctype</a></span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="CETYPING.WellTyped.Γ">Γ</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.type">type</a></span> * <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>)).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="CETYPING.wt_clock">wt_clock</a></span> : <span class="id"><a href="Velus.CoreExpr.CETyping.html#Cks.clock">clock</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Cbase">wt_Cbase</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_clock</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Cks.Cbase">Cbase</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Con">wt_Con</a></span>: <span class="kwd">forall</span> <span class="id">ck</span> <span class="id">x</span> <span class="id">tx</span> <span class="id">tn</span> <span class="id">islast</span> <span class="id">c</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>, <span class="id">islast</span>)) <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped.Γ">Γ</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>) <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped.types">types</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">c</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">tn</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_clock</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_clock</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Cks.Con">Con</a></span> <span class="id">ck</span> <span class="id">x</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>, <span class="id">c</span>)).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="CETYPING.wt_exp">wt_exp</a></span> : <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.exp">exp</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Econst">wt_Econst</a></span>: <span class="kwd">forall</span> <span class="id">c</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_exp</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Econst">Econst</a></span> <span class="id">c</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Eenum">wt_Eenum</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">tx</span> <span class="id">tn</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>) <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped.types">types</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">tn</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_exp</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Eenum">Eenum</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Evar">wt_Evar</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">ty</span> <span class="id">islast</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, (<span class="id">ty</span>, <span class="id">islast</span>)) <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped.Γ">Γ</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_exp</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Evar">Evar</a></span> <span class="id">x</span> <span class="id">ty</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Elast">wt_Elast</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, (<span class="id">ty</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>)) <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped.Γ">Γ</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_exp</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Elast">Elast</a></span> <span class="id">x</span> <span class="id">ty</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Ewhen">wt_Ewhen</a></span>: <span class="kwd">forall</span> <span class="id">e</span> <span class="id">x</span> <span class="id">b</span> <span class="id">tx</span> <span class="id">tn</span> <span class="id">islast</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>, <span class="id">islast</span>)) <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped.Γ">Γ</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>) <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped.types">types</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">b</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">tn</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_exp</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_exp</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Ewhen">Ewhen</a></span> <span class="id">e</span> (<span class="id">x</span>, <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>) <span class="id">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Eunop">wt_Eunop</a></span>: <span class="kwd">forall</span> <span class="id">op</span> <span class="id">e</span> <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.type_unop">type_unop</a></span> <span class="id">op</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.typeof">typeof</a></span> <span class="id">e</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">ty</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_exp</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_exp</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Eunop">Eunop</a></span> <span class="id">op</span> <span class="id">e</span> <span class="id">ty</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Ebinop">wt_Ebinop</a></span>: <span class="kwd">forall</span> <span class="id">op</span> <span class="id">e1</span> <span class="id">e2</span> <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.type_binop">type_binop</a></span> <span class="id">op</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.typeof">typeof</a></span> <span class="id">e1</span>) (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.typeof">typeof</a></span> <span class="id">e2</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">ty</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_exp</span> <span class="id">e1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_exp</span> <span class="id">e2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_exp</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Ebinop">Ebinop</a></span> <span class="id">op</span> <span class="id">e1</span> <span class="id">e2</span> <span class="id">ty</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="CETYPING.wt_cexp">wt_cexp</a></span> : <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.cexp">cexp</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Emerge">wt_Emerge</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">l</span> <span class="id">ty</span> <span class="id">tx</span> <span class="id">tn</span> <span class="id">islast</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>, <span class="id">islast</span>)) <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped.Γ">Γ</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>) <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped.types">types</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">tn</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">e</span> =&gt; <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.typeofc">typeofc</a></span> <span class="id">e</span> = <span class="id">ty</span>) <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">wt_cexp</span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_cexp</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Emerge">Emerge</a></span> (<span class="id">x</span>, <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>) <span class="id">l</span> <span class="id">ty</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Ecase">wt_Ecase</a></span>: <span class="kwd">forall</span> <span class="id">e</span> <span class="id">l</span> <span class="id">d</span> <span class="id">tx</span> <span class="id">tn</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_exp">wt_exp</a></span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.typeof">typeof</a></span> <span class="id">e</span> = <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>) <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped.types">types</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">tn</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">e</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">e</span>) <span class="id">l</span> -&gt; <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.typeofc">typeofc</a></span> <span class="id">e</span> = <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.typeofc">typeofc</a></span> <span class="id">d</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_cexp</span> <span class="id">d</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">e</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">e</span>) <span class="id">l</span> -&gt; <span class="id">wt_cexp</span> <span class="id">e</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_cexp</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Ecase">Ecase</a></span> <span class="id">e</span> <span class="id">l</span> <span class="id">d</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Eexp">wt_Eexp</a></span>: <span class="kwd">forall</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_exp">wt_exp</a></span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_cexp</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Eexp">Eexp</a></span> <span class="id">e</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="CETYPING.wt_rhs">wt_rhs</a></span> : <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.rhs">rhs</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Eextcall">wt_Eextcall</a></span>: <span class="kwd">forall</span> <span class="id">f</span> <span class="id">es</span> <span class="id">tyout</span> <span class="id">tyins</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_exp">wt_exp</a></span> <span class="id">es</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="kwd">fun</span> <span class="id">e</span> <span class="id">ty</span> =&gt; <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.typeof">typeof</a></span> <span class="id">e</span> = <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.Tprimitive">Tprimitive</a></span> <span class="id">ty</span>) <span class="id">es</span> <span class="id">tyins</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">f</span>, (<span class="id">tyins</span>, <span class="id">tyout</span>)) <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped.externs">externs</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_rhs</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Eextcall">Eextcall</a></span> <span class="id">f</span> <span class="id">es</span> <span class="id">tyout</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="CETYPING.wt_Ecexp">wt_Ecexp</a></span>: <span class="kwd">forall</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_cexp">wt_cexp</a></span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_rhs</span> (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.Ecexp">Ecexp</a></span> <span class="id">e</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.WellTyped">WellTyped</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#wt_clock">wt_clock</a></span> : <span class="id">typing</span> <span class="id">ltyping</span> <span class="id">nltyping</span> <span class="id">stctyping</span>.<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#wt_exp">wt_exp</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#wt_cexp">wt_cexp</a></span> : <span class="id">nltyping</span> <span class="id">stctyping</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CETYPING.wt_clock_add">wt_clock_add</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">v</span> <span class="id">enums</span> <span class="id">Γ</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Common.CommonList.html#InMembers">InMembers</a></span> <span class="id">x</span> <span class="id">Γ</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_clock">wt_clock</a></span> <span class="id">enums</span> <span class="id">Γ</span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_clock">wt_clock</a></span> <span class="id">enums</span> ((<span class="id">x</span>, <span class="id">v</span>) :: <span class="id">Γ</span>) <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">nltyping</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span> 2.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">with</span> <span class="id">nltyping</span> <span class="id">datatypes</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="CETYPING.wt_clock_Proper">wt_clock_Proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.type">type</a></span> ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Cks.clock">clock</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_clock">wt_clock</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">enums'</span> <span class="id">enums</span> <span class="id">Henums</span> <span class="id">env'</span> <span class="id">env</span> <span class="id">Henv</span> <span class="id">ck'</span> <span class="id">ck</span> <span class="id">Hck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hck</span>; <span class="id">clear</span> <span class="id">Hck</span> <span class="id">ck'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">nltyping</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">IHck</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">inversion_clear</span> 1; <span class="id">econstructor</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span> <span class="id">rewrite</span> <span class="id">Henv</span> <span class="kwd">in</span> *;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span> <span class="id">rewrite</span> <span class="id">Henums</span> <span class="kwd">in</span> *;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="CETYPING.wt_exp_Proper">wt_exp_Proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.type">type</a></span> ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.exp">exp</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_exp">wt_exp</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">enums'</span> <span class="id">enums</span> <span class="id">Henums</span> <span class="id">env'</span> <span class="id">env</span> <span class="id">Henv</span> <span class="id">e'</span> <span class="id">e</span> <span class="id">He</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">He</span>; <span class="id">clear</span> <span class="id">He</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">e</span>; <span class="id">try</span> <span class="id">destruct</span> <span class="id">IHe</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span> <span class="id">destruct</span> <span class="id">IHe1</span>, <span class="id">IHe2</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((<span class="id">rewrite</span> <span class="id">Henv</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">rewrite</span> <span class="id">Henums</span> <span class="kwd">in</span> *)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| (<span class="id">rewrite</span> &lt;-<span class="id">Henv</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">rewrite</span> &lt;-<span class="id">Henums</span> <span class="kwd">in</span> *) || <span class="id">idtac</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">with</span> <span class="id">nltyping</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> &lt;-<span class="id">Henums</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">Henums</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="CETYPING.wt_exp_pointwise_Proper">wt_exp_pointwise_Proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.type">type</a></span> ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#pointwise_relation">pointwise_relation</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.exp">exp</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_exp">wt_exp</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">enums'</span> <span class="id">enums</span> <span class="id">Henums</span> <span class="id">env'</span> <span class="id">env</span> <span class="id">Henv</span> <span class="id">e</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">Henv</span>, <span class="id">Henums</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="CETYPING.wt_cexp_Proper">wt_cexp_Proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.type">type</a></span> ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn.cexp">cexp</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_cexp">wt_cexp</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">enums'</span> <span class="id">enums</span> <span class="id">Henums</span> <span class="id">env'</span> <span class="id">env</span> <span class="id">Henv</span> <span class="id">e'</span> <span class="id">e</span> <span class="id">He</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">He</span>; <span class="id">clear</span> <span class="id">He</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">e</span> <span class="kwd">using</span> <span class="id">cexp_ind2'</span>; <span class="id">try</span> <span class="id">destruct</span> <span class="id">IHe1</span>, <span class="id">IHe2</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">inversion_clear</span> 1; <span class="id">try</span> <span class="id">rewrite</span> <span class="id">Henv</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">rewrite</span> <span class="id">Henums</span> <span class="kwd">in</span> *;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span>; <span class="id">try</span> <span class="id">rewrite</span> <span class="id">Henv</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">rewrite</span> <span class="id">Henums</span> <span class="kwd">in</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl_Forall</span>. <span class="id">apply</span> <span class="id">H</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl_Forall</span>. <span class="id">apply</span> <span class="id">H</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">now</span> <span class="id">apply</span> <span class="id">IHe</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>. <span class="id">apply</span> <span class="id">H</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">now</span> <span class="id">apply</span> <span class="id">IHe</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>. <span class="id">apply</span> <span class="id">H</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="CETYPING.wt_rhs_Proper">wt_rhs_Proper</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation.Permutation</a></span> _ ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> _ ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_rhs">wt_rhs</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">types'</span> <span class="id">types</span> <span class="id">Htypes</span> <span class="id">externs'</span> <span class="id">externs</span> <span class="id">Hexterns</span> <span class="id">env'</span> <span class="id">env</span> <span class="id">Henv</span> <span class="id">e'</span> <span class="id">e</span> ?; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">e</span>; <span class="id">split</span>; <span class="id">intros</span> <span class="id">Hwt</span>; <span class="id">inv</span> <span class="id">Hwt</span>; <span class="id">econstructor</span>; <span class="id">eauto</span>; <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">try</span> <span class="id">rewrite</span> <span class="id">Htypes</span>, <span class="id">Henv</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">try</span> <span class="id">rewrite</span> &lt;-<span class="id">Htypes</span>, &lt;-<span class="id">Henv</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">try</span> <span class="id">rewrite</span> <span class="id">Hexterns</span>; <span class="id">auto</span>; <span class="id">try</span> <span class="id">rewrite</span> &lt;-<span class="id">Hexterns</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="CETYPING.incl">incl</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> (<span class="id"><a name="CETYPING.incl.types">types</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.type">type</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> (<span class="id"><a name="CETYPING.incl.vars">vars</a></span> <span class="id">vars'</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * (<span class="id"><a href="Velus.CoreExpr.CETyping.html#Op.type">type</a></span> * <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>))).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="CETYPING.incl.Hincl">Hincl</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.vars">vars</a></span> <span class="id">vars'</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="CETYPING.wt_clock_incl">wt_clock_incl</a></span> : <span class="kwd">forall</span> <span class="id">ck</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_clock">wt_clock</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.types">types</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.vars">vars</a></span> <span class="id">ck</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_clock">wt_clock</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.types">types</a></span> <span class="id">vars'</span> <span class="id">ck</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hwt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hwt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CETYPING.wt_exp_incl">wt_exp_incl</a></span> : <span class="kwd">forall</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_exp">wt_exp</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.types">types</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.vars">vars</a></span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_exp">wt_exp</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.types">types</a></span> <span class="id">vars'</span> <span class="id">e</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">e</span>; <span class="id">intros</span> <span class="id">Hwt</span>; <span class="id">inv</span> <span class="id">Hwt</span>; <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CETYPING.wt_cexp_incl">wt_cexp_incl</a></span> : <span class="kwd">forall</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_cexp">wt_cexp</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.types">types</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.vars">vars</a></span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_cexp">wt_cexp</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.types">types</a></span> <span class="id">vars'</span> <span class="id">e</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">e</span> <span class="kwd">using</span> <span class="id">cexp_ind2'</span>; <span class="id">intros</span> <span class="id">Hwt</span>; <span class="id">inv</span> <span class="id">Hwt</span>; <span class="id">econstructor</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_exp_incl">wt_exp_incl</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl_Forall</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span>. <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="CETYPING.wt_rhs_incl">wt_rhs_incl</a></span> <span class="id">externs</span> : <span class="kwd">forall</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_rhs">wt_rhs</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.types">types</a></span> <span class="id">externs</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.vars">vars</a></span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_rhs">wt_rhs</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl.types">types</a></span> <span class="id">externs</span> <span class="id">vars'</span> <span class="id">e</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Wt</span>; <span class="id">inv</span> <span class="id">Wt</span>; <span class="id">econstructor</span>; <span class="id">simpl_Forall</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_exp_incl">wt_exp_incl</a></span>, <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.wt_cexp_incl">wt_cexp_incl</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING.incl">incl</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">wt_clock_incl</span> <span class="id">wt_exp_incl</span> <span class="id">wt_cexp_incl</span> <span class="id">wt_rhs_incl</span> : <span class="id">nltyping</span> <span class="id">stctyping</span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING">CETYPING</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="CETypingFun">CETypingFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>  : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>   : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span>: <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>  : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.CoreExpr.CETyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Syn</span>  : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>      <span class="id"><a href="Velus.CoreExpr.CETyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;: <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING">CETYPING</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Cks">Cks</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn">Syn</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETYPING">CETYPING</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Cks">Cks</a></span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#Syn">Syn</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.CoreExpr.CETyping.html#CETypingFun">CETypingFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

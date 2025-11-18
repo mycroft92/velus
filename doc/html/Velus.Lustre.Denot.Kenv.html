@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module Kenv</title>
+<meta name="description" content="Documentation of Coq module Kenv" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module Kenv</h1>
+<div class="coq">
+<span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.html">Cpo</a></span>.<br/>
+<br/>
+<h1> Environment types of the Kahn semantics </h1>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="KENV">KENV</a></span>.<br/>
+<br/>
+<div class="doc">identifier of variables </div>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="KENV.ident">ident</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="key">key</a></span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="Var">Var</a></span> : <span class="id"><a href="Velus.Lustre.Denot.Kenv.html#KENV.ident">ident</a></span> -&gt; <span class="id">key</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="Last">Last</a></span> : <span class="id"><a href="Velus.Lustre.Denot.Kenv.html#KENV.ident">ident</a></span> -&gt; <span class="id">key</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="env">env</a></span> (<span class="id">A</span> : <span class="kwd">Type</span>) : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span> := <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="kwd">fun</span> _:<span class="id"><a href="Velus.Lustre.Denot.Kenv.html#key">key</a></span> =&gt; <span class="id">A</span>).<br/>
+<br/>
+<div class="doc">apply a function to every stream of the environment </div>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="ext_env">ext_env</a></span> {<span class="id">A</span> <span class="id">B</span> : <span class="kwd">Type</span>} : (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> <span class="id">A</span> -<span class="id">C</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> <span class="id">B</span>) -<span class="id">C</span>-&gt; (<span class="id"><a href="Velus.Lustre.Denot.Kenv.html#env">env</a></span> <span class="id">A</span> -<span class="id">C</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Kenv.html#env">env</a></span> <span class="id">B</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#curry">curry</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#Dprodi_DISTR">Dprodi_DISTR</a></span>; <span class="id">intro</span> <span class="id">i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">refine</span> ((<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#AP">AP</a></span> _ _ @2_ <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#FST">FST</a></span> _ _) (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#PROJ">PROJ</a></span> _ <span class="id">i</span> @_ <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#SND">SND</a></span> _ _)).<br/>
+&nbsp;&nbsp;Defined.
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ext_env_simpl">ext_env_simpl</a></span> : <span class="kwd">forall</span> <span class="id">A</span> <span class="id">B</span> <span class="id">f</span> <span class="id">env</span> <span class="id">i</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="Velus.Lustre.Denot.Kenv.html#ext_env">ext_env</a></span> <span class="id">A</span> <span class="id">B</span> <span class="id">f</span> <span class="id">env</span> <span class="id">i</span> = <span class="id">f</span> (<span class="id">env</span> <span class="id">i</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">trivial</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<div class="doc">state/branch identifier </div>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="KENV.id_st">id_st</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="KENV.id_st_dec">id_st_dec</a></span> : <span class="kwd">forall</span> <span class="id">i</span> <span class="id">j</span> : <span class="id"><a href="Velus.Lustre.Denot.Kenv.html#KENV.id_st">id_st</a></span>, { <span class="id">i</span> = <span class="id">j</span> } + { ~ <span class="id">i</span> = <span class="id">j</span> }}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="id_st_eqb">id_st_eqb</a></span> (<span class="id">i</span> <span class="id">j</span> : <span class="id"><a href="Velus.Lustre.Denot.Kenv.html#KENV.id_st">id_st</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id"><a href="Velus.Lustre.Denot.Kenv.html#KENV.id_st_dec">id_st_dec</a></span> <span class="id">i</span> <span class="id">j</span> <span class="kwd">with</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#left">left</a></span> _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> | _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span> <span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Lustre.Denot.Kenv.html#KENV">KENV</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

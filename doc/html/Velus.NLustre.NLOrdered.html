@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module NLOrdered</title>
+<meta name="description" content="Documentation of Coq module NLOrdered" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module NLOrdered</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.PArith.PArith.html">PArith</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.CommonProgram.html">CommonProgram</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html">CoreExpr.CESyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.NLustre.NLSyntax.html">NLustre.NLSyntax</a></span>.<br/>
+<br/>
+<h1> Ordering of nodes </h1>
+<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="NLORDERED">NLORDERED</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>          : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>           : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span>        : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.NLustre.NLOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>      <span class="id"><a href="Velus.NLustre.NLOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Syn</span>   : <span class="id"><a href="Velus.NLustre.NLSyntax.html#NLSYNTAX">NLSYNTAX</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Ids">Ids</a></span>  <span class="id"><a href="Velus.NLustre.NLOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#CESyn">CESyn</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="NLORDERED.Is_node_in_eq">Is_node_in_eq</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.equation">equation</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="NLORDERED.INI">INI</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">ck</span> <span class="id">f</span> <span class="id">e</span> <span class="id">r</span>, <span class="id">Is_node_in_eq</span> <span class="id">f</span> (<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.EqApp">EqApp</a></span> <span class="id">x</span> <span class="id">ck</span> <span class="id">f</span> <span class="id">e</span> <span class="id">r</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="NLORDERED.Is_node_in">Is_node_in</a></span> (<span class="id">f</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">eqs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.equation">equation</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists">List.Exists</a></span> (<span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_in_eq">Is_node_in_eq</a></span> <span class="id">f</span>) <span class="id">eqs</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="NLORDERED.Ordered_nodes">Ordered_nodes</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> (<span class="kwd">fun</span> <span class="id">f</span> <span class="id">node</span> =&gt; <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_in">Is_node_in</a></span> <span class="id">f</span> <span class="id">node</span>.(<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.n_eqs">n_eqs</a></span>)).<br/>
+<br/>
+<h2> Properties of <span class="bracket"><span class="id">Is_node_in</span></span> </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="NLORDERED.Is_node_Properties">Is_node_Properties</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="NLORDERED.not_Is_node_in_cons">not_Is_node_in_cons</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span> <span class="id">eq</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_in">Is_node_in</a></span> <span class="id">n</span> (<span class="id">eq</span>::<span class="id">eqs</span>) &lt;-&gt; ~<span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_in_eq">Is_node_in_eq</a></span> <span class="id">n</span> <span class="id">eq</span> /\ ~<span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_in">Is_node_in</a></span> <span class="id">n</span> <span class="id">eqs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">n</span> <span class="id">eq</span> <span class="id">eqs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intro</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">intro</span>; <span class="id">apply</span> <span class="id">HH</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_in">Is_node_in</a></span>; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">HH</span>; <span class="id">inversion_clear</span> 1; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="NLORDERED.Is_node_in_Forall">Is_node_in_Forall</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_in">Is_node_in</a></span> <span class="id">n</span> <span class="id">eqs</span> &lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">List.Forall</a></span> (<span class="kwd">fun</span> <span class="id">eq</span>=&gt;~<span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_in_eq">Is_node_in_eq</a></span> <span class="id">n</span> <span class="id">eq</span>) <span class="id">eqs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">eqs</span> <span class="kwd">as</span> [|<span class="id">eq</span> <span class="id">eqs</span> <span class="id">IH</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id">split</span>; [<span class="id">now</span> <span class="id">constructor</span>|<span class="id">now</span> <span class="id">inversion</span> 2]|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intro</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.not_Is_node_in_cons">not_Is_node_in_cons</a></span> <span class="kwd">in</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">HH</span> <span class="kwd">as</span> [<span class="id">Heq</span> <span class="id">Heqs</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; [<span class="id">exact</span> <span class="id">Heq</span>|<span class="id">apply</span> <span class="id">IH</span> <span class="kwd">with</span> (1:=<span class="id">Heqs</span>)].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.not_Is_node_in_cons">not_Is_node_in_cons</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">HH</span> <span class="kwd">as</span> [|? ? <span class="id">Heq</span> <span class="id">Heqs</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IH</span> <span class="kwd">in</span> <span class="id">Heqs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_Properties">Is_node_Properties</a></span>.<br/>
+<br/>
+<h2> Properties of <span class="bracket"><span class="id">Ordered_nodes</span></span> </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="NLORDERED.Ordered_nodes_append">Ordered_nodes_append</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">G</span> <span class="id">G'</span> <span class="id">enums</span> <span class="id">externs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Ordered_nodes">Ordered_nodes</a></span> (<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.Global">Global</a></span> <span class="id">enums</span> <span class="id">externs</span> (<span class="id">G</span> ++ <span class="id">G'</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Ordered_nodes">Ordered_nodes</a></span> (<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.Global">Global</a></span> <span class="id">enums</span> <span class="id">externs</span> <span class="id">G'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Ordered_program_append'</span> <span class="kwd">in</span> <span class="id">Ord</span> <span class="kwd">as</span> (?&amp;?); <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="NLORDERED.find_node_other_not_Is_node_in">find_node_other_not_Is_node_in</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">nd</span> <span class="id">G</span> <span class="id">nd'</span> <span class="id">enums</span> <span class="id">externs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Ordered_nodes">Ordered_nodes</a></span> (<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.Global">Global</a></span> <span class="id">enums</span> <span class="id">externs</span> (<span class="id">nd</span>::<span class="id">G</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.find_node">find_node</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.Global">Global</a></span> <span class="id">enums</span> <span class="id">externs</span> <span class="id">G</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">nd'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; ~<span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_in">Is_node_in</a></span> <span class="id">nd</span>.(<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.n_name">n_name</a></span>) <span class="id">nd'</span>.(<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.n_eqs">n_eqs</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTactics.html#option_map_inv">option_map_inv</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> ((?&amp;?)&amp;?&amp;?); <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_other_not_Is_called_in">find_unit_other_not_Is_called_in</a></span> <span class="kwd">in</span> <span class="id">Ord</span>; <span class="id">eauto</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="NLORDERED.find_node_not_Is_node_in">find_node_not_Is_node_in</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">nd</span> <span class="id">G</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Ordered_nodes">Ordered_nodes</a></span> <span class="id">G</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.find_node">find_node</a></span> <span class="id">f</span> <span class="id">G</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">nd</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; ~<span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_in">Is_node_in</a></span> <span class="id">nd</span>.(<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.n_name">n_name</a></span>) <span class="id">nd</span>.(<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.n_eqs">n_eqs</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTactics.html#option_map_inv">option_map_inv</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> ((?&amp;?)&amp; <span class="id">Find</span> &amp;?); <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.n_name">n_name</a></span> <span class="id">n</span> = <span class="id">f</span>) <span class="kwd">as</span> -&gt; <span class="kwd">by</span> (<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_In">find_unit_In</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> []; <span class="id">auto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#not_Is_called_in_self">not_Is_called_in_self</a></span> <span class="kwd">in</span> <span class="id">Ord</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="NLORDERED.find_node_not_Is_node_in_eq">find_node_not_Is_node_in_eq</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">G</span> <span class="id">f</span> <span class="id">g</span> <span class="id">n</span> <span class="id">enums</span> <span class="id">externs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Ordered_nodes">Ordered_nodes</a></span> (<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.Global">Global</a></span> <span class="id">enums</span> <span class="id">externs</span> <span class="id">G</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">n'</span> =&gt; ~(<span class="id">g</span> = <span class="id">n'</span>.(<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.n_name">n_name</a></span>))) <span class="id">G</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.find_node">find_node</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.Global">Global</a></span> <span class="id">enums</span> <span class="id">externs</span> <span class="id">G</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">eq</span> =&gt; ~ <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED.Is_node_in_eq">Is_node_in_eq</a></span> <span class="id">g</span> <span class="id">eq</span>) <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn.n_eqs">n_eqs</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span> <span class="id">Hnn</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTactics.html#option_map_inv">option_map_inv</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> ((?&amp;?)&amp;?&amp;?); <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_not_Is_called_in">find_unit_not_Is_called_in</a></span> <span class="kwd">in</span> <span class="id">Ord</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_Exists_neg">Forall_Exists_neg</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_None">find_unit_None</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED">NLORDERED</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="NLOrderedFun">NLOrderedFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.NLustre.NLOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>      <span class="id"><a href="Velus.NLustre.NLOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Syn</span>   : <span class="id"><a href="Velus.NLustre.NLSyntax.html#NLSYNTAX">NLSYNTAX</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Ids">Ids</a></span>  <span class="id"><a href="Velus.NLustre.NLOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#CESyn">CESyn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;: <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED">NLORDERED</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn">Syn</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLORDERED">NLORDERED</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#Syn">Syn</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.NLOrdered.html#NLOrderedFun">NLOrderedFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

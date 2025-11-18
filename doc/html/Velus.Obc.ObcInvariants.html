@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module ObcInvariants</title>
+<meta name="description" content="Documentation of Coq module ObcInvariants" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module ObcInvariants</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Environment.html">Environment</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Obc.ObcSyntax.html">Obc.ObcSyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Obc.ObcSemantics.html">Obc.ObcSemantics</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="OBCINVARIANTS">OBCINVARIANTS</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">SynObc</span>: <span class="id"><a href="Velus.Obc.ObcSyntax.html#OBCSYNTAX">OBCSYNTAX</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">SemObc</span>: <span class="id"><a href="Velus.Obc.ObcSemantics.html#OBCSEMANTICS">OBCSEMANTICS</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc">SynObc</a></span>).<br/>
+<br/>
+<h2> Determine whether an Obc command can modify a variable . </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.stmt">stmt</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.CWIVAssign">CWIVAssign</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Can_write_in_var</span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Assign">Assign</a></span> <span class="id">x</span> <span class="id">e</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.CWIVSwitch">CWIVSwitch</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">e</span> <span class="id">ss</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists">Exists</a></span> (<span class="kwd">fun</span> <span class="id">s</span> =&gt; <span class="id">Can_write_in_var</span> <span class="id">x</span> (<span class="id"><a href="Velus.Common.Common.html#or_default">or_default</a></span> <span class="id">d</span> <span class="id">s</span>)) <span class="id">ss</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Can_write_in_var</span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Switch">Switch</a></span> <span class="id">e</span> <span class="id">ss</span> <span class="id">d</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.CWIVCall_ap">CWIVCall_ap</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">xs</span> <span class="id">cls</span> <span class="id">i</span> <span class="id">f</span> <span class="id">es</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Can_write_in_var</span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Call">Call</a></span> <span class="id">xs</span> <span class="id">cls</span> <span class="id">i</span> <span class="id">f</span> <span class="id">es</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.CWIVExternCall">CWIVExternCall</a></span>: <span class="kwd">forall</span> <span class="id">y</span> <span class="id">f</span> <span class="id">fty</span> <span class="id">es</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Can_write_in_var</span> <span class="id">y</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.ExternCall">ExternCall</a></span> <span class="id">y</span> <span class="id">f</span> <span class="id">fty</span> <span class="id">es</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.CWIVComp1">CWIVComp1</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">s1</span> <span class="id">s2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Can_write_in_var</span> <span class="id">x</span> <span class="id">s1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Can_write_in_var</span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Comp">Comp</a></span> <span class="id">s1</span> <span class="id">s2</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.CWIVComp2">CWIVComp2</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">s1</span> <span class="id">s2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Can_write_in_var</span> <span class="id">x</span> <span class="id">s2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Can_write_in_var</span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Comp">Comp</a></span> <span class="id">s1</span> <span class="id">s2</span>).<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Can_write_in_var">Can_write_in_var</a></span> : <span class="id">obcinv</span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCINVARIANTS.Can_write_in_var_Switch">Can_write_in_var_Switch</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span> <span class="id">ss</span> <span class="id">d</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Switch">Switch</a></span> <span class="id">e</span> <span class="id">ss</span> <span class="id">d</span>) &lt;-&gt; (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists">Exists</a></span> (<span class="kwd">fun</span> <span class="id">s</span> =&gt; <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Common.Common.html#or_default">or_default</a></span> <span class="id">d</span> <span class="id">s</span>)) <span class="id">ss</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [<span class="id">inversion_clear</span> 1|<span class="id">intros</span> [<span class="id">HH</span>|<span class="id">HH</span>]]; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">obcinv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCINVARIANTS.cannot_write_in_var_Switch">cannot_write_in_var_Switch</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">e</span> <span class="id">ss</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Switch">Switch</a></span> <span class="id">e</span> <span class="id">ss</span> <span class="id">d</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">s</span> =&gt; ~<span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Common.Common.html#or_default">or_default</a></span> <span class="id">d</span> <span class="id">s</span>)) <span class="id">ss</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_Exists_neg">Forall_Exists_neg</a></span>, <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var_Switch">Can_write_in_var_Switch</a></span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCINVARIANTS.Can_write_in_var_Comp">Can_write_in_var_Comp</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">s1</span> <span class="id">s2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Comp">Comp</a></span> <span class="id">s1</span> <span class="id">s2</span>) &lt;-&gt; (<span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> <span class="id">s1</span> \/ <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> <span class="id">s2</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion_clear</span> <span class="id">HH</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">HH</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">obcinv</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCINVARIANTS.cannot_write_in_var_Comp">cannot_write_in_var_Comp</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">s1</span> <span class="id">s2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Comp">Comp</a></span> <span class="id">s1</span> <span class="id">s2</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> <span class="id">s1</span> /\ ~ <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> <span class="id">s2</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">split</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Hn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span> <span class="id">Hn</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Assert that an Obc command never writes to a variable more than once. </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="OBCINVARIANTS.No_Overwrites">No_Overwrites</a></span> : <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.stmt">stmt</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NoOAssign">NoOAssign</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Overwrites</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Assign">Assign</a></span> <span class="id">x</span> <span class="id">e</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NoOAssignSt">NoOAssignSt</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">e</span> <span class="id">isreset</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Overwrites</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.AssignSt">AssignSt</a></span> <span class="id">x</span> <span class="id">e</span> <span class="id">isreset</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NoOSwitch">NoOSwitch</a></span>: <span class="kwd">forall</span> <span class="id">e</span> <span class="id">ss</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">s</span> =&gt; <span class="id">No_Overwrites</span> (<span class="id"><a href="Velus.Common.Common.html#or_default">or_default</a></span> <span class="id">d</span> <span class="id">s</span>)) <span class="id">ss</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Overwrites</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Switch">Switch</a></span> <span class="id">e</span> <span class="id">ss</span> <span class="id">d</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NoOCall">NoOCall</a></span>: <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">cls</span> <span class="id">i</span> <span class="id">f</span> <span class="id">es</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Overwrites</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Call">Call</a></span> <span class="id">xs</span> <span class="id">cls</span> <span class="id">i</span> <span class="id">f</span> <span class="id">es</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NoOExternCall">NoOExternCall</a></span>: <span class="kwd">forall</span> <span class="id">y</span> <span class="id">f</span> <span class="id">fty</span> <span class="id">es</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Overwrites</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.ExternCall">ExternCall</a></span> <span class="id">y</span> <span class="id">f</span> <span class="id">fty</span> <span class="id">es</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NoOComp">NoOComp</a></span>: <span class="kwd">forall</span> <span class="id">s1</span> <span class="id">s2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> <span class="id">s1</span> -&gt; ~<span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> <span class="id">s2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> <span class="id">s2</span> -&gt; ~<span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> <span class="id">s1</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Overwrites</span> <span class="id">s1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Overwrites</span> <span class="id">s2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Overwrites</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Comp">Comp</a></span> <span class="id">s1</span> <span class="id">s2</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NoOSkip">NoOSkip</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Overwrites</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Skip">Skip</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#No_Overwrites">No_Overwrites</a></span> : <span class="id">obcinv</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCINVARIANTS.cannot_write_in_var_No_Overwrites">cannot_write_in_var_No_Overwrites</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">s</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span>, ~<span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> <span class="id">s</span>) -&gt; <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.No_Overwrites">No_Overwrites</a></span> <span class="id">s</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">s</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.stmt_ind2">stmt_ind2</a></span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">obcinv</span>; <span class="id">intro</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.cannot_write_in_var_Switch">cannot_write_in_var_Switch</a></span> <span class="kwd">in</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">y</span>; <span class="id">specialize</span> (<span class="id">HH</span> <span class="id">y</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">HH</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS.cannot_write_in_var_Comp">cannot_write_in_var_Comp</a></span> <span class="kwd">in</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">try</span> (<span class="id">apply</span> <span class="id">IHs1</span> || <span class="id">apply</span> <span class="id">IHs2</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> <span class="id">Hcw</span>; <span class="id">specialize</span> (<span class="id">HH</span> <span class="id">x</span>); <span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Assert that Obc calls never involve undefined variables. </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="OBCINVARIANTS.No_Naked_Vars">No_Naked_Vars</a></span> : <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.stmt">stmt</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NNVAssign">NNVAssign</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Naked_Vars</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Assign">Assign</a></span> <span class="id">x</span> <span class="id">e</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NNVAssignSt">NNVAssignSt</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">e</span> <span class="id">isreset</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Naked_Vars</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.AssignSt">AssignSt</a></span> <span class="id">x</span> <span class="id">e</span> <span class="id">isreset</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NNVSwitch">NNVSwitch</a></span>: <span class="kwd">forall</span> <span class="id">e</span> <span class="id">ss</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">s</span> =&gt; <span class="id">No_Naked_Vars</span> (<span class="id"><a href="Velus.Common.Common.html#or_default">or_default</a></span> <span class="id">d</span> <span class="id">s</span>)) <span class="id">ss</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Naked_Vars</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Switch">Switch</a></span> <span class="id">e</span> <span class="id">ss</span> <span class="id">d</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NNVCall">NNVCall</a></span>: <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">cls</span> <span class="id">i</span> <span class="id">f</span> <span class="id">es</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">e</span> =&gt; <span class="kwd">forall</span> <span class="id">x</span> <span class="id">ty</span>, <span class="id">e</span> &lt;&gt; <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Var">Var</a></span> <span class="id">x</span> <span class="id">ty</span>) <span class="id">es</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Naked_Vars</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Call">Call</a></span> <span class="id">xs</span> <span class="id">cls</span> <span class="id">i</span> <span class="id">f</span> <span class="id">es</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NNVExternCall">NNVExternCall</a></span>: <span class="kwd">forall</span> <span class="id">y</span> <span class="id">f</span> <span class="id">fty</span> <span class="id">es</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Naked_Vars</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.ExternCall">ExternCall</a></span> <span class="id">y</span> <span class="id">f</span> <span class="id">fty</span> <span class="id">es</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NNVComp">NNVComp</a></span>: <span class="kwd">forall</span> <span class="id">s1</span> <span class="id">s2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Naked_Vars</span> <span class="id">s1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Naked_Vars</span> <span class="id">s2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Naked_Vars</span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Comp">Comp</a></span> <span class="id">s1</span> <span class="id">s2</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OBCINVARIANTS.NNVSkip">NNVSkip</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">No_Naked_Vars</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Skip">Skip</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#No_Naked_Vars">No_Naked_Vars</a></span> : <span class="id">obcinv</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCINVARIANTS.stmt_eval_mono">stmt_eval_mono</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">s</span> <span class="id">me</span> <span class="id">ve</span> <span class="id">me'</span> <span class="id">ve'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcInvariants.html#SemObc.stmt_eval">stmt_eval</a></span> <span class="id">p</span> <span class="id">me</span> <span class="id">ve</span> <span class="id">s</span> (<span class="id">me'</span>, <span class="id">ve'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Environment.html#Env.In">Env.In</a></span> <span class="id">x</span> <span class="id">ve</span> -&gt; <span class="id"><a href="Velus.Environment.html#Env.In">Env.In</a></span> <span class="id">x</span> <span class="id">ve'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">s</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.stmt_ind2">stmt_ind2</a></span>; <span class="id">intros</span> * <span class="id">Heval</span> ??; <span class="id">inv</span> <span class="id">Heval</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Environment.html#Env.adds_opt_mono">Env.adds_opt_mono</a></span> <span class="kwd">with</span> <span class="id">env</span> <span class="id">obcinv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_error">nth_error</a></span> _ _ = _) <span class="id">and</span> <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_error_In">nth_error_In</a></span> <span class="kwd">in</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> 2 <span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> _ _) <span class="id">and</span> <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">it</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCINVARIANTS.no_vars_in_args_spec">no_vars_in_args_spec</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">me</span> <span class="id">ve</span> <span class="id">es</span> <span class="id">vos</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="id"><a href="Velus.Obc.ObcInvariants.html#SemObc.exp_eval">exp_eval</a></span> <span class="id">me</span> <span class="id">ve</span>) <span class="id">es</span> <span class="id">vos</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">e</span> =&gt; <span class="kwd">forall</span> <span class="id">x</span> <span class="id">ty</span>, <span class="id">e</span> &lt;&gt; <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc.Var">Var</a></span> <span class="id">x</span> <span class="id">ty</span>) <span class="id">es</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">vo</span> =&gt; <span class="id">vo</span> &lt;&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>) <span class="id">vos</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1 <span class="kwd">as</span> [|???? <span class="id">Exp</span>]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1 <span class="kwd">as</span> [|?? <span class="id">E</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Exp</span>; <span class="id">eapply</span> <span class="id">E</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS">OBCINVARIANTS</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="ObcInvariantsFun">ObcInvariantsFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>  : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>   : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span>: <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">SynObc</span>: <span class="id"><a href="Velus.Obc.ObcSyntax.html#OBCSYNTAX">OBCSYNTAX</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">SemObc</span>: <span class="id"><a href="Velus.Obc.ObcSemantics.html#OBCSEMANTICS">OBCSEMANTICS</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc">SynObc</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;: <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS">OBCINVARIANTS</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc">SynObc</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#SemObc">SemObc</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS">OBCINVARIANTS</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#SynObc">SynObc</a></span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#SemObc">SemObc</a></span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html#ObcInvariantsFun">ObcInvariantsFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

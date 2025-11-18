@@ -1,0 +1,945 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module CommonList2</title>
+<meta name="description" content="Documentation of Coq module CommonList2" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module CommonList2</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.micromega.Lia.html">Lia</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Setoids.Setoid.html">Setoid</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html">Morphisms</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationPairs.html">RelationPairs</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">ListNotations</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span> <span class="id"><a href="Velus.Common.CommonList.html">CommonList</a></span>.<br/>
+<br/>
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="and_impl">and_impl</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">A</span> <span class="id">B</span> <span class="id">C</span> : <span class="kwd">Prop</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">A</span> -&gt; <span class="id">B</span> /\ <span class="id">C</span>) &lt;-&gt; ((<span class="id">A</span> -&gt; <span class="id">B</span>) /\ (<span class="id">A</span> -&gt; <span class="id">C</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">firstorder</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="map_eq_nnil">map_eq_nnil</a></span> : <span class="kwd">forall</span> <span class="id">A</span> <span class="id">B</span> (<span class="id">f</span> : <span class="id">A</span> -&gt; <span class="id">B</span>) <span class="id">l</span>, <span class="id">l</span> &lt;&gt; [] -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id">f</span> <span class="id">l</span> &lt;&gt; [].<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Hf</span>; <span class="id">destruct</span> <span class="id">l</span>; [<span class="id">contradiction</span>|].<br/>
+&nbsp;&nbsp;<span class="id">discriminate</span> <span class="id">Hf</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="map_ignore">map_ignore</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> <span class="id">B</span> (<span class="id">b</span> : <span class="id">B</span>) (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> _ =&gt; <span class="id">b</span>) <span class="id">l</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">b</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="tl_length">tl_length</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#tl">tl</a></span> <span class="id">l</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.pred">Nat.pred</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">now</span> <span class="id">destruct</span> <span class="id">l</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="nth_nil">nth_nil</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> <span class="id">n</span> (<span class="id">d</span> : <span class="id">A</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> [] <span class="id">d</span> = <span class="id">d</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">n</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="hd_nth">hd_nth</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>) (<span class="id">d</span> : <span class="id">A</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#O">O</a></span> <span class="id">l</span> <span class="id">d</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#hd">hd</a></span> <span class="id">d</span> <span class="id">l</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">l</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="tl_nth">tl_nth</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>) (<span class="id">d</span> : <span class="id">A</span>) <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>) <span class="id">l</span> <span class="id">d</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#tl">tl</a></span> <span class="id">l</span>) <span class="id">d</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">l</span>, <span class="id">n</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="map_hd_nth">map_hd_nth</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>)) <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#hd">hd</a></span> <span class="id">d</span>) <span class="id">l</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> <span class="id">l0</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> 0 <span class="id">l0</span> <span class="id">d</span>) <span class="id">l</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span>; <span class="id">f_equal</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#hd_nth">hd_nth</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="map_tl_nth">map_tl_nth</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>)) <span class="id">n</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> <span class="id">l0</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>) <span class="id">l0</span> <span class="id">d</span>) <span class="id">l</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> <span class="id">l0</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#tl">tl</a></span> <span class="id">l0</span>) <span class="id">d</span>) <span class="id">l</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span>; <span class="id">f_equal</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#tl_nth">tl_nth</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="list_eq_ext">list_eq_ext</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> (<span class="id">l1</span> <span class="id">l2</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>) <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l1</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">n</span>, <span class="id">n</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l1</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">l1</span> <span class="id">d</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">l2</span> <span class="id">d</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">l1</span> = <span class="id">l2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l1</span>; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hl</span> <span class="id">Hn</span>.<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">l2</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">l2</span>; <span class="id">try</span> (<span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">congruence</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> (<span class="id">Hn</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#O">O</a></span>); <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHl1</span> <span class="kwd">with</span> <span class="id">d</span>; <span class="id">intros</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">Hn</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>)); <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="list_eq_ext2">list_eq_ext2</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> (<span class="id">l1</span> <span class="id">l2</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">n</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_error">nth_error</a></span> <span class="id">l1</span> <span class="id">n</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_error">nth_error</a></span> <span class="id">l2</span> <span class="id">n</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">l1</span> = <span class="id">l2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l1</span>; <span class="id">intros</span> * <span class="id">Hn</span>.<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">l2</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Hn</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#O">O</a></span>); <span class="id">inv</span> <span class="id">Hn</span>.<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">l2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Hn</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#O">O</a></span>); <span class="id">inv</span> <span class="id">Hn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">now</span> <span class="id">injection</span> (<span class="id">Hn</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#O">O</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHl1</span>; <span class="id">intros</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> (<span class="id">Hn</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>)).<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall3_same_1_2">Forall3_same_1_2</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> <span class="id">B</span> <span class="id">P</span> (<span class="id">xs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>) (<span class="id">ys</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">B</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#Forall3">Forall3</a></span> <span class="id">P</span> <span class="id">xs</span> <span class="id">xs</span> <span class="id">ys</span> &lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="kwd">fun</span> <span class="id">x</span> <span class="id">y</span> =&gt; <span class="id">P</span> <span class="id">x</span> <span class="id">x</span> <span class="id">y</span>) <span class="id">xs</span> <span class="id">ys</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span> <span class="kwd">as</span> [|<span class="id">x</span> <span class="id">xs</span> <span class="id">IH</span>]; <span class="id">split</span>; <span class="id">intros</span> * <span class="id">H</span>; <span class="id">inv</span> <span class="id">H</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id">IH</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">IH</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall3_same_2_3">Forall3_same_2_3</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> <span class="id">B</span> <span class="id">P</span> (<span class="id">xs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>) (<span class="id">ys</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">B</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#Forall3">Forall3</a></span> <span class="id">P</span> <span class="id">xs</span> <span class="id">ys</span> <span class="id">ys</span> &lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="kwd">fun</span> <span class="id">x</span> <span class="id">y</span> =&gt; <span class="id">P</span> <span class="id">x</span> <span class="id">y</span> <span class="id">y</span>) <span class="id">xs</span> <span class="id">ys</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span> <span class="kwd">as</span> [|<span class="id">x</span> <span class="id">xs</span> <span class="id">IH</span>]; <span class="id">split</span>; <span class="id">intros</span> * <span class="id">H</span>; <span class="id">inv</span> <span class="id">H</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id">IH</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">IH</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="combine_map_2">combine_map_2</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> <span class="id">B</span> <span class="id">C</span> <span class="id">D</span> (<span class="id">f</span> : <span class="id">A</span> -&gt; <span class="id">C</span> -&gt; <span class="id">D</span>) (<span class="id">g</span> : <span class="id">B</span> -&gt; <span class="id">C</span>) <span class="id">xs</span> <span class="id">ys</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>,<span class="id">y</span>) =&gt; <span class="id">f</span> <span class="id">x</span> (<span class="id">g</span> <span class="id">y</span>)) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#combine">combine</a></span> <span class="id">xs</span> <span class="id">ys</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;= <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>,<span class="id">z</span>) =&gt; <span class="id">f</span> <span class="id">x</span> <span class="id">z</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#combine">combine</a></span> <span class="id">xs</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id">g</span> <span class="id">ys</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>, <span class="id">ys</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id">length_combine'</span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> <span class="id">B</span>,<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>) (<span class="id">l'</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">B</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#combine">combine</a></span> <span class="id">l</span> <span class="id">l'</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_combine">length_combine</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">lia</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="In_list_pair_l">In_list_pair_l</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id">A</span>*<span class="id">B</span>)) <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>,<span class="id">y</span>) <span class="id">l</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">l</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span>; <span class="id">firstorder</span>; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall_In">Forall_In</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">P</span> : <span class="id">A</span> -&gt; <span class="kwd">Prop</span>) <span class="id">l</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">P</span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P</span> <span class="id">x</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall_impl_inside">Forall_impl_inside</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">P</span> <span class="id">Q</span> : <span class="id">A</span> -&gt; <span class="kwd">Prop</span>) <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id">P</span> <span class="id">x</span> -&gt; <span class="id">Q</span> <span class="id">x</span>) <span class="id">xs</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">P</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">Q</span> <span class="id">xs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> <span class="id">FPQ</span> <span class="id">FP</span>. <span class="id">inv</span> <span class="id">FPQ</span>. <span class="id">inv</span> <span class="id">FP</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall_iff">Forall_iff</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> (<span class="id">P</span> <span class="id">Q</span> : <span class="id">A</span> -&gt; <span class="kwd">Prop</span>) <span class="id">l</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id">P</span> <span class="id">x</span> &lt;-&gt; <span class="id">Q</span> <span class="id">x</span>) <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">P</span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">Q</span> <span class="id">l</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">intros</span> * <span class="id">Pq</span> <span class="id">Hp</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">inversion</span> <span class="id">Hp</span>; <span class="id">inversion</span> <span class="id">Pq</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">eauto</span>; <span class="id">firstorder</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id">in_app_weak'</span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> (<span class="id">x</span> : <span class="id">A</span>) <span class="id">l</span> <span class="id">l'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">l'</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> (<span class="id">l</span> ++ <span class="id">l'</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#in_app">in_app</a></span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall2_Forall_eq">Forall2_Forall_eq</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">P</span> : <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) <span class="id">a</span> <span class="id">l1</span> <span class="id">l2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id">a</span>) <span class="id">l1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">P</span> <span class="id">l1</span> <span class="id">l2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="id">P</span> <span class="id">a</span>) <span class="id">l2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> 2; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">inversion</span> <span class="id">H</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall2_Forall3">Forall2_Forall3</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span> <span class="id">C</span>} (<span class="id">P</span> : <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) (<span class="id">Q</span> : <span class="id">B</span> -&gt; <span class="id">C</span> -&gt; <span class="kwd">Prop</span>) <span class="id">xs</span> <span class="id">ys</span> <span class="id">zs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">P</span> <span class="id">xs</span> <span class="id">ys</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">Q</span> <span class="id">ys</span> <span class="id">zs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#Forall3">Forall3</a></span> (<span class="kwd">fun</span> <span class="id">x</span> <span class="id">y</span> <span class="id">z</span> =&gt; <span class="id">P</span> <span class="id">x</span> <span class="id">y</span> /\ <span class="id">Q</span> <span class="id">y</span> <span class="id">z</span>) <span class="id">xs</span> <span class="id">ys</span> <span class="id">zs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hp</span> <span class="id">Hq</span>.<br/>
+&nbsp;&nbsp;<span class="id">generalize</span> <span class="id">dependent</span> <span class="id">zs</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hp</span>; <span class="id">intros</span>; <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">Hq</span>. <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall2_nth">Forall2_nth</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">P</span> : <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) <span class="id">xs</span> <span class="id">ys</span> <span class="id">a</span> <span class="id">b</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">P</span> <span class="id">xs</span> <span class="id">ys</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">n</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">xs</span> <span class="id">a</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">ys</span> <span class="id">b</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">H</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall2_forall2">Forall2_forall2</a></span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall3_nth">Forall3_nth</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span> <span class="id">C</span>} (<span class="id">P</span> : <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="id">C</span> -&gt; <span class="kwd">Prop</span>) <span class="id">xs</span> <span class="id">ys</span> <span class="id">zs</span> <span class="id">a</span> <span class="id">b</span> <span class="id">c</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#Forall3">Forall3</a></span> <span class="id">P</span> <span class="id">xs</span> <span class="id">ys</span> <span class="id">zs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">n</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">xs</span> <span class="id">a</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">ys</span> <span class="id">b</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">zs</span> <span class="id">c</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">H</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall3_forall3">Forall3_forall3</a></span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id">Forall2_ignore1''</span>: <span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">P</span> : <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) (<span class="id">xs</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>) <span class="id">ys</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="kwd">fun</span> _ <span class="id">y</span> =&gt; <span class="id">P</span> <span class="id">y</span>) <span class="id">xs</span> <span class="id">ys</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">P</span> <span class="id">ys</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> ?? <span class="id">P</span> <span class="id">xs</span> <span class="id">ys</span>; <span class="id">revert</span> <span class="id">xs</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ys</span>; <span class="id">intros</span> * <span class="id">Hf</span>; <span class="id">inversion</span> <span class="id">Hf</span>; <span class="id">subst</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="concat_length_sum">concat_length_sum</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#concat">concat</a></span> <span class="id">l</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#list_sum">list_sum</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">A</span>) <span class="id">l</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_app">List.length_app</a></span>; <span class="id">lia</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="length_app_decomp">length_app_decomp</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>) <span class="id">n</span> <span class="id">m</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span> = (<span class="id">n</span> + <span class="id">m</span>)%<span class="id">nat</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">l1</span> <span class="id">l2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">l</span> = <span class="id">l1</span> ++ <span class="id">l2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l1</span> = <span class="id">n</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l2</span> = <span class="id">m</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hl</span>.<br/>
+&nbsp;&nbsp;- <span class="kwd">exists</span> [],<span class="id">l</span>. <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id">IHn</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">m</span>)) <span class="kwd">as</span> (<span class="id">l1</span> &amp; [| <span class="id">x</span> <span class="id">l2</span>] &amp;?&amp;?&amp;?); <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id">l1</span> ++ [<span class="id">x</span>]),<span class="id">l2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_assoc">app_assoc</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_app">List.length_app</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>; <span class="id">lia</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="flat_map_repeat">flat_map_repeat</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">f</span> : <span class="id">B</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span>) (<span class="id">a</span> : <span class="id">A</span>) (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">B</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#flat_map">flat_map</a></span> (<span class="kwd">fun</span> <span class="id">e</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">a</span> (<span class="id">f</span> <span class="id">e</span>)) <span class="id">l</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">a</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#list_sum">list_sum</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id">f</span> <span class="id">l</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat_app">repeat_app</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_inv_head_iff">app_inv_head_iff</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="map_repeat">map_repeat</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">f</span> : <span class="id">A</span> -&gt; <span class="id">B</span>) (<span class="id">a</span> : <span class="id">A</span>) <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id">f</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">a</span> <span class="id">n</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> (<span class="id">f</span> <span class="id">a</span>) <span class="id">n</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="repeat_map">repeat_map</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">a</span> : <span class="id">A</span>) <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">a</span> <span class="id">n</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> _ =&gt; <span class="id">a</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">a</span> <span class="id">n</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="nth_repeat_in">nth_repeat_in</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">a</span> <span class="id">d</span> : <span class="id">A</span>) (<span class="id">m</span> <span class="id">n</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">n</span> &lt; <span class="id">m</span>)%<span class="id">nat</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">a</span> <span class="id">m</span>) <span class="id">d</span> = <span class="id">a</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">m</span>; <span class="id">simpl</span>; <span class="id">intros</span>; <span class="id">cases</span>; <span class="id">try</span> <span class="id">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall3_repeat">Forall3_repeat</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span> <span class="id">C</span>} (<span class="id">R</span> : <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="id">C</span> -&gt; <span class="kwd">Prop</span>) <span class="id">a</span> <span class="id">b</span> <span class="id">c</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">R</span> <span class="id">a</span> <span class="id">b</span> <span class="id">c</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#Forall3">Forall3</a></span> <span class="id">R</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">a</span> <span class="id">n</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">b</span> <span class="id">n</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">c</span> <span class="id">n</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall2_repeat">Forall2_repeat</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">R</span> : <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) <span class="id">a</span> <span class="id">b</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">R</span> <span class="id">a</span> <span class="id">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">R</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">a</span> <span class="id">n</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#repeat">repeat</a></span> <span class="id">b</span> <span class="id">n</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<h2> <span class="bracket"><span class="id">mem_nth</span> <span class="id">l</span> <span class="id">x</span></span> returns the index of the first occurrence of x in l </h2>
+<span class="kwd">Section</span> <span class="id"><a name="Mem_nth">Mem_nth</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> (<span class="id"><a name="Mem_nth.T">T</a></span> : <span class="kwd">Type</span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="Mem_nth.T_eq_dec">T_eq_dec</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">y</span> : <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth.T">T</a></span>, { <span class="id">x</span> = <span class="id">y</span> } + { <span class="id">x</span> &lt;&gt; <span class="id">y</span> }.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="mem_nth">mem_nth</a></span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth.T">T</a></span>) (<span class="id">x</span> : <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth.T">T</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">l</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">y</span> :: <span class="id">l</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth.T_eq_dec">T_eq_dec</a></span> <span class="id">x</span> <span class="id">y</span> <span class="kwd">then</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#O">O</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">else</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> (<span class="id">mem_nth</span> <span class="id">l</span> <span class="id">x</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="mem_nth_nth">mem_nth_nth</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">l</span> <span class="id">k</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">k</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth">mem_nth</a></span> <span class="id">l</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">k</span> <span class="id">l</span> <span class="id">d</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">k</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hdup</span> <span class="id">Hk</span>. <span class="id">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">k</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth.T_eq_dec">T_eq_dec</a></span>; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion_clear</span> <span class="id">Hdup</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth.T_eq_dec">T_eq_dec</a></span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">exfalso</span>. <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_In">nth_In</a></span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id">IHl</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="mem_nth_In">mem_nth_In</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span> <span class="id">n</span>, <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth">mem_nth</a></span> <span class="id">l</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">n</span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">l</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span> <span class="kwd">as</span> [|<span class="id">y</span> <span class="id">l</span>]; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hm</span>; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth.T_eq_dec">T_eq_dec</a></span> <span class="id">x</span> <span class="id">y</span>); <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="kwd">in</span> <span class="id">Hm</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth">mem_nth</a></span> <span class="id">eqn</span>:?; <span class="id">inversion_clear</span> <span class="id">Hm</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="mem_nth_Some">mem_nth_Some</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">l</span> <span class="id">k</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth">mem_nth</a></span> <span class="id">l</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">k</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">k</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span> /\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">k</span> <span class="id">l</span> <span class="id">d</span> = <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hk</span>; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth.T_eq_dec">T_eq_dec</a></span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion</span> <span class="id">Hk</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="kwd">in</span> <span class="id">Hk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth">mem_nth</a></span> <span class="id">eqn</span>:?; <span class="id">inversion_clear</span> <span class="id">Hk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">edestruct</span> <span class="id">IHl</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="mem_nth_nin">mem_nth_nin</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">xs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth">mem_nth</a></span> <span class="id">xs</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#False">False</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hf</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth.T_eq_dec">T_eq_dec</a></span>; <span class="id">subst</span>; <span class="id">inversion</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Hin</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="kwd">in</span> *; <span class="id">destruct</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth">mem_nth</a></span> <span class="id">eqn</span>:?; <span class="id">auto</span>; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="nth_mem_nth">nth_mem_nth</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span> <span class="id">k</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_error">nth_error</a></span> <span class="id">l</span> <span class="id">k</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth">mem_nth</a></span> <span class="id">l</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">k</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">ND</span>. <span class="id">revert</span> <span class="id">k</span> <span class="id">x</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ND</span>; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">k</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth.T_eq_dec">T_eq_dec</a></span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> <span class="id">k</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_error_In">nth_error_In</a></span> <span class="kwd">in</span> <span class="id">Hn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">destruct</span> <span class="id">k</span>; <span class="id">simpl</span> <span class="kwd">in</span> *. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id">IHND</span>; <span class="id">now</span> <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="mem_nth_error">mem_nth_error</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span> <span class="id">k</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth">mem_nth</a></span> <span class="id">l</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">k</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_error">nth_error</a></span> <span class="id">l</span> <span class="id">k</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hm</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth.T_eq_dec">T_eq_dec</a></span>; <span class="id">subst</span>; <span class="id">inversion</span> <span class="id">Hm</span>; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth">mem_nth</a></span> <span class="id">eqn</span>:?; <span class="id">inversion</span> <span class="id">Hm</span>; <span class="id">subst</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Mem_nth">Mem_nth</a></span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="mem_ident_nth">mem_ident_nth</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">l</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#mem_ident">mem_ident</a></span> <span class="id">x</span> <span class="id">l</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">k</span>, <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#mem_nth">mem_nth</a></span> _ <span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">l</span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">k</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hm</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#O">O</a></span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#orb_prop">Bool.orb_prop</a></span> <span class="kwd">in</span> <span class="id">Hm</span> <span class="kwd">as</span> [<span class="id">Hm</span>|<span class="id">Hm</span>].<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#ident_eqb_eq">ident_eqb_eq</a></span> <span class="kwd">in</span> <span class="id">Hm</span>; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">IHl</span> <span class="kwd">as</span> [? -&gt;]; <span class="id">simpl</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<h2> Lifting of a relation over a list of elements </h2>
+<span class="kwd">Section</span> <span class="id"><a name="Forall2_relation">Forall2_relation</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variables</span> (<span class="id"><a name="Forall2_relation.A">A</a></span> <span class="id"><a name="Forall2_relation.B">B</a></span> : <span class="kwd">Type</span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Variables</span> (<span class="id"><a name="Forall2_relation.RA">RA</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.A">A</a></span>) (<span class="id"><a name="Forall2_relation.RB">RB</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.B">B</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> (<span class="id">a</span> : <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.A">A</a></span>) `(<span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> _ <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span>) : (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#hd">hd</a></span> <span class="id">a</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> ==&gt; <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">hd_morph</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#tl">tl</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.A">A</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">tl_morph</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="F2_refl">F2_refl</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Hr</span> <span class="id">l</span>; <span class="id">induction</span> <span class="id">l</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="F2_sym">F2_sym</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Symmetric">Symmetric</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Symmetric">Symmetric</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Hs</span> <span class="id">xs</span> <span class="id">ys</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="F2_trans">F2_trans</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Ht</span> <span class="id">xs</span> <span class="id">ys</span> <span class="id">zs</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">revert</span> <span class="id">zs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hf</span>; <span class="id">intros</span> * <span class="id">Hf'</span>; <span class="id">inv</span> <span class="id">Hf'</span>; <span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="F2_equiv">F2_equiv</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Equivalence">Equivalence</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Equivalence">Equivalence</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#F2_refl">F2_refl</a></span>, <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#F2_sym">F2_sym</a></span>, <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#F2_trans">F2_trans</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> (<span class="id">f</span> : <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.A">A</a></span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.B">B</a></span>) (<span class="id">Hf</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> ==&gt; <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RB">RB</a></span>) <span class="id">f</span>) : (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id">f</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RB">RB</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">map_morph2</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.A">A</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> (<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span>) ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">F_morph3</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">P</span> <span class="id">Q</span> <span class="id">PQ</span> <span class="id">xs</span> <span class="id">ys</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">intro</span> <span class="id">Hf</span>; <span class="id">inv</span> <span class="id">Hf</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">PQ</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.A">A</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.B">B</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> (<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> ==&gt; <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RB">RB</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span>) ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RB">RB</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">F2_morph2</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">P</span> <span class="id">Q</span> <span class="id">PQ</span> <span class="id">xs1</span> <span class="id">xs2</span> <span class="id">Ha</span> <span class="id">ys1</span> <span class="id">ys2</span> <span class="id">Hb</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">generalize</span> <span class="id">dependent</span> <span class="id">xs2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">generalize</span> <span class="id">dependent</span> <span class="id">ys2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hf</span>; <span class="id">intros</span>; <span class="id">inv</span> <span class="id">Ha</span>; <span class="id">inv</span> <span class="id">Hb</span>; <span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">PQ</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.A">A</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.B">B</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> (<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> ==&gt; <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RB">RB</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>) ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RB">RB</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">F2_morph2_iff</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">P</span> <span class="id">Q</span> <span class="id">PQ</span> <span class="id">xs1</span> <span class="id">xs2</span> <span class="id">Ha</span> <span class="id">ys1</span> <span class="id">ys2</span> <span class="id">Hb</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intro</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">refine</span> (<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#F2_morph2">F2_morph2</a></span> _ _ _ _ _ _ _ _ _ _); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ???????; <span class="id">edestruct</span> <span class="id">PQ</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">generalize</span> <span class="id">dependent</span> <span class="id">xs1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">generalize</span> <span class="id">dependent</span> <span class="id">ys1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hf</span>; <span class="id">intros</span>; <span class="id">inv</span> <span class="id">Ha</span>; <span class="id">inv</span> <span class="id">Hb</span>; <span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">PQ</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#combine">combine</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.A">A</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.B">B</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RB">RB</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RA">RA</a></span> * <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation.RB">RB</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">combine_morph</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">la1</span> <span class="id">la2</span> <span class="id">Eqa</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Eqa</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">lb1</span> <span class="id">lb2</span> <span class="id">Eqb</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Eqb</span>; <span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2_relation">Forall2_relation</a></span>.<br/>
+<br/>
+<span class="id">Global</span> <span class="kwd">Instance</span> : <span class="kwd">forall</span> <span class="id">A</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#subrelation">subrelation</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id">A</span>)) (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> <span class="id">A</span> <span class="id">xs</span> <span class="id">ys</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> <span class="id">A</span> <span class="id">B</span> : (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">A</span> <span class="id">B</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id">A</span> ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id">B</span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>) ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span>) ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">B</span>) ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">F2_morph_eq</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> <span class="id">P</span> <span class="id">Q</span> <span class="id">PQ</span> <span class="id">xs</span> <span class="id">ys</span>.<br/>
+&nbsp;&nbsp;<span class="id">split</span>; <span class="id">induction</span> 1; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">all</span>: <span class="id">destruct</span> (<span class="id">PQ</span> <span class="id">x</span> <span class="id">x</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq_refl">eq_refl</a></span> <span class="id">y</span> <span class="id">y</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq_refl">eq_refl</a></span>); <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<h2> Application d'un prédicat sur les lignes d'une matrice </h2>
+<span class="kwd">Section</span> <span class="id"><a name="Forall2t">Forall2t</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="Forall2t.A">A</a></span> <span class="id"><a name="Forall2t.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> (<span class="id"><a name="Forall2t.d">d</a></span> : <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.A">A</a></span>). <br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> (<span class="id"><a name="Forall2t.P">P</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.A">A</a></span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.B">B</a></span> -&gt; <span class="kwd">Prop</span>).<br/>
+<br/>
+<div class="doc">On considère une matrice de A avec une colonne supplémentaire de B.
+      Le prédicat P doit être vrai sur chaque ligne. </div>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="Forall2t">Forall2t</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.A">A</a></span>) -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.B">B</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="f2tnil">f2tnil</a></span> : <span class="kwd">forall</span> <span class="id">l</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> []) <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Forall2t</span> <span class="id">l</span> []<br/>
+&nbsp;&nbsp;| <span class="id"><a name="f2tcons">f2tcons</a></span> : <span class="kwd">forall</span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.A">A</a></span>)) (<span class="id">h</span> : <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.B">B</a></span>) (<span class="id">t</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.P">P</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#hd">hd</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.d">d</a></span>) <span class="id">l</span>) <span class="id">h</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Forall2t</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#tl">tl</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.A">A</a></span>) <span class="id">l</span>) <span class="id">t</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Forall2t</span> <span class="id">l</span> (<span class="id">h</span> :: <span class="id">t</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Forall2t_forall2">Forall2t_forall2</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ll</span> <span class="id">l</span> (<span class="id">b</span> : <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">xl</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">xl</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span>) <span class="id">ll</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t">Forall2t</a></span> <span class="id">ll</span> <span class="id">l</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="kwd">forall</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">n</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.P">P</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> <span class="id">l</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">l</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.d">d</a></span>) <span class="id">ll</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">l</span> <span class="id">b</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hl</span>; <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> <span class="id">Ht</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Ht</span>; <span class="id">intros</span> * <span class="id">Le</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">now</span> <span class="id">inv</span> <span class="id">Le</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">n</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> &lt;- <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#map_hd_nth">map_hd_nth</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">setoid_rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span> <span class="kwd">in</span> <span class="id">IHHt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#map_tl_nth">map_tl_nth</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">IHHt</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_map">Forall_map</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_impl">Forall_impl</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [] **; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intro</span> <span class="id">Nth</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">generalize</span> <span class="id">dependent</span> <span class="id">ll</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span> <span class="kwd">as</span> [| <span class="id">x</span> <span class="id">l</span>]; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#symmetry">symmetry</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_zero_iff_nil">length_zero_iff_nil</a></span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#map_hd_nth">map_hd_nth</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> (<span class="id">Nth</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#O">O</a></span>); <span class="id">simpl</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_map">Forall_map</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_impl">Forall_impl</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [] **; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">lia</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span>, &lt;- <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#map_tl_nth">map_tl_nth</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> (<span class="id">Nth</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>)); <span class="id">simpl</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<div class="doc">Calcul de la transposée d'une matrice. On donne sa spécification
+      dans son type car raisonner sur la fonction direcement est rendu
+      très pénible par la preuve de terminaison. </div>
+&nbsp;&nbsp;<span class="id">Program</span> <span class="kwd">Fixpoint</span> <span class="id"><a name="transp">transp</a></span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.A">A</a></span>)) (<span class="id">k</span> : { <span class="id">k</span> | <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">l</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span> = <span class="id">k</span>) <span class="id">l</span> })<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{<span class="id">measure</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#concat">concat</a></span> <span class="id">l</span>))}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: { <span class="id">l'</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.A">A</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (<span class="id">l</span> &lt;&gt; [] -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l'</span> = <span class="id">k</span> /\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">ll</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">ll</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span>) <span class="id">l'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="kwd">forall</span> <span class="id">n</span> <span class="id">m</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">m</span> <span class="id">l'</span> []) <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.d">d</a></span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">m</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">l</span> []) <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.d">d</a></span> } :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">l</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; []<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| [] :: _ =&gt; []<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">rows</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#hd">hd</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.d">d</a></span>) <span class="id">rows</span> :: <span class="id">transp</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#tl">tl</a></span> _) <span class="id">rows</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#exist">exist</a></span> _ (<span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.pred">Nat.pred</a></span> <span class="id">k</span>) _)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>; <span class="id">split</span>; <span class="id">intros</span>; <span class="id">cases</span>; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>; <span class="id">split</span>; <span class="id">intros</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_zero_iff_nil">length_zero_iff_nil</a></span> <span class="kwd">in</span> <span class="id">H3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_nth">Forall_nth</a></span> <span class="kwd">in</span> <span class="id">H3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.lt_ge_cases">Nat.lt_ge_cases</a></span> <span class="id">n</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">wildcard'</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id">H3</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">do</span> 2 (<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_overflow">nth_overflow</a></span>; <span class="id">auto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.lt_ge_cases">Nat.lt_ge_cases</a></span> <span class="id">n</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">wildcard'</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id">H3</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">do</span> 2 (<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_overflow">nth_overflow</a></span>; <span class="id">simpl</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>).<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_map">Forall_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#tl_length">tl_length</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">l</span> <span class="kwd">as</span> [|[] <span class="id">l</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1,2: <span class="id">contradict</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_app">List.length_app</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Peano.html#le">le</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#concat">concat</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#tl">tl</a></span> (<span class="id">A</span>:=<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.A">A</a></span>)) <span class="id">l</span>))) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#concat">concat</a></span> <span class="id">l</span>))); <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> 2 <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_app">List.length_app</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">a</span>; <span class="id">simpl</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rename</span> <span class="id">n</span> <span class="id">into</span> <span class="id">Hl'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">transp</span> <span class="kwd">as</span> [? [<span class="id">Heq</span> <span class="id">Ht</span>]]; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Heq</span> <span class="kwd">as</span> [<span class="id">Heq</span> <span class="id">Hf</span>]; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#map_eq_nnil">map_eq_nnil</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">rewrite</span> <span class="id">Heq</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">k</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">l</span> <span class="kwd">as</span> [|[]]; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">H</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_impl">Forall_impl</a></span> <span class="kwd">in</span> <span class="id">Hf</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span> <span class="kwd">in</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html#Nat.lt_ge_cases">Nat.lt_ge_cases</a></span> <span class="id">n</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span>)) <span class="kwd">as</span> [<span class="id">Lt</span>|<span class="id">Le</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;2:{ <span class="id">rewrite</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_overflow">nth_overflow</a></span> _ _ <span class="id">Le</span>), <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#nth_nil">nth_nil</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>. <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_overflow">nth_overflow</a></span>; <span class="id">auto</span>; <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Ht</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_overflow">nth_overflow</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_overflow">nth_overflow</a></span>; <span class="id">simpl</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">arith</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id">map_nth'</span>, <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#hd_nth">hd_nth</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id">Ht</span>, <span class="id">map_nth'</span>, <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#tl_nth">tl_nth</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span>; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<div class="doc">Forall2t est bien l'analogue de Forall2 sur la matrice tansposée. </div>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Forall2t_Forall2">Forall2t_Forall2</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ll</span> <span class="id">l</span> (<span class="id">Hl</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">l'</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l'</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span>) <span class="id">ll</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">ll</span> &lt;&gt; [] -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t">Forall2t</a></span> <span class="id">ll</span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.P">P</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#proj1_sig">proj1_sig</a></span> (<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#transp">transp</a></span> <span class="id">ll</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Specif.html#exist">exist</a></span> _ _ <span class="id">Hl</span>))) <span class="id">l</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Nnil</span> <span class="id">Hft</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall2_forall2">Forall2_forall2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#transp">transp</a></span> <span class="kwd">as</span> [<span class="id">ll'</span> [<span class="id">Hlt</span> <span class="id">Ht</span>]]; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Hlt</span> <span class="kwd">as</span> [<span class="id">Hlt</span> <span class="id">Hf</span>]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hn</span> ??; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_indep">nth_indep</a></span> _ _ [] <span class="id">Hn</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t_forall2">Forall2t_forall2</a></span> _ _ <span class="id">b</span>) <span class="kwd">in</span> <span class="id">Hft</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> ((<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">ll'</span> []) =  (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> <span class="id">l</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth">nth</a></span> <span class="id">n</span> <span class="id">l</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.d">d</a></span>) <span class="id">ll</span>)) <span class="kwd">as</span> -&gt;.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;2: <span class="id">apply</span> <span class="id">Hft</span>; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#list_eq_ext">list_eq_ext</a></span> <span class="kwd">with</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.d">d</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_nth">Forall_nth</a></span> <span class="kwd">in</span> <span class="id">Hf</span> <span class="kwd">as</span> -&gt;; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> <span class="id">m</span> <span class="id">Hm</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;TODO:&nbsp;il&nbsp;y&nbsp;a&nbsp;sans&nbsp;doute&nbsp;plus&nbsp;propre&nbsp;à&nbsp;faire...&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id">Ht</span>, <span class="id">map_nth'</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_nth">Forall_nth</a></span> <span class="kwd">in</span> <span class="id">Hf</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">Hf</span> <span class="kwd">in</span> <span class="id">Hm</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">eqA</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.A">A</a></span>) (<span class="id">eqB</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.B">B</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">EqA</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Equivalence">Equivalence</a></span> <span class="id">eqA</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">reB</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> <span class="id">eqB</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">P_compat</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">eqA</span> ==&gt; <span class="id">eqB</span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span>) <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.P">P</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t">Forall2t</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">eqA</span>)) ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">eqB</span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">F2t_morph</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">xss</span> <span class="id">xss'</span> <span class="id">Hxy</span> <span class="id">ys</span> <span class="id">ys'</span> <span class="id">Heq</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">revert</span> <span class="id">Hxy</span> <span class="id">Hf</span>. <span class="id">revert</span> <span class="id">xss</span> <span class="id">xss'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Heq</span>; <span class="id">intros</span> * <span class="id">Hxy</span> <span class="id">Hf</span>; <span class="id">inv</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hxy</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">H</span>; <span class="id">constructor</span>; <span class="id">auto</span>; <span class="id">now</span> <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> &lt;- <span class="id">Hxy</span>, &lt;- <span class="id">H</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHHeq</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> &lt;- <span class="id">Hxy</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">eqA</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.A">A</a></span>) (<span class="id">eqB</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Relations.Relation_Definitions.html#relation">relation</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.B">B</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">EqA</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Equivalence">Equivalence</a></span> <span class="id">eqA</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">reB</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> <span class="id">eqB</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">P_compat</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#Proper">Proper</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">eqA</span> ==&gt; <span class="id">eqB</span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span>) <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t.P">P</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t">Forall2t</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">eqA</span>)) ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id">eqB</span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">F2t_morph_iff</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">xss</span> <span class="id">xss'</span> <span class="id">Hxy</span> <span class="id">ys</span> <span class="id">ys'</span> <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">revert</span> <span class="id">Hxy</span>. <span class="id">revert</span> <span class="id">xss</span> <span class="id">xss'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Heq</span>; <span class="id">split</span>; <span class="id">intro</span> <span class="id">Hf</span>; <span class="id">inv</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> - <span class="id">Hxy</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hxy</span>; <span class="id">auto</span>; <span class="id">inv</span> <span class="id">H</span>; <span class="id">inv</span> <span class="id">H0</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">clear</span> - <span class="id">Hxy</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hxy</span>; <span class="id">auto</span>; <span class="id">inv</span> <span class="id">H</span>; <span class="id">inv</span> <span class="id">H0</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">now</span> <span class="id">rewrite</span> &lt;- <span class="id">Hxy</span>, &lt;- <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHHeq</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> &lt;- <span class="id">Hxy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">now</span> <span class="id">rewrite</span>  <span class="id">H</span>, <span class="id">Hxy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHHeq</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">Hxy</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t">Forall2t</a></span>.<br/>
+<br/>
+<div class="doc">Lorsque l'on combine chaque ligne de la matrice <span class="bracket"><span class="id">ll</span></span> avec une même
+    liste <span class="bracket"><span class="id">la</span></span>, typiquement une liste d'enumtag. </div>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall2t_combine">Forall2t_combine</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> <span class="id">B</span> <span class="id">C</span> <span class="id">d1</span> <span class="id">d2</span> (<span class="id">P</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id">A</span> * <span class="id">B</span>) -&gt; <span class="id">C</span> -&gt; <span class="kwd">Prop</span>) (<span class="id">ll</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">B</span>)) <span class="id">la</span> <span class="id">lc</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">xl</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">xl</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">lc</span>) <span class="id">ll</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t">Forall2t</a></span> <span class="id">d1</span> (<span class="kwd">fun</span> <span class="id">l</span> <span class="id">c</span> =&gt; <span class="id">P</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#combine">combine</a></span> <span class="id">la</span> <span class="id">l</span>) <span class="id">c</span>) <span class="id">ll</span> <span class="id">lc</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t">Forall2t</a></span> <span class="id">d2</span> <span class="id">P</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> '(<span class="id">a</span>,<span class="id">l</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#pair">pair</a></span> <span class="id">a</span>) <span class="id">l</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#combine">combine</a></span> <span class="id">la</span> <span class="id">ll</span>)) <span class="id">lc</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hl</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">lc</span> <span class="kwd">as</span> [|<span class="id">c</span> <span class="id">lc</span>].<br/>
+&nbsp;&nbsp;{ <span class="comment">(*&nbsp;si&nbsp;lc&nbsp;est&nbsp;vide&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Hd</span>; <span class="id">inv</span> <span class="id">Hd</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_combine_r">in_combine_r</a></span> <span class="kwd">in</span> <span class="id">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">subst</span>; <span class="id">auto</span>. }<br/>
+&nbsp;&nbsp;<span class="id">unshelve</span> <span class="id">rewrite</span> 2 <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t_forall2">Forall2t_forall2</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;2:{ <span class="id">simpl_Forall</span>; <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_combine_r">in_combine_r</a></span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hl</span>; <span class="id">eauto</span>. }<br/>
+&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Hp</span> <span class="id">k</span> <span class="id">Hk</span>.<br/>
+&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">Hp</span> <span class="id">k</span> <span class="id">Hk</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#combine_map_snd">combine_map_snd</a></span> <span class="kwd">in</span> <span class="id">Hp</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| _: <span class="id">P</span> ?<span class="id">l1</span> _ |- <span class="id">P</span> ?<span class="id">l2</span> _ =&gt; <span class="id">assert</span> (<span class="id">l2</span> = <span class="id">l1</span>) <span class="kwd">as</span> -&gt;; [<span class="id">clear</span> <span class="id">Hp</span> | <span class="id">eassumption</span>]<br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_ext_in_iff">map_ext_in_iff</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> [] <span class="id">Hin</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_combine_r">in_combine_r</a></span> <span class="kwd">in</span> <span class="id">Hin</span> <span class="kwd">as</span> <span class="id">Hr</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hl</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_indep">nth_indep</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_nth">map_nth</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>; <span class="id">lia</span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">On peut simuler un Forall3t en ajoutant une colonne supplémentaire
+    grâce à un appel à <span class="bracket"><span class="id">combine</span></span> sur le dernier argument.
+    Ou encore en ajoutant la colonne en tête de la matrice, et dans
+    ce cas il faut ajuster les arguments de <span class="bracket"><span class="id">P</span></span>. </div>
+<span class="kwd">Lemma</span> <span class="id"><a name="Forall2t_more_col">Forall2t_more_col</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> <span class="id">B</span> (<span class="id">P</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">A</span> -&gt; <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) <span class="id">d</span> <span class="id">lb</span> <span class="id">ma</span> <span class="id">la</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">la</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">lb</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t">Forall2t</a></span> <span class="id">d</span> (<span class="kwd">fun</span> <span class="id">l</span> <span class="id">b</span> =&gt; <span class="id">P</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#tl">tl</a></span> <span class="id">l</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#hd">hd</a></span> <span class="id">d</span> <span class="id">l</span>) <span class="id">b</span>) (<span class="id">la</span> :: <span class="id">ma</span>) <span class="id">lb</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall2t">Forall2t</a></span> <span class="id">d</span> (<span class="kwd">fun</span> <span class="id">l</span> <span class="id">ab</span> =&gt; <span class="id">P</span> <span class="id">l</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">ab</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">ab</span>)) <span class="id">ma</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#combine">combine</a></span> <span class="id">la</span> <span class="id">lb</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">clear</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">lb</span>; <span class="id">intros</span> * <span class="id">Hl</span> <span class="id">Hft</span>; <span class="id">inv</span> <span class="id">Hft</span>.<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">la</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">inv</span> <span class="id">H</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">la</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

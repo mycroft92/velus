@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module CESyntax</title>
+<meta name="description" content="Documentation of Coq module CESyntax" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module CESyntax</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<br/>
+<h1> The core dataflow expresion syntax </h1>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="CESYNTAX">CESYNTAX</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>  : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>   : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span>: <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>  : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#OpAux">OpAux</a></span>).<br/>
+<br/>
+<h2> Expressions </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="CESYNTAX.exp">exp</a></span> : <span class="kwd">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Econst">Econst</a></span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.cconst">cconst</a></span> -&gt; <span class="id">exp</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Eenum">Eenum</a></span>  : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.enumtag">enumtag</a></span> -&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.type">type</a></span> -&gt; <span class="id">exp</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Evar">Evar</a></span>   : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.type">type</a></span> -&gt; <span class="id">exp</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Elast">Elast</a></span>  : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.type">type</a></span> -&gt; <span class="id">exp</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Ewhen">Ewhen</a></span>  : <span class="id">exp</span> -&gt; (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.type">type</a></span>) -&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.enumtag">enumtag</a></span> -&gt; <span class="id">exp</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Eunop">Eunop</a></span>  : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.unop">unop</a></span> -&gt; <span class="id">exp</span> -&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.type">type</a></span> -&gt; <span class="id">exp</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Ebinop">Ebinop</a></span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.binop">binop</a></span> -&gt; <span class="id">exp</span> -&gt; <span class="id">exp</span> -&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.type">type</a></span> -&gt; <span class="id">exp</span>.<br/>
+<br/>
+<h2> Control expressions </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="CESYNTAX.cexp">cexp</a></span> : <span class="kwd">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Emerge">Emerge</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.type">type</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id">cexp</span> -&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.type">type</a></span> -&gt; <span class="id">cexp</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Ecase">Ecase</a></span>  : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.exp">exp</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id">cexp</span>) -&gt; <span class="id">cexp</span> -&gt; <span class="id">cexp</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Eexp">Eexp</a></span>   : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.exp">exp</a></span> -&gt; <span class="id">cexp</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="CESYNTAX.rhs">rhs</a></span> : <span class="kwd">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Eextcall">Eextcall</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.exp">exp</a></span> -&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.ctype">ctype</a></span> -&gt; <span class="id">rhs</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="CESYNTAX.Ecexp">Ecexp</a></span>  : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp">cexp</a></span> -&gt; <span class="id">rhs</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="CESYNTAX.cexp_ind2">cexp_ind2</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="CESYNTAX.cexp_ind2.P">P</a></span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp">cexp</a></span> -&gt; <span class="kwd">Prop</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="CESYNTAX.cexp_ind2.MergeCase">MergeCase</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">l</span> <span class="id">t</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">List.Forall</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp_ind2.P">P</a></span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp_ind2.P">P</a></span> (<span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Emerge">Emerge</a></span> <span class="id">x</span> <span class="id">l</span> <span class="id">t</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="CESYNTAX.cexp_ind2.CaseCase">CaseCase</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">c</span> <span class="id">l</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">List.Forall</a></span> (<span class="kwd">fun</span> <span class="id">oce</span> =&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp_ind2.P">P</a></span> (<span class="id"><a href="Velus.Common.Common.html#or_default">or_default</a></span> <span class="id">d</span> <span class="id">oce</span>)) <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp_ind2.P">P</a></span> (<span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Ecase">Ecase</a></span> <span class="id">c</span> <span class="id">l</span> <span class="id">d</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="CESYNTAX.cexp_ind2.ExpCase">ExpCase</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp_ind2.P">P</a></span> (<span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Eexp">Eexp</a></span> <span class="id">e</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="CESYNTAX.cexp_ind2">cexp_ind2</a></span> (<span class="id">e</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp">cexp</a></span>) : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp_ind2.P">P</a></span> <span class="id">e</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">e</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp_ind2.MergeCase">MergeCase</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp_ind2.CaseCase">CaseCase</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span> <span class="kwd">as</span> [|[|]]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp_ind2.ExpCase">ExpCase</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Defined.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp_ind2">cexp_ind2</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id">cexp_ind2'</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id">P</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp">cexp</a></span> -&gt; <span class="kwd">Prop</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id">MergeCase</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">l</span> <span class="id">t</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">List.Forall</a></span> <span class="id">P</span> <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P</span> (<span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Emerge">Emerge</a></span> <span class="id">x</span> <span class="id">l</span> <span class="id">t</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id">CaseCase</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">c</span> <span class="id">l</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P</span> <span class="id">d</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">List.Forall</a></span> (<span class="id"><a href="Velus.Common.Common.html#or_default_with">or_default_with</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span> <span class="id">P</span>) <span class="id">l</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P</span> (<span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Ecase">Ecase</a></span> <span class="id">c</span> <span class="id">l</span> <span class="id">d</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id">ExpCase</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P</span> (<span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Eexp">Eexp</a></span> <span class="id">e</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id">cexp_ind2'</span> (<span class="id">e</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp">cexp</a></span>) : <span class="id">P</span> <span class="id">e</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">e</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">MergeCase</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">CaseCase</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span> <span class="kwd">as</span> [|[|]]; <span class="id">constructor</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">ExpCase</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Defined.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id">cexp_ind2'</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="CESYNTAX.typeof">typeof</a></span> (<span class="id">le</span>: <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.exp">exp</a></span>): <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.type">type</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">le</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Econst">Econst</a></span> <span class="id">c</span> =&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.Tprimitive">Tprimitive</a></span> (<span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.ctype_cconst">ctype_cconst</a></span> <span class="id">c</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Eenum">Eenum</a></span> _ <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Evar">Evar</a></span> _ <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Elast">Elast</a></span> _ <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Eunop">Eunop</a></span> _ _ <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Ebinop">Ebinop</a></span> _ _ _ <span class="id">ty</span> =&gt; <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Ewhen">Ewhen</a></span> <span class="id">e</span> _ _ =&gt; <span class="id">typeof</span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="CESYNTAX.typeofc">typeofc</a></span> (<span class="id">ce</span>: <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.cexp">cexp</a></span>): <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.type">type</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">ce</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Emerge">Emerge</a></span> _ _ <span class="id">ty</span> =&gt; <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Ecase">Ecase</a></span> _ _ <span class="id">e</span>   =&gt; <span class="id">typeofc</span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Eexp">Eexp</a></span> <span class="id">e</span>        =&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.typeof">typeof</a></span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="CESYNTAX.typeofr">typeofr</a></span> (<span class="id">r</span>: <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.rhs">rhs</a></span>): <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.type">type</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">r</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Eextcall">Eextcall</a></span> _ _ <span class="id">cty</span> =&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op.Tprimitive">Tprimitive</a></span> <span class="id">cty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Ecexp">Ecexp</a></span> <span class="id">e</span>         =&gt; <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.typeofc">typeofc</a></span> <span class="id">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<div class="doc">Predicate used in <span class="bracket"><span class="id">normal_args</span></span> in NLustre and Stc. </div>
+&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="CESYNTAX.noops_exp">noops_exp</a></span> (<span class="id">ck</span>: <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Cks.clock">clock</a></span>) (<span class="id">e</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.exp">exp</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">ck</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Cks.Cbase">Cbase</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Cks.Con">Con</a></span> <span class="id">ck'</span> _ _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">e</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Econst">Econst</a></span> _ | <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Eenum">Eenum</a></span> _ _ | <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Evar">Evar</a></span> _ _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX.Ewhen">Ewhen</a></span> <span class="id">e'</span> _ _ =&gt; <span class="id">noops_exp</span> <span class="id">ck'</span> <span class="id">e'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#False">False</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="CESyntaxFun">CESyntaxFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>  : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>   : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span>: <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>  : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#OpAux">OpAux</a></span>) &lt;: <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Cks">Cks</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Ids">Ids</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Op">Op</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#Cks">Cks</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESyntaxFun">CESyntaxFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

@@ -1,0 +1,343 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module ObcDeadCode</title>
+<meta name="description" content="Documentation of Coq module ObcDeadCode" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module ObcDeadCode</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.CommonTyping.html">CommonTyping</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Environment.html">Environment</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.VelusMemory.html">VelusMemory</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Obc.ObcSyntax.html">Obc.ObcSyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Obc.ObcSemantics.html">Obc.ObcSemantics</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Obc.ObcInvariants.html">Obc.ObcInvariants</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Obc.ObcTyping.html">Obc.ObcTyping</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="OBCDEADCODE">OBCDEADCODE</a></span><br/>
+&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">SynObc</span>: <span class="id"><a href="Velus.Obc.ObcSyntax.html#OBCSYNTAX">OBCSYNTAX</a></span>     <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">ComTyp</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING">COMMONTYPING</a></span>  <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">SemObc</span>: <span class="id"><a href="Velus.Obc.ObcSemantics.html#OBCSEMANTICS">OBCSEMANTICS</a></span>  <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc">SynObc</a></span>)<br/>
+&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">InvObc</span>: <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS">OBCINVARIANTS</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc">SynObc</a></span>        <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc">SemObc</a></span>)<br/>
+&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">TypObc</span>: <span class="id"><a href="Velus.Obc.ObcTyping.html#OBCTYPING">OBCTYPING</a></span>     <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc">SynObc</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#ComTyp">ComTyp</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc">SemObc</a></span>).<br/>
+<br/>
+<h2> Dead Updates Elimination
+      Remove instruction of the form state.x = state.x
+   </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="OBCDEADCODE.deadcode_stmt">deadcode_stmt</a></span> (<span class="id">s</span>: <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.stmt">stmt</a></span>): <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.stmt">stmt</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">s</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.AssignSt">AssignSt</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.State">State</a></span> <span class="id">y</span> _ _) _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> <span class="id">x</span> ==<span class="id">b</span> <span class="id">y</span> <span class="kwd">then</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.Skip">Skip</a></span> <span class="kwd">else</span> <span class="id">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.Switch">Switch</a></span> <span class="id">e</span> <span class="id">ss</span> <span class="id">sd</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.Switch">Switch</a></span> <span class="id">e</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="id">deadcode_stmt</span>) <span class="id">ss</span>) (<span class="id">deadcode_stmt</span> <span class="id">sd</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.Comp">Comp</a></span> <span class="id">s1</span> <span class="id">s2</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.Comp">Comp</a></span> (<span class="id">deadcode_stmt</span> <span class="id">s1</span>) (<span class="id">deadcode_stmt</span> <span class="id">s2</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OBCDEADCODE.deadcode_method">deadcode_method</a></span> (<span class="id">m</span>: <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.method">method</a></span>): <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.method">method</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.mk_method">mk_method</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_name">m_name</a></span> <span class="id">m</span>) (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_in">m_in</a></span> <span class="id">m</span>) (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_vars">m_vars</a></span> <span class="id">m</span>) (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_out">m_out</a></span> <span class="id">m</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_stmt">deadcode_stmt</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_body">m_body</a></span> <span class="id">m</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_nodupvars">m_nodupvars</a></span> <span class="id">m</span>) (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_good">m_good</a></span> <span class="id">m</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.map_m_name_deadcode_methods">map_m_name_deadcode_methods</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">methods</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_name">m_name</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_method">deadcode_method</a></span> <span class="id">methods</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_name">m_name</a></span> <span class="id">methods</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_map">map_map</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Program</span> <span class="kwd">Definition</span> <span class="id"><a name="OBCDEADCODE.deadcode_class">deadcode_class</a></span> (<span class="id">c</span>: <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.class">class</a></span>): <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.class">class</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.mk_class">mk_class</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_name">c_name</a></span> <span class="id">c</span>) (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_mems">c_mems</a></span> <span class="id">c</span>) (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_objs">c_objs</a></span> <span class="id">c</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_method">deadcode_method</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_methods">c_methods</a></span> <span class="id">c</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_nodup">c_nodup</a></span> <span class="id">c</span>) _ (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_good">c_good</a></span> <span class="id">c</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.map_m_name_deadcode_methods">map_m_name_deadcode_methods</a></span>. <span class="id">exact</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_nodupm">c_nodupm</a></span> <span class="id">c</span>).<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Program</span> <span class="kwd">Instance</span> <span class="id"><a name="OBCDEADCODE.deadcode_class_transform_unit">deadcode_class_transform_unit</a></span>: <span class="id"><a href="Velus.Common.CommonProgram.html#TransformUnit">TransformUnit</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.class">class</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.class">class</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> := <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_class">deadcode_class</a></span> }.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Program</span> <span class="kwd">Instance</span> <span class="id"><a name="OBCDEADCODE.deadcode_class_transform_state_unit">deadcode_class_transform_state_unit</a></span>: <span class="id"><a href="Velus.Common.CommonProgram.html#TransformStateUnit">TransformStateUnit</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.class">class</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.class">class</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OBCDEADCODE.deadcode_program">deadcode_program</a></span> : <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.program">program</a></span> -&gt; <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.program">program</a></span> := <span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.deadcode_find_class">deadcode_find_class</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">id</span> <span class="id">c</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.find_class">find_class</a></span> <span class="id">id</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">c</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.find_class">find_class</a></span> <span class="id">id</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">p</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_class">deadcode_class</a></span> <span class="id">c</span>, <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">p'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Find</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_transform_units_forward">find_unit_transform_units_forward</a></span> <span class="kwd">in</span> <span class="id">Find</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.deadcode_find_method">deadcode_find_method</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">fm</span> <span class="id">cls</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.find_method">find_method</a></span> <span class="id">f</span> <span class="id">cls</span>.(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_methods">c_methods</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">fm</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.find_method">find_method</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_class">deadcode_class</a></span> <span class="id">cls</span>).(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_methods">c_methods</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_method">deadcode_method</a></span> <span class="id">fm</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">cls</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">c_methods0</span> <span class="kwd">as</span> [|<span class="id">m</span> <span class="id">ms</span>]; <span class="id">inversion</span> 1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">m</span>.(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_name">m_name</a></span>) <span class="id">f</span>) <span class="kwd">as</span> [<span class="id">He</span>|<span class="id">Hne</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id">He</span>, <span class="id"><a href="Velus.Common.Common.html#ident_eqb_refl">ident_eqb_refl</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">injection</span> <span class="id">H1</span>; <span class="id">intro</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#ident_eqb_neq">ident_eqb_neq</a></span> <span class="kwd">in</span> <span class="id">Hne</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hne</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">c_nodupm0</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id">deadcode_find_method'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">id</span> <span class="id">c</span> <span class="id">m</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.find_method">find_method</a></span> <span class="id">id</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_class">deadcode_class</a></span> <span class="id">c</span>).(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_methods">c_methods</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">m</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">m'</span>, <span class="id">m</span> = <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_method">deadcode_method</a></span> <span class="id">m'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.find_method">find_method</a></span> <span class="id">id</span> <span class="id">c</span>.(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_methods">c_methods</a></span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">m'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">c</span> <span class="kwd">as</span> [? ? ? <span class="id">meths</span> ? <span class="id">Nodup</span>]; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">meths</span> <span class="kwd">as</span> [|<span class="id">m'</span>]; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">try</span> <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Nodup</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eqb">ident_eqb</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_name">m_name</a></span> <span class="id">m'</span>) <span class="id">id</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">m'</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Semantic preservation </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.deadcode_stmt_eval">deadcode_stmt_eval</a></span> <span class="id">prog</span> : <span class="kwd">forall</span> <span class="id">s</span> <span class="id">menv</span> <span class="id">env</span> <span class="id">menv'</span> <span class="id">env'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.stmt_eval">stmt_eval</a></span> <span class="id">prog</span> <span class="id">menv</span> <span class="id">env</span> <span class="id">s</span> (<span class="id">menv'</span>, <span class="id">env'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.stmt_eval">stmt_eval</a></span> <span class="id">prog</span> <span class="id">menv</span> <span class="id">env</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_stmt">deadcode_stmt</a></span> <span class="id">s</span>) (<span class="id">menv'</span>, <span class="id">env'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">s</span> <span class="kwd">using</span> <span class="id">stmt_ind2'</span>; <span class="id">intros</span> * <span class="id">Sem</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;AssignSt&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases_eqn</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Eq">Eq</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">Eq0</span>. <span class="id">inv</span> <span class="id">Eq0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Sem</span>. <span class="id">take</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.exp_eval">exp_eval</a></span> _ _ _ _) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span>. <span class="id">destruct</span> <span class="id">menv0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gsident">Env.gsident</a></span>; <span class="id">auto</span>. <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;Switch&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Sem</span>. <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_error">nth_error</a></span> _ _ = _) <span class="id">and</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_error_map">nth_error_map</a></span>, <span class="id">it</span>; <span class="id">simpl</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_error">nth_error</a></span> _ _ = _) <span class="id">and</span> <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#nth_error_In">nth_error_In</a></span> <span class="kwd">in</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">s0</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;Comp&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Sem</span>. <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.deadcode_call">deadcode_call</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">n</span> <span class="id">me</span> <span class="id">me'</span> <span class="id">f</span> <span class="id">xss</span> <span class="id">rs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.stmt_call_eval">stmt_call_eval</a></span> <span class="id">p</span> <span class="id">me</span> <span class="id">n</span> <span class="id">f</span> <span class="id">xss</span> <span class="id">me'</span> <span class="id">rs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.stmt_call_eval">stmt_call_eval</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">p</span>) <span class="id">me</span> <span class="id">n</span> <span class="id">f</span> <span class="id">xss</span> <span class="id">me'</span> <span class="id">rs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cut</span> ((<span class="kwd">forall</span> <span class="id">p</span> <span class="id">me</span> <span class="id">ve</span> <span class="id">stmt</span> <span class="id">e'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.stmt_eval">stmt_eval</a></span> <span class="id">p</span> <span class="id">me</span> <span class="id">ve</span> <span class="id">stmt</span> <span class="id">e'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.stmt_eval">stmt_eval</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">p</span>) <span class="id">me</span> <span class="id">ve</span> <span class="id">stmt</span> <span class="id">e'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ (<span class="kwd">forall</span> <span class="id">p</span> <span class="id">me</span> <span class="id">clsid</span> <span class="id">f</span> <span class="id">vs</span> <span class="id">me'</span> <span class="id">rvs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.stmt_call_eval">stmt_call_eval</a></span> <span class="id">p</span> <span class="id">me</span> <span class="id">clsid</span> <span class="id">f</span> <span class="id">vs</span> <span class="id">me'</span> <span class="id">rvs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.stmt_call_eval">stmt_call_eval</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">p</span>) <span class="id">me</span> <span class="id">clsid</span> <span class="id">f</span> <span class="id">vs</span> <span class="id">me'</span> <span class="id">rvs</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">destruct</span> 1 <span class="kwd">as</span> (<span class="id">Hf1</span> &amp; <span class="id">Hf2</span>); <span class="id">intros</span>; <span class="id">apply</span> <span class="id">Hf2</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.stmt_eval_call_ind">stmt_eval_call_ind</a></span>; <span class="id">intros</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.stmt_eval">stmt_eval</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.find_class">find_class</a></span> _ _ = _) <span class="id">and</span> <span class="id">rename</span> <span class="id">it</span> <span class="id">into</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.find_method">find_method</a></span> _ _ = _) <span class="id">and</span> <span class="id">rename</span> <span class="id">it</span> <span class="id">into</span> <span class="id">Findm</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_find_class">deadcode_find_class</a></span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_find_method">deadcode_find_method</a></span> <span class="kwd">in</span> <span class="id">Findm</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_stmt_eval">deadcode_stmt_eval</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="OBCDEADCODE.deadcode_loop_call">deadcode_loop_call</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">c</span> <span class="id">ins</span> <span class="id">outs</span> <span class="id">prog</span> <span class="id">me</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.loop_call">loop_call</a></span> <span class="id">prog</span> <span class="id">c</span> <span class="id">f</span> <span class="id">ins</span> <span class="id">outs</span> 0 <span class="id">me</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc.loop_call">loop_call</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">prog</span>) <span class="id">c</span> <span class="id">f</span> <span class="id">ins</span> <span class="id">outs</span> 0 <span class="id">me</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?????; <span class="id">generalize</span> 0%<span class="id">nat</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">cofix</span> <span class="id">COINDHYP</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">n</span> <span class="id">me</span> <span class="id">Hdo</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Hdo</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_call">deadcode_call</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Typing preservation </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.wt_exp_deadcode">wt_exp_deadcode</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">Γm</span> <span class="id">Γv</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#TypObc.wt_exp">wt_exp</a></span> <span class="id">p</span> <span class="id">Γm</span> <span class="id">Γv</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#TypObc.wt_exp">wt_exp</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">p</span>) <span class="id">Γm</span> <span class="id">Γv</span> <span class="id">e</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">e</span>; <span class="id">inversion_clear</span> 1; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#TypObc.wt_exp">wt_exp</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.deadcode_stmt_wt">deadcode_stmt_wt</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">insts</span> <span class="id">Γm</span> <span class="id">Γv</span> <span class="id">s</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#TypObc.wt_stmt">wt_stmt</a></span> <span class="id">p</span> <span class="id">insts</span> <span class="id">Γm</span> <span class="id">Γv</span> <span class="id">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#TypObc.wt_stmt">wt_stmt</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">p</span>) <span class="id">insts</span> <span class="id">Γm</span> <span class="id">Γv</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_stmt">deadcode_stmt</a></span> <span class="id">s</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">s</span> <span class="kwd">using</span> <span class="id">stmt_ind2'</span>; <span class="id">intros</span> * <span class="id">Stmt</span>; <span class="id">inv</span> <span class="id">Stmt</span>; <span class="id">simpl</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.wt_exp_deadcode">wt_exp_deadcode</a></span> <span class="kwd">with</span> <span class="id">obctyping</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;AssignSt&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.wt_exp_deadcode">wt_exp_deadcode</a></span> <span class="kwd">with</span> <span class="id">obctyping</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;Switch&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.wt_exp_deadcode">wt_exp_deadcode</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#length_map">length_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">intros</span> * <span class="id">In</span>. <span class="id">simpl_In</span>. <span class="id">simpl_Forall</span>. <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;Call&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_find_class">deadcode_find_class</a></span>, <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_find_method">deadcode_find_method</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.wt_exp_deadcode">wt_exp_deadcode</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;ExtCall&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.wt_exp_deadcode">wt_exp_deadcode</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.deadcode_program_wt">deadcode_program_wt</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#TypObc.wt_program">wt_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#TypObc.wt_program">wt_program</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">p</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#transform_units_wt_program">transform_units_wt_program</a></span> <span class="kwd">in</span> <span class="id">WT</span>; <span class="id">eauto</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1 <span class="kwd">as</span> (<span class="id">Hos</span> &amp; <span class="id">Hms</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#not_None_is_Some">not_None_is_Some</a></span> <span class="kwd">in</span> <span class="id">Hos</span> <span class="kwd">as</span> ((?&amp;?)&amp;<span class="id">Hfind</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_find_class">deadcode_find_class</a></span> <span class="kwd">in</span> <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl_In</span>. <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hms</span>. <span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_stmt_wt">deadcode_stmt_wt</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.deadcode_program_wt_memory">deadcode_program_wt_memory</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">me</span> <span class="id">p</span> <span class="id">c</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#ComTyp.wt_memory">wt_memory</a></span> <span class="id">me</span> <span class="id">p</span> <span class="id">c</span>.(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_mems">c_mems</a></span>) <span class="id">c</span>.(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_objs">c_objs</a></span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#ComTyp.wt_memory">wt_memory</a></span> <span class="id">me</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">p</span>) (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_class">deadcode_class</a></span> <span class="id">c</span>).(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_mems">c_mems</a></span>) (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_class">deadcode_class</a></span> <span class="id">c</span>).(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.c_objs">c_objs</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> <span class="id">transform_units_wt_memory'</span> <span class="kwd">as</span> <span class="id">Spec</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Spec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Spec</span> <span class="kwd">in</span> <span class="id">WT</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Preservation of <span class="bracket"><span class="id">Can_write_in</span></span>. </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.deadcode_stmt_Can_write_in_var">deadcode_stmt_Can_write_in_var</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">s</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> <span class="id">s</span> &lt;-&gt; <span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_stmt">deadcode_stmt</a></span> <span class="id">s</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">s</span> <span class="kwd">using</span> <span class="id">stmt_ind2'</span>; <span class="id">simpl</span>; <span class="id">try</span> <span class="id">reflexivity</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;AssignSt&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">try</span> <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> <span class="id">CwI</span>; <span class="id">inv</span> <span class="id">CwI</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;Switch&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> ? <span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc.Can_write_in_var_Switch">Can_write_in_var_Switch</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> <span class="id">Ex</span>; <span class="id">solve_Exists</span>; <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> _) <span class="id">and</span> <span class="id">destruct</span> <span class="id">it</span>; [<span class="id">apply</span> <span class="id">H</span>|<span class="id">apply</span> <span class="id">IHs</span>]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;Comp&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> ? <span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc.Can_write_in_var_Comp">Can_write_in_var_Comp</a></span>, <span class="id">IHs1</span>, <span class="id">IHs2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.deadcode_program_cannot_write_inputs">deadcode_program_cannot_write_inputs</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.Forall_methods">Forall_methods</a></span> (<span class="kwd">fun</span> <span class="id">m</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; ~ <span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_body">m_body</a></span> <span class="id">m</span>)) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_in">m_in</a></span> <span class="id">m</span>))) <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.Forall_methods">Forall_methods</a></span> (<span class="kwd">fun</span> <span class="id">m</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; ~ <span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc.Can_write_in_var">Can_write_in_var</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_body">m_body</a></span> <span class="id">m</span>)) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_in">m_in</a></span> <span class="id">m</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">p</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.Forall_methods">Forall_methods</a></span> <span class="kwd">in</span> *. <span class="id">simpl_Forall</span>. <span class="id">simpl_In</span>. <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> &lt;-<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_stmt_Can_write_in_var">deadcode_stmt_Can_write_in_var</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Preservation of <span class="bracket"><span class="id">No_Overwrites</span></span> </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.deadcode_stmt_No_Overwrites">deadcode_stmt_No_Overwrites</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">s</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc.No_Overwrites">No_Overwrites</a></span> <span class="id">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc.No_Overwrites">No_Overwrites</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_stmt">deadcode_stmt</a></span> <span class="id">s</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">s</span> <span class="kwd">using</span> <span class="id">stmt_ind2'</span>; <span class="id">intros</span> * <span class="id">NO</span>; <span class="id">auto</span>; <span class="id">simpl</span>; <span class="id">inv</span> <span class="id">NO</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;AssignSt&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;Switch&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>. <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> _) <span class="id">and</span> <span class="id">destruct</span> <span class="id">it</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;Comp&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">intros</span> *; <span class="id">rewrite</span> &lt;- ? <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_stmt_Can_write_in_var">deadcode_stmt_Can_write_in_var</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OBCDEADCODE.deadcode_program_No_Overwrites">deadcode_program_No_Overwrites</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.Forall_methods">Forall_methods</a></span> (<span class="kwd">fun</span> <span class="id">m</span> =&gt; <span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc.No_Overwrites">No_Overwrites</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_body">m_body</a></span> <span class="id">m</span>)) <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.Forall_methods">Forall_methods</a></span> (<span class="kwd">fun</span> <span class="id">m</span> =&gt; <span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc.No_Overwrites">No_Overwrites</a></span> (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.m_body">m_body</a></span> <span class="id">m</span>)) (<span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_program">deadcode_program</a></span> <span class="id">p</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc.Forall_methods">Forall_methods</a></span> <span class="kwd">in</span> *. <span class="id">simpl_Forall</span>. <span class="id">simpl_In</span>. <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE.deadcode_stmt_No_Overwrites">deadcode_stmt_No_Overwrites</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE">OBCDEADCODE</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="ObcDeadCodeFun">ObcDeadCodeFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">SynObc</span>: <span class="id"><a href="Velus.Obc.ObcSyntax.html#OBCSYNTAX">OBCSYNTAX</a></span>     <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">ComTyp</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING">COMMONTYPING</a></span>  <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">SemObc</span>: <span class="id"><a href="Velus.Obc.ObcSemantics.html#OBCSEMANTICS">OBCSEMANTICS</a></span>  <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc">SynObc</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">InvObc</span>: <span class="id"><a href="Velus.Obc.ObcInvariants.html#OBCINVARIANTS">OBCINVARIANTS</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc">SynObc</a></span>         <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc">SemObc</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">TypObc</span>: <span class="id"><a href="Velus.Obc.ObcTyping.html#OBCTYPING">OBCTYPING</a></span>     <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc">SynObc</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#ComTyp">ComTyp</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc">SemObc</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;: <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE">OBCDEADCODE</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc">SynObc</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#ComTyp">ComTyp</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc">SemObc</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc">InvObc</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#TypObc">TypObc</a></span> .<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OBCDEADCODE">OBCDEADCODE</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#Op">Op</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SynObc">SynObc</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#ComTyp">ComTyp</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#SemObc">SemObc</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#InvObc">InvObc</a></span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#TypObc">TypObc</a></span> .<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Obc.ObcDeadCode.html#ObcDeadCodeFun">ObcDeadCodeFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

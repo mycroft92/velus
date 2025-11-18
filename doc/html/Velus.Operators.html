@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module Operators</title>
+<meta name="description" content="Documentation of Coq module Operators" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module Operators</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Arith.PeanoNat.html">PeanoNat</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Export</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html">Classes.EquivDec</a></span>.<br/>
+<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="OPERATORS">OPERATORS</a></span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.cvalue">cvalue</a></span> : <span class="kwd">Type</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.ctype">ctype</a></span>  : <span class="kwd">Type</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.cconst">cconst</a></span> : <span class="kwd">Type</span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS.enumtag">enumtag</a></span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="OPERATORS.value">value</a></span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS.Vscalar">Vscalar</a></span> : <span class="id"><a href="Velus.Operators.html#OPERATORS.cvalue">cvalue</a></span> -&gt; <span class="id">value</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS.Venum">Venum</a></span>   : <span class="id"><a href="Velus.Operators.html#OPERATORS.enumtag">enumtag</a></span> -&gt; <span class="id">value</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="OPERATORS.type">type</a></span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS.Tprimitive">Tprimitive</a></span> : <span class="id"><a href="Velus.Operators.html#OPERATORS.ctype">ctype</a></span> -&gt; <span class="id">type</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS.Tenum">Tenum</a></span>      : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id">type</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="OPERATORS.const">const</a></span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS.Const">Const</a></span>: <span class="id"><a href="Velus.Operators.html#OPERATORS.cconst">cconst</a></span> -&gt; <span class="id">const</span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS.Enum">Enum</a></span> : <span class="id"><a href="Velus.Operators.html#OPERATORS.enumtag">enumtag</a></span> -&gt; <span class="id">const</span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.ctype_cconst">ctype_cconst</a></span> : <span class="id"><a href="Velus.Operators.html#OPERATORS.cconst">cconst</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.ctype">ctype</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.sem_cconst">sem_cconst</a></span>  : <span class="id"><a href="Velus.Operators.html#OPERATORS.cconst">cconst</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.cvalue">cvalue</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.init_ctype">init_ctype</a></span>  : <span class="id"><a href="Velus.Operators.html#OPERATORS.ctype">ctype</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.cconst">cconst</a></span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.unop">unop</a></span>  : <span class="kwd">Type</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.binop">binop</a></span> : <span class="kwd">Type</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.sem_unop">sem_unop</a></span>  : <span class="id"><a href="Velus.Operators.html#OPERATORS.unop">unop</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.value">value</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Operators.html#OPERATORS.value">value</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.sem_binop">sem_binop</a></span> : <span class="id"><a href="Velus.Operators.html#OPERATORS.binop">binop</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.value">value</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.value">value</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Operators.html#OPERATORS.value">value</a></span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.sem_extern">sem_extern</a></span> :  <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Operators.html#OPERATORS.ctype">ctype</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Operators.html#OPERATORS.cvalue">cvalue</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.ctype">ctype</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.cvalue">cvalue</a></span> -&gt; <span class="kwd">Prop</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="OPERATORS.sem_extern_det">sem_extern_det</a></span> : <span class="kwd">forall</span> <span class="id">f</span> <span class="id">tyins</span> <span class="id">ins</span> <span class="id">tyout</span> <span class="id">out1</span> <span class="id">out2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.sem_extern">sem_extern</a></span> <span class="id">f</span> <span class="id">tyins</span> <span class="id">ins</span> <span class="id">tyout</span> <span class="id">out1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.sem_extern">sem_extern</a></span> <span class="id">f</span> <span class="id">tyins</span> <span class="id">ins</span> <span class="id">tyout</span> <span class="id">out2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">out1</span> = <span class="id">out2</span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.type_unop">type_unop</a></span>  : <span class="id"><a href="Velus.Operators.html#OPERATORS.unop">unop</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.type_binop">type_binop</a></span> : <span class="id"><a href="Velus.Operators.html#OPERATORS.binop">binop</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.wt_cvalue">wt_cvalue</a></span> : <span class="id"><a href="Velus.Operators.html#OPERATORS.cvalue">cvalue</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.ctype">ctype</a></span> -&gt; <span class="kwd">Prop</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="OPERATORS.wt_cvalue_cconst">wt_cvalue_cconst</a></span> : <span class="kwd">forall</span> <span class="id">c</span>, <span class="id"><a href="Velus.Operators.html#OPERATORS.wt_cvalue">wt_cvalue</a></span> (<span class="id"><a href="Velus.Operators.html#OPERATORS.sem_cconst">sem_cconst</a></span> <span class="id">c</span>) (<span class="id"><a href="Velus.Operators.html#OPERATORS.ctype_cconst">ctype_cconst</a></span> <span class="id">c</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="OPERATORS.wt_init_ctype">wt_init_ctype</a></span> : <span class="kwd">forall</span> <span class="id">ty</span>, <span class="id"><a href="Velus.Operators.html#OPERATORS.wt_cvalue">wt_cvalue</a></span> (<span class="id"><a href="Velus.Operators.html#OPERATORS.sem_cconst">sem_cconst</a></span> (<span class="id"><a href="Velus.Operators.html#OPERATORS.init_ctype">init_ctype</a></span> <span class="id">ty</span>)) <span class="id">ty</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="OPERATORS.ctype_init_ctype">ctype_init_ctype</a></span> : <span class="kwd">forall</span> <span class="id">ty</span>, <span class="id"><a href="Velus.Operators.html#OPERATORS.ctype_cconst">ctype_cconst</a></span> (<span class="id"><a href="Velus.Operators.html#OPERATORS.init_ctype">init_ctype</a></span> <span class="id">ty</span>) = <span class="id">ty</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="OPERATORS.wt_value">wt_value</a></span>: <span class="id"><a href="Velus.Operators.html#OPERATORS.value">value</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="OPERATORS.WTVScalarPrimitive">WTVScalarPrimitive</a></span>: <span class="kwd">forall</span> <span class="id">v</span> <span class="id">t</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.wt_cvalue">wt_cvalue</a></span> <span class="id">v</span> <span class="id">t</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_value</span> (<span class="id"><a href="Velus.Operators.html#OPERATORS.Vscalar">Vscalar</a></span> <span class="id">v</span>) (<span class="id"><a href="Velus.Operators.html#OPERATORS.Tprimitive">Tprimitive</a></span> <span class="id">t</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="OPERATORS.WTVEnum">WTVEnum</a></span>: <span class="kwd">forall</span> <span class="id">v</span> <span class="id">tx</span> <span class="id">tn</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">v</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">tn</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_value</span> (<span class="id"><a href="Velus.Operators.html#OPERATORS.Venum">Venum</a></span> <span class="id">v</span>) (<span class="id"><a href="Velus.Operators.html#OPERATORS.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="OPERATORS.pres_sem_unop">pres_sem_unop</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">op</span> <span class="id">ty1</span> <span class="id">ty</span> <span class="id">v1</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.type_unop">type_unop</a></span> <span class="id">op</span> <span class="id">ty1</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">ty</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.sem_unop">sem_unop</a></span> <span class="id">op</span> <span class="id">v1</span> <span class="id">ty1</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.wt_value">wt_value</a></span> <span class="id">v1</span> <span class="id">ty1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">ty</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="OPERATORS.pres_sem_binop">pres_sem_binop</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">op</span> <span class="id">ty1</span> <span class="id">ty2</span> <span class="id">ty</span> <span class="id">v1</span> <span class="id">v2</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.type_binop">type_binop</a></span> <span class="id">op</span> <span class="id">ty1</span> <span class="id">ty2</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">ty</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.sem_binop">sem_binop</a></span> <span class="id">op</span> <span class="id">v1</span> <span class="id">ty1</span> <span class="id">v2</span> <span class="id">ty2</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.wt_value">wt_value</a></span> <span class="id">v1</span> <span class="id">ty1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.wt_value">wt_value</a></span> <span class="id">v2</span> <span class="id">ty2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">ty</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="OPERATORS.pres_sem_extern">pres_sem_extern</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">tyins</span> <span class="id">vins</span> <span class="id">tyout</span> <span class="id">vout</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> <span class="id"><a href="Velus.Operators.html#OPERATORS.wt_cvalue">wt_cvalue</a></span> <span class="id">vins</span> <span class="id">tyins</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.sem_extern">sem_extern</a></span> <span class="id">f</span> <span class="id">tyins</span> <span class="id">vins</span> <span class="id">tyout</span> <span class="id">vout</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.wt_cvalue">wt_cvalue</a></span> <span class="id">vout</span> <span class="id">tyout</span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="OPERATORS.cvalue_dec">cvalue_dec</a></span>   : <span class="kwd">forall</span> <span class="id">v1</span>  <span class="id">v2</span>  : <span class="id"><a href="Velus.Operators.html#OPERATORS.cvalue">cvalue</a></span>,    {<span class="id">v1</span> = <span class="id">v2</span>}  +  {<span class="id">v1</span> &lt;&gt; <span class="id">v2</span>}.<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="OPERATORS.ctype_dec">ctype_dec</a></span>  : <span class="kwd">forall</span> <span class="id">t1</span>  <span class="id">t2</span>  : <span class="id"><a href="Velus.Operators.html#OPERATORS.ctype">ctype</a></span>,   {<span class="id">t1</span> = <span class="id">t2</span>}  +  {<span class="id">t1</span> &lt;&gt; <span class="id">t2</span>}.<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="OPERATORS.cconst_dec">cconst_dec</a></span> : <span class="kwd">forall</span> <span class="id">c1</span>  <span class="id">c2</span>  : <span class="id"><a href="Velus.Operators.html#OPERATORS.cconst">cconst</a></span>,  {<span class="id">c1</span> = <span class="id">c2</span>}  +  {<span class="id">c1</span> &lt;&gt; <span class="id">c2</span>}.<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="OPERATORS.unop_dec">unop_dec</a></span>  : <span class="kwd">forall</span> <span class="id">op1</span> <span class="id">op2</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS.unop">unop</a></span>,  {<span class="id">op1</span> = <span class="id">op2</span>} + {<span class="id">op1</span> &lt;&gt; <span class="id">op2</span>}.<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="OPERATORS.binop_dec">binop_dec</a></span> : <span class="kwd">forall</span> <span class="id">op1</span> <span class="id">op2</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS.binop">binop</a></span>, {<span class="id">op1</span> = <span class="id">op2</span>} + {<span class="id">op1</span> &lt;&gt; <span class="id">op2</span>}.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.check_unop">check_unop</a></span> : <span class="id"><a href="Velus.Operators.html#OPERATORS.unop">unop</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Operators.html#OPERATORS.value">value</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="OPERATORS.check_unop_correct">check_unop_correct</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">op</span> <span class="id">ov</span> <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.check_unop">check_unop</a></span> <span class="id">op</span> <span class="id">ov</span> <span class="id">ty</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.type_unop">type_unop</a></span> <span class="id">op</span> <span class="id">ty</span> &lt;&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">ty</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">ov</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v'</span> =&gt; <span class="id">v'</span> = <span class="id">v</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.sem_unop">sem_unop</a></span> <span class="id">op</span> <span class="id">v</span> <span class="id">ty</span> &lt;&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="OPERATORS.check_binop">check_binop</a></span> : <span class="id"><a href="Velus.Operators.html#OPERATORS.binop">binop</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Operators.html#OPERATORS.value">value</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Operators.html#OPERATORS.value">value</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS.type">type</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="OPERATORS.check_binop_correct">check_binop_correct</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">op</span> <span class="id">ov1</span> <span class="id">ty1</span> <span class="id">ov2</span> <span class="id">ty2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.check_binop">check_binop</a></span> <span class="id">op</span> <span class="id">ov1</span> <span class="id">ty1</span> <span class="id">ov2</span> <span class="id">ty2</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.type_binop">type_binop</a></span> <span class="id">op</span> <span class="id">ty1</span> <span class="id">ty2</span> &lt;&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">v1</span> <span class="id">v2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.wt_value">wt_value</a></span> <span class="id">v1</span> <span class="id">ty1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.wt_value">wt_value</a></span> <span class="id">v2</span> <span class="id">ty2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">ov1</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> =&gt; <span class="id">v</span> = <span class="id">v1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">ov2</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> =&gt; <span class="id">v</span> = <span class="id">v2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS.sem_binop">sem_binop</a></span> <span class="id">op</span> <span class="id">v1</span> <span class="id">ty1</span> <span class="id">v2</span> <span class="id">ty2</span> &lt;&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="OPERATORS_AUX">OPERATORS_AUX</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span> : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ops</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Close</span> <span class="kwd">Scope</span> <span class="id">equiv_scope</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id"><a href="Velus.Operators.html#Ops.cvalue">cvalue</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> := { <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#equiv_dec">equiv_dec</a></span> := <span class="id"><a href="Velus.Operators.html#Ops.cvalue_dec">cvalue_dec</a></span> }.<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id"><a href="Velus.Operators.html#Ops.ctype">ctype</a></span>  <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> := { <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#equiv_dec">equiv_dec</a></span> := <span class="id"><a href="Velus.Operators.html#Ops.ctype_dec">ctype_dec</a></span>  }.<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id"><a href="Velus.Operators.html#Ops.cconst">cconst</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> := { <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#equiv_dec">equiv_dec</a></span> := <span class="id"><a href="Velus.Operators.html#Ops.cconst_dec">cconst_dec</a></span> }.<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id"><a href="Velus.Operators.html#Ops.unop">unop</a></span>   <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> := { <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#equiv_dec">equiv_dec</a></span> := <span class="id"><a href="Velus.Operators.html#Ops.unop_dec">unop_dec</a></span>   }.<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id"><a href="Velus.Operators.html#Ops.binop">binop</a></span>  <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> := { <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#equiv_dec">equiv_dec</a></span> := <span class="id"><a href="Velus.Operators.html#Ops.binop_dec">binop_dec</a></span>  }.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.false_tag">false_tag</a></span> : <span class="id"><a href="Velus.Operators.html#Ops.enumtag">enumtag</a></span> := 0.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.true_tag">true_tag</a></span> : <span class="id"><a href="Velus.Operators.html#Ops.enumtag">enumtag</a></span> := 1.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OPERATORS_AUX.enumtag_eqb_eq">enumtag_eqb_eq</a></span> : <span class="kwd">forall</span> (<span class="id">x</span> <span class="id">y</span> : <span class="id"><a href="Velus.Operators.html#Ops.enumtag">enumtag</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x</span> ==<span class="id">b</span> <span class="id">y</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> &lt;-&gt; <span class="id">x</span> = <span class="id">y</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OPERATORS_AUX.enumtag_eqb_neq">enumtag_eqb_neq</a></span> : <span class="kwd">forall</span> (<span class="id">x</span> <span class="id">y</span> : <span class="id"><a href="Velus.Operators.html#Ops.enumtag">enumtag</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x</span> ==<span class="id">b</span> <span class="id">y</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span> &lt;-&gt; <span class="id">x</span> &lt;&gt; <span class="id">y</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> &lt;-<span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#not_true_iff_false">Bool.not_true_iff_false</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OPERATORS_AUX.value_dec">value_dec</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">v1</span> <span class="id">v2</span> : <span class="id"><a href="Velus.Operators.html#Ops.value">value</a></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<span class="id">v1</span> = <span class="id">v2</span>} + {<span class="id">v1</span> &lt;&gt; <span class="id">v2</span>}.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span>  <span class="id">decide</span> <span class="id">equality</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Operators.html#Ops.cvalue_dec">cvalue_dec</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.sem_const">sem_const</a></span> (<span class="id">c0</span>: <span class="id"><a href="Velus.Operators.html#Ops.const">const</a></span>) : <span class="id"><a href="Velus.Operators.html#Ops.value">value</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">c0</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Operators.html#Ops.Const">Const</a></span> <span class="id">c0</span> =&gt; <span class="id"><a href="Velus.Operators.html#Ops.Vscalar">Vscalar</a></span> (<span class="id"><a href="Velus.Operators.html#Ops.sem_cconst">sem_cconst</a></span> <span class="id">c0</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Operators.html#Ops.Enum">Enum</a></span> <span class="id">c</span>   =&gt; <span class="id"><a href="Velus.Operators.html#Ops.Venum">Venum</a></span> <span class="id">c</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.bool_velus_type">bool_velus_type</a></span> := <span class="id"><a href="Velus.Operators.html#Ops.Tenum">Tenum</a></span> <span class="id"><a href="Velus.Operators.html#Ids.bool_id">bool_id</a></span> [<span class="id"><a href="Velus.Operators.html#Ids.false_id">false_id</a></span>; <span class="id"><a href="Velus.Operators.html#Ids.true_id">true_id</a></span>].<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.type_dec">type_dec</a></span> (<span class="id">t1</span> <span class="id">t2</span>: <span class="id"><a href="Velus.Operators.html#Ops.type">type</a></span>) : {<span class="id">t1</span> = <span class="id">t2</span>} + {<span class="id">t1</span> &lt;&gt; <span class="id">t2</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">decide</span> <span class="id">equality</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Operators.html#Ops.ctype_dec">ctype_dec</a></span>.<br/>
+&nbsp;&nbsp;Defined.
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id"><a href="Velus.Operators.html#Ops.type">type</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> := { <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#equiv_dec">equiv_dec</a></span> := <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.type_dec">type_dec</a></span> }.<br/>
+<br/>
+<div class="doc">A synchronous <span class="bracket"><span class="id">value</span></span> is either an absence or a present constant </div>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="OPERATORS_AUX.synchronous">synchronous</a></span> (<span class="id">A</span> : <span class="kwd">Type</span>) :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS_AUX.absent">absent</a></span><br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS_AUX.present">present</a></span> (<span class="id">v</span>: <span class="id">A</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Arguments</span> <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.absent">absent</a></span> {_}.<br/>
+&nbsp;&nbsp;<span class="kwd">Arguments</span> <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.present">present</a></span> {_}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.svalue">svalue</a></span> := <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.synchronous">synchronous</a></span> <span class="id"><a href="Velus.Operators.html#Ops.value">value</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.svalue_dec">svalue_dec</a></span> (<span class="id">v1</span> <span class="id">v2</span>: <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.svalue">svalue</a></span>) : {<span class="id">v1</span> = <span class="id">v2</span>} + {<span class="id">v1</span> &lt;&gt; <span class="id">v2</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">decide</span> <span class="id">equality</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Operators.html#Ops.cvalue_dec">cvalue_dec</a></span>.<br/>
+&nbsp;&nbsp;Defined.
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#EqDec">EqDec</a></span> <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.svalue">svalue</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> := { <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#equiv_dec">equiv_dec</a></span> := <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.svalue_dec">svalue_dec</a></span> }.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OPERATORS_AUX.not_absent_bool">not_absent_bool</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">x</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.svalue">svalue</a></span>), <span class="id">x</span> &lt;&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.absent">absent</a></span> &lt;-&gt; <span class="id">x</span> &lt;&gt;<span class="id">b</span> <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.absent">absent</a></span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#nequiv_decb">nequiv_decb</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#negb_true_iff">Bool.negb_true_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intro</span> <span class="id">Hx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">x</span>. <span class="id">now</span> <span class="id">contradiction</span> <span class="id">Hx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#not_equiv_decb_equiv">not_equiv_decb_equiv</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">x</span>. <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#not_equiv_decb_equiv">not_equiv_decb_equiv</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#not_equiv_decb_equiv">not_equiv_decb_equiv</a></span> <span class="kwd">in</span> <span class="id">Hx</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OPERATORS_AUX.neg_eq_svalue">neg_eq_svalue</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">x</span> <span class="id">y</span>: <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.svalue">svalue</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id">x</span> &lt;&gt;<span class="id">b</span> <span class="id">y</span>) = (<span class="id">x</span> ==<span class="id">b</span> <span class="id">y</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.EquivDec.html#nequiv_decb">nequiv_decb</a></span>; <span class="id">setoid_rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#negb_involutive">Bool.negb_involutive</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OPERATORS_AUX.svalue_eqb_eq">svalue_eqb_eq</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">x</span> <span class="id">y</span>: <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.svalue">svalue</a></span>), <span class="id">x</span> ==<span class="id">b</span> <span class="id">y</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> &lt;-&gt; <span class="id">x</span> = <span class="id">y</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.Common.html#equiv_decb_equiv">equiv_decb_equiv</a></span>; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OPERATORS_AUX.decidable_eq_svalue">decidable_eq_svalue</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">x</span> <span class="id">y</span>: <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.svalue">svalue</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Logic.Decidable.html#decidable">Decidable.decidable</a></span> (<span class="id">x</span> = <span class="id">y</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Logic.Decidable.html#decidable">Decidable.decidable</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> &lt;-<span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.svalue_eqb_eq">svalue_eqb_eq</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">x</span> ==<span class="id">b</span> <span class="id">y</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="OPERATORS_AUX.wt_type">wt_type</a></span> (<span class="id">types</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Operators.html#Ops.type">type</a></span>): <span class="id"><a href="Velus.Operators.html#Ops.type">type</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS_AUX.WTTPrim">WTTPrim</a></span>: <span class="kwd">forall</span> <span class="id">cty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_type</span> <span class="id">types</span> (<span class="id"><a href="Velus.Operators.html#Ops.Tprimitive">Tprimitive</a></span> <span class="id">cty</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS_AUX.WTTEnum">WTTEnum</a></span>: <span class="kwd">forall</span> <span class="id">tx</span> <span class="id">tn</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id"><a href="Velus.Operators.html#Ops.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>) <span class="id">types</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">tn</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> <span class="id">tn</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_type</span> <span class="id">types</span> (<span class="id"><a href="Velus.Operators.html#Ops.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="OPERATORS_AUX.wt_const">wt_const</a></span> (<span class="id">enums</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Operators.html#Ops.type">type</a></span>): <span class="id"><a href="Velus.Operators.html#Ops.const">const</a></span> -&gt; <span class="id"><a href="Velus.Operators.html#Ops.type">type</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS_AUX.WTCConst">WTCConst</a></span>: <span class="kwd">forall</span> <span class="id">c</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_const</span> <span class="id">enums</span> (<span class="id"><a href="Velus.Operators.html#Ops.Const">Const</a></span> <span class="id">c</span>) (<span class="id"><a href="Velus.Operators.html#Ops.Tprimitive">Tprimitive</a></span> (<span class="id"><a href="Velus.Operators.html#Ops.ctype_cconst">ctype_cconst</a></span> <span class="id">c</span>))<br/>
+&nbsp;&nbsp;| <span class="id"><a name="OPERATORS_AUX.WTCEnum">WTCEnum</a></span>: <span class="kwd">forall</span> <span class="id">c</span> <span class="id">tx</span> <span class="id">tn</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id"><a href="Velus.Operators.html#Ops.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>) <span class="id">enums</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">c</span> &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">tn</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_const</span> <span class="id">enums</span> (<span class="id"><a href="Velus.Operators.html#Ops.Enum">Enum</a></span> <span class="id">c</span>) (<span class="id"><a href="Velus.Operators.html#Ops.Tenum">Tenum</a></span> <span class="id">tx</span> <span class="id">tn</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.wt_values">wt_values</a></span> <span class="id">vs</span> (<span class="id">xts</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Operators.html#Ops.type">type</a></span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;:= <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">List.Forall2</a></span> (<span class="kwd">fun</span> <span class="id">v</span> <span class="id">xt</span> =&gt; <span class="id"><a href="Velus.Operators.html#Ops.wt_value">wt_value</a></span> <span class="id">v</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">xt</span>)) <span class="id">vs</span> <span class="id">xts</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="OPERATORS_AUX.wt_value_const">wt_value_const</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">enums</span> <span class="id">c</span> <span class="id">t</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.wt_const">wt_const</a></span> <span class="id">enums</span> <span class="id">c</span> <span class="id">t</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Operators.html#Ops.wt_value">wt_value</a></span> (<span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.sem_const">sem_const</a></span> <span class="id">c</span>) <span class="id">t</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span> 1; <span class="id">subst</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Operators.html#Ops.wt_cvalue_cconst">wt_cvalue_cconst</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.wt_option_value">wt_option_value</a></span> (<span class="id">vo</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Operators.html#Ops.value">value</a></span>) (<span class="id">ty</span>: <span class="id"><a href="Velus.Operators.html#Ops.type">type</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">vo</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> =&gt; <span class="id"><a href="Velus.Operators.html#Ops.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.value_to_bool">value_to_bool</a></span> (<span class="id">v</span> : <span class="id"><a href="Velus.Operators.html#Ops.value">value</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">v</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Operators.html#Ops.Venum">Venum</a></span> <span class="id">tag</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">tag</span> ==<span class="id">b</span> <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.true_tag">true_tag</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.svalue_to_bool">svalue_to_bool</a></span> (<span class="id">v</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.svalue">svalue</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">v</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.absent">absent</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.present">present</a></span> <span class="id">v</span> =&gt; <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.value_to_bool">value_to_bool</a></span> <span class="id">v</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="OPERATORS_AUX.wt_svalue">wt_svalue</a></span> (<span class="id">v</span>: <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.svalue">svalue</a></span>) (<span class="id">ty</span>: <span class="id"><a href="Velus.Operators.html#Ops.type">type</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">v</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.absent">absent</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX.present">present</a></span> <span class="id">v</span> =&gt; <span class="id"><a href="Velus.Operators.html#Ops.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="OperatorsAux">OperatorsAux</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span> : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ops</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>) &lt;: <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Operators.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Operators.html#Ops">Ops</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Operators.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Operators.html#Ops">Ops</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Operators.html#OperatorsAux">OperatorsAux</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

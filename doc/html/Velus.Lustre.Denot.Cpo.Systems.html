@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module Systems</title>
+<meta name="description" content="Documentation of Coq module Systems" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module Systems</h1>
+<div class="coq">
+<h1> System.v: Formalisation of Kahn networks </h1>
+<span class="kwd">Set</span> <span class="kwd">Implicit</span> <span class="kwd">Arguments</span>.<br/>
+<br/>
+<span class="kwd">Require</span> <span class="kwd">Export</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html">Cpo_streams_type</a></span>.<br/>
+<br/>
+<h2> Definition of nodes </h2>
+<div class="doc">Definition of a multiple node :
+    - index for inputs with associated types
+    - index for outputs with associated types
+    - continuous function on corresponding streams
+</div>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="DS_fam">DS_fam</a></span> (<span class="id">I</span>:<span class="kwd">Type</span>)(<span class="id">SI</span>:<span class="id">I</span> -&gt; <span class="kwd">Type</span>) (<span class="id">i</span>:<span class="id">I</span>) := <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> (<span class="id">SI</span> <span class="id">i</span>).<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="DS_prod">DS_prod</a></span> (<span class="id">I</span>:<span class="kwd">Type</span>)(<span class="id">SI</span>:<span class="id">I</span> -&gt; <span class="kwd">Type</span>) := <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_fam">DS_fam</a></span> <span class="id">SI</span>).<br/>
+<br/>
+<div class="doc">- A node is a continuous function from inputs to outputs </div>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="node_fun">node_fun</a></span> (<span class="id">I</span> <span class="id">O</span> : <span class="kwd">Type</span>) (<span class="id">SI</span> : <span class="id">I</span> -&gt; <span class="kwd">Type</span>) (<span class="id">SO</span> : <span class="id">O</span> -&gt; <span class="kwd">Type</span>) :<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:= <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SI</span> -<span class="id">C</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SO</span>.<br/>
+<br/>
+<div class="doc">- node with a single output </div>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="snode_fun">snode_fun</a></span> (<span class="id">I</span> : <span class="kwd">Type</span>) (<span class="id">SI</span> : <span class="id">I</span> -&gt; <span class="kwd">Type</span>) (<span class="id">SO</span> : <span class="kwd">Type</span>) : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span> := <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SI</span> -<span class="id">C</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> <span class="id">SO</span>.<br/>
+<br/>
+<h2> Definition of a system </h2>
+<br/>
+<div class="doc">- Each link is either an input link or is associated to the output of a simple node,
+       each input of that node is associated to a link with the apropriate type </div>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="inlSL">inlSL</a></span>  (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:(<span class="id">LI</span>+<span class="id">LO</span>)-&gt;<span class="kwd">Type</span>) (<span class="id">i</span>:<span class="id">LI</span>) := <span class="id">SL</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#inl">inl</a></span> <span class="id">LO</span> <span class="id">i</span>).<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="inrSL">inrSL</a></span>  (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:(<span class="id">LI</span>+<span class="id">LO</span>)-&gt;<span class="kwd">Type</span>) (<span class="id">o</span>:<span class="id">LO</span>) := <span class="id">SL</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#inr">inr</a></span> <span class="id">LI</span> <span class="id">o</span>).<br/>
+<br/>
+<div class="doc">A system associates a continuous functions to a set of typed output links </div>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="system">system</a></span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;:= <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> (<span class="kwd">fun</span> (<span class="id">o</span>:<span class="id">LO</span>) =&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span> -<span class="id">C</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inrSL">inrSL</a></span> <span class="id">SL</span> <span class="id">o</span>)).<br/>
+<br/>
+<h2> Semantics of a system </h2>
+<div class="doc">Each system defines a new node with inputs for the inputs of the system </div>
+<br/>
+<h3> Definition of the equations </h3>
+<div class="doc">Equations are a continuous functional on links </div>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="eqn_of_system">eqn_of_system</a></span> :  <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>) -&gt;  <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span> -<span class="id">m</span>&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span>.<br/>
+<span class="id">intros</span> <span class="id">LI</span> <span class="id">LO</span> <span class="id">SL</span> <span class="id">s</span> <span class="id">init</span>.<br/>
+<span class="kwd">exists</span> (<span class="kwd">fun</span> <span class="id">X</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span> =&gt; <span class="kwd">fun</span> <span class="id">l</span> : <span class="id">LI</span>+<span class="id">LO</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">l</span> <span class="kwd">return</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> (<span class="id">SL</span> <span class="id">l</span>))  <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#inl">inl</a></span> <span class="id">i</span> =&gt; <span class="id">init</span> <span class="id">i</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#inr">inr</a></span> <span class="id">o</span> =&gt; <span class="id">s</span> <span class="id">o</span> <span class="id">X</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>).<br/>
+<span class="id">red</span>;<span class="id">intros</span> <span class="id">X</span> <span class="id">Y</span> <span class="id">Hle</span>; <span class="id">intro</span> <span class="id">l</span>.<br/>
+<span class="id">case</span> <span class="id">l</span>; <span class="id">auto</span>.<br/>
+Defined.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="eqn_of_system_simpl">eqn_of_system_simpl</a></span> : <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>)(<span class="id">s</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">init</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>)) (<span class="id">X</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#eqn_of_system">eqn_of_system</a></span> <span class="id">s</span> <span class="id">init</span> <span class="id">X</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">l</span> : <span class="id">LI</span>+<span class="id">LO</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">l</span> <span class="kwd">return</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> (<span class="id">SL</span> <span class="id">l</span>)) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#inl">inl</a></span> <span class="id">i</span> =&gt; <span class="id">init</span> <span class="id">i</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#inr">inr</a></span> <span class="id">o</span> =&gt; <span class="id">s</span> <span class="id">o</span> <span class="id">X</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<span class="id">trivial</span>.<br/>
+Qed.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="eqn_of_system_cont">eqn_of_system_cont</a></span> : <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>)(<span class="id">s</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">init</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>)), <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#continuous">continuous</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#eqn_of_system">eqn_of_system</a></span> <span class="id">s</span> <span class="id">init</span>).<br/>
+<span class="id">intros</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi_continuous">Dprodi_continuous</a></span> <span class="kwd">with</span> (<span class="id">Di</span>:= <span class="kwd">fun</span> <span class="id">i</span> =&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> (<span class="id">SL</span> <span class="id">i</span>)); <span class="id">intro</span>.<br/>
+<span class="id">red</span>; <span class="id">intros</span>.<br/>
+<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fmon_comp_simpl">fmon_comp_simpl</a></span>.<br/>
+<span class="id">setoid_rewrite</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Proj_simpl">Proj_simpl</a></span> (<span class="id">O</span>:=<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_fam">DS_fam</a></span> <span class="id">SL</span>)).<br/>
+<span class="id">rewrite</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#eqn_of_system_simpl">eqn_of_system_simpl</a></span> (<span class="id">SL</span>:=<span class="id">SL</span>)).<br/>
+<span class="id">case</span> <span class="id">i</span>; <span class="id">intros</span>; <span class="id">auto</span>.<br/>
+<span class="id">apply</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#le_lub">le_lub</a></span> (<span class="id">c</span>:=<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> (<span class="id">SL</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#inl">inl</a></span> <span class="id">LO</span> <span class="id">l</span>)))) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">f</span>:=(<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Proj">Proj</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_fam">DS_fam</a></span> <span class="id">SL</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#inl">inl</a></span> <span class="id">LO</span> <span class="id">l</span>) @ <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#eqn_of_system">eqn_of_system</a></span> <span class="id">s</span> <span class="id">init</span>) @ <span class="id">h</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">n</span>:=<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#O">O</a></span>).<br/>
+<span class="id">rewrite</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_continuous">fcont_continuous</a></span> (<span class="id">s</span> <span class="id">l</span>)).<br/>
+<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#lub_le_compat">lub_le_compat</a></span>; <span class="id">intro</span> <span class="id">n</span>; <span class="id">simpl</span>.<br/>
+<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DSle_refl">DSle_refl</a></span>.<br/>
+Qed.
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">eqn_of_system_cont</span> : <span class="id">core</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="EQN_of_system">EQN_of_system</a></span> : <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>) -&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span> -<span class="id">c</span>&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span>.<br/>
+<span class="id">intros</span> <span class="id">LI</span> <span class="id">LO</span> <span class="id">SL</span> <span class="id">s</span> <span class="id">init</span>; <span class="kwd">exists</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#eqn_of_system">eqn_of_system</a></span> <span class="id">s</span> <span class="id">init</span>); <span class="id">auto</span>.<br/>
+Defined.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="EQN_of_system_simpl">EQN_of_system_simpl</a></span> :  <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>)(<span class="id">s</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">init</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>)) (<span class="id">X</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#EQN_of_system">EQN_of_system</a></span> <span class="id">s</span> <span class="id">init</span> <span class="id">X</span> = <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#eqn_of_system">eqn_of_system</a></span> <span class="id">s</span> <span class="id">init</span> <span class="id">X</span>.<br/>
+<span class="id">trivial</span>.<br/>
+Qed.
+<br/>
+<br/>
+<h3> Properties of the equations </h3>
+<div class="doc">The equations are monotonic with respect to the inputs and the system </div>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="EQN_of_system_mon">EQN_of_system_mon</a></span> : <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">s1</span> <span class="id">s2</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span>) (<span class="id">init1</span> <span class="id">init2</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">s1</span> &lt;= <span class="id">s2</span> -&gt; <span class="id">init1</span> &lt;= <span class="id">init2</span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#EQN_of_system">EQN_of_system</a></span> <span class="id">s1</span> <span class="id">init1</span> &lt;= <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#EQN_of_system">EQN_of_system</a></span> <span class="id">s2</span> <span class="id">init2</span>.<br/>
+<span class="id">intros</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_le_intro">fcont_le_intro</a></span>; <span class="id">intro</span> <span class="id">X</span>.<br/>
+<span class="id">repeat</span> (<span class="id">rewrite</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#EQN_of_system_simpl">EQN_of_system_simpl</a></span>)); <span class="id">repeat</span> (<span class="id">rewrite</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#eqn_of_system_simpl">eqn_of_system_simpl</a></span>)).<br/>
+<span class="id">intro</span> <span class="id">l</span>; <span class="id">case</span> <span class="id">l</span>; <span class="id">auto</span>.<br/>
+<span class="id">intros</span>; <span class="id">apply</span> (<span class="id">H</span> <span class="id">l0</span> <span class="id">X</span>).<br/>
+Qed.
+<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="Eqn_of_system">Eqn_of_system</a></span> : <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span>) -<span class="id">m</span>&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>) -<span class="id">M</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span> -<span class="id">C</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span>.<br/>
+<span class="id">intros</span>; <span class="id">exact</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#le_compat2_mon">le_compat2_mon</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#EQN_of_system_mon">EQN_of_system_mon</a></span> (<span class="id">SL</span>:=<span class="id">SL</span>))).<br/>
+Defined.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Eqn_of_system_simpl">Eqn_of_system_simpl</a></span> : <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>)(<span class="id">s</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">init</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>)), <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#Eqn_of_system">Eqn_of_system</a></span> <span class="id">SL</span> <span class="id">s</span> <span class="id">init</span> = <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#EQN_of_system">EQN_of_system</a></span> <span class="id">s</span> <span class="id">init</span>.<br/>
+<span class="id">trivial</span>.<br/>
+Qed.
+<br/>
+<br/>
+<div class="doc">The equations are continuous with respect to the inputs </div>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Eqn_of_system_cont">Eqn_of_system_cont</a></span> : <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#continuous2">continuous2</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#Eqn_of_system">Eqn_of_system</a></span> <span class="id">SL</span>).<br/>
+<span class="id">red</span>; <span class="id">intros</span>.<br/>
+<span class="id">rewrite</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#Eqn_of_system_simpl">Eqn_of_system_simpl</a></span> (<span class="id">SL</span>:=<span class="id">SL</span>)).<br/>
+<span class="id">apply</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_le_intro">fcont_le_intro</a></span> (<span class="id">D1</span>:=<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span>) (<span class="id">D2</span>:=<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span>)); <span class="id">intro</span> <span class="id">X</span>.<br/>
+<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#EQN_of_system_simpl">EQN_of_system_simpl</a></span>; <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#eqn_of_system_simpl">eqn_of_system_simpl</a></span>; <span class="id">intro</span> <span class="id">l</span>.<br/>
+<span class="id">case_eq</span> <span class="id">l</span>; <span class="id">intros</span>.<br/>
+<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_lub_simpl">fcont_lub_simpl</a></span>.<br/>
+<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span>; <span class="id">repeat</span> (<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi_lub_simpl">Dprodi_lub_simpl</a></span>).<br/>
+<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#lub_le_compat">lub_le_compat</a></span>; <span class="id">intro</span> <span class="id">n</span>; <span class="id">auto</span>.<br/>
+<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi_lub_simpl">Dprodi_lub_simpl</a></span>.<br/>
+<span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_lub_simpl">fcont_lub_simpl</a></span>.<br/>
+<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi_lub_simpl">Dprodi_lub_simpl</a></span>.<br/>
+<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#lub_le_compat">lub_le_compat</a></span>.<br/>
+<span class="id">intro</span> <span class="id">n</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+Qed.
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">Eqn_of_system_cont</span> : <span class="id">core</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Eqn_of_system_cont2">Eqn_of_system_cont2</a></span> : <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>)(<span class="id">s</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#continuous">continuous</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#Eqn_of_system">Eqn_of_system</a></span> <span class="id">SL</span> <span class="id">s</span>).<br/>
+<span class="id">red</span>; <span class="id">intros</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#continuous2_right">continuous2_right</a></span>; <span class="id">auto</span>.<br/>
+Qed.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Eqn_of_system_cont1">Eqn_of_system_cont1</a></span> : <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#continuous">continuous</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#Eqn_of_system">Eqn_of_system</a></span> <span class="id">SL</span>).<br/>
+<span class="id">auto</span>.<br/>
+Qed.
+<br/>
+<br/>
+<span class="kwd">Definition</span>  <span class="id"><a name="EQN_of_SYSTEM">EQN_of_SYSTEM</a></span>  (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:  <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span> -<span class="id">c</span>&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>) -<span class="id">C</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span> -<span class="id">C</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:=   <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#continuous2_cont">continuous2_cont</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#Eqn_of_system_cont">Eqn_of_system_cont</a></span> (<span class="id">SL</span>:=<span class="id">SL</span>)).<br/>
+<br/>
+<h3> Solution of the equations </h3>
+<div class="doc">The solution is defined as the smallest fixpoint of the equations
+           it is a monotonic function of the  inputs </div>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="sol_of_system">sol_of_system</a></span>  (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span> -<span class="id">c</span>&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>) -<span class="id">C</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span> := <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#FIXP">FIXP</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span>) @@_ <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#EQN_of_SYSTEM">EQN_of_SYSTEM</a></span> <span class="id">SL</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="sol_of_system_simpl">sol_of_system_simpl</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>) (<span class="id">s</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span>) (<span class="id">init</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#sol_of_system">sol_of_system</a></span> <span class="id">SL</span> <span class="id">s</span> <span class="id">init</span> = <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#FIXP">FIXP</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span>) (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#EQN_of_system">EQN_of_system</a></span> <span class="id">s</span> <span class="id">init</span>).<br/>
+<span class="id">trivial</span>.<br/>
+Qed.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="sol_of_system_eq">sol_of_system_eq</a></span> : <span class="kwd">forall</span> (<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>) (<span class="id">s</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span>) (<span class="id">init</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#inlSL">inlSL</a></span> <span class="id">SL</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#sol_of_system">sol_of_system</a></span> <span class="id">SL</span> <span class="id">s</span> <span class="id">init</span> == <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#eqn_of_system">eqn_of_system</a></span> <span class="id">s</span> <span class="id">init</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#sol_of_system">sol_of_system</a></span> <span class="id">SL</span> <span class="id">s</span> <span class="id">init</span>).<br/>
+<span class="id">intros</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#sol_of_system_simpl">sol_of_system_simpl</a></span>.<br/>
+<span class="id">apply</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fixp_eq">fixp_eq</a></span> (<span class="id">D</span>:=<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id">SL</span>) (<span class="id">f</span>:=<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#eqn_of_system">eqn_of_system</a></span> <span class="id">s</span> <span class="id">init</span>)); <span class="id">auto</span>.<br/>
+Qed.
+<br/>
+<br/>
+<h3> New node from the system </h3>
+<div class="doc">We can choose an arbitrary set of outputs </div>
+<span class="kwd">Definition</span> <span class="id"><a name="node_of_system">node_of_system</a></span> (<span class="id">O</span>:<span class="kwd">Type</span>)(<span class="id">LI</span> <span class="id">LO</span>:<span class="kwd">Type</span>) (<span class="id">SL</span>:<span class="id">LI</span>+<span class="id">LO</span>-&gt;<span class="kwd">Type</span>)(<span class="id">indO</span> : <span class="id">O</span> -&gt; <span class="id">LO</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#system">system</a></span> <span class="id">SL</span> -<span class="id">C</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#node_fun">node_fun</a></span> (<span class="kwd">fun</span> <span class="id">i</span> : <span class="id">LI</span> =&gt; <span class="id">SL</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#inl">inl</a></span> <span class="id">LO</span> <span class="id">i</span>)) (<span class="kwd">fun</span> <span class="id">o</span> : <span class="id">O</span> =&gt; <span class="id">SL</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#inr">inr</a></span> <span class="id">LI</span> (<span class="id">indO</span> <span class="id">o</span>)))<br/>
+:= <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#DLIFTi">DLIFTi</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_fam">DS_fam</a></span> <span class="id">SL</span>) (<span class="kwd">fun</span> <span class="id">o</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#inr">inr</a></span> <span class="id">LI</span> (<span class="id">indO</span> <span class="id">o</span>)) @@_ (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#sol_of_system">sol_of_system</a></span> <span class="id">SL</span>).<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

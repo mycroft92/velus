@@ -1,0 +1,798 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module OpErr</title>
+<meta name="description" content="Documentation of Coq module OpErr" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module OpErr</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">ListNotations</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span> <span class="id"><a href="Velus.Operators.html">Operators</a></span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html">StaticEnv</a></span> <span class="id"><a href="Velus.Lustre.LSyntax.html">LSyntax</a></span> <span class="id"><a href="Velus.Lustre.LTyping.html">LTyping</a></span> <span class="id"><a href="Velus.Lustre.LOrdered.html">LOrdered</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.html">Cpo</a></span> <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html">SDfuns</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html">CommonDS</a></span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html">CommonList2</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Lustre.Denot.SD.html">SD</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html">Restr</a></span> <span class="id"><a href="Velus.Lustre.Denot.CheckOp.html">CheckOp</a></span>.<br/>
+<br/>
+<h1> Operators failure
+    Some class of errors, denoted by the <span class="bracket"><span class="id">error_Op</span></span> constructor of <span class="bracket"><span class="id">SDfuns.error</span></span>,
+    cannot be prevented at compile time. It is the case for divisions by zero,
+    overflows in modulo/shifting, etc. The precise behaviour of these operators is
+    described in <span class="bracket"><span class="id">CompCert</span>/<span class="id">cfrontend</span>/<span class="id">Cop.v</span></span>.
+    This file introduces the <span class="bracket"><span class="id">no_rte</span></span> predicate that describes the (minimal?)
+    set of assumptions required on a Lustre program for its denotation to be
+    free of <span class="bracket"><span class="id">error_Op</span></span>.
+ </h1>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="OP_ERR">OP_ERR</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Senv</span>  : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV">STATICENV</a></span>     <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Syn</span>   : <span class="id"><a href="Velus.Lustre.LSyntax.html#LSYNTAX">LSYNTAX</a></span>       <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Typ</span>   : <span class="id"><a href="Velus.Lustre.LTyping.html#LTYPING">LTYPING</a></span>       <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Restr</span> : <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR">LRESTR</a></span>        <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Lord</span>  : <span class="id"><a href="Velus.Lustre.LOrdered.html#LORDERED">LORDERED</a></span>      <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Den</span>   : <span class="id"><a href="Velus.Lustre.Denot.SD.html#SD">SD</a></span>            <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord">Lord</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ckop</span>  : <span class="id"><a href="Velus.Lustre.Denot.CheckOp.html#CHECKOP">CHECKOP</a></span>       <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span>).<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="OP_ERR.DSForall_pres">DSForall_pres</a></span> {<span class="id">A</span>} (<span class="id">P</span> : <span class="id">A</span> -&gt; <span class="kwd">Prop</span>) : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> (<span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#sampl">sampl</a></span> <span class="id">A</span>) -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DSForall">DSForall</a></span> (<span class="kwd">fun</span> <span class="id">s</span> =&gt; <span class="kwd">match</span> <span class="id">s</span> <span class="kwd">with</span> <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#pres">pres</a></span> <span class="id">v</span> =&gt; <span class="id">P</span> <span class="id">v</span> | _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span> <span class="kwd">end</span>).<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.DSForall_pres_impl">DSForall_pres_impl</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">P</span> <span class="id">Q</span> : <span class="id">A</span> -&gt; <span class="kwd">Prop</span>) (<span class="id">s</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> (<span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#sampl">sampl</a></span> <span class="id">A</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_pres">DSForall_pres</a></span> <span class="id">P</span> <span class="id">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_pres">DSForall_pres</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id">P</span> <span class="id">x</span> -&gt; <span class="id">Q</span> <span class="id">x</span>) <span class="id">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_pres">DSForall_pres</a></span> <span class="id">Q</span> <span class="id">s</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> ???.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_pres">DSForall_pres</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">cofix</span> <span class="id">Cof</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">s</span>; <span class="id">intros</span> <span class="id">Hp</span> <span class="id">Himpl</span>; <span class="id">inv</span> <span class="id">Hp</span>; <span class="id">inv</span> <span class="id">Himpl</span>; <span class="id">constructor</span>; <span class="id">cases</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="OP_ERR.DSForall_2pres">DSForall_2pres</a></span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">P</span> : <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#DS">DS</a></span> (<span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#sampl">sampl</a></span> <span class="id">A</span> * <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#sampl">sampl</a></span> <span class="id">B</span>) -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DSForall">DSForall</a></span> (<span class="kwd">fun</span> <span class="id">v</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">v</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (<span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#pres">pres</a></span> <span class="id">a</span>, <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#pres">pres</a></span> <span class="id">b</span>) =&gt; <span class="id">P</span> <span class="id">a</span> <span class="id">b</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>).<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.DSForall_2pres_impl">DSForall_2pres_impl</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">P</span> : <span class="id">A</span> -&gt; <span class="kwd">Prop</span>) (<span class="id">Q</span> : <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) (<span class="id">R</span> : <span class="id">A</span> -&gt; <span class="id">B</span> -&gt; <span class="kwd">Prop</span>) <span class="id">s1</span> <span class="id">s2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_pres">DSForall_pres</a></span> <span class="id">P</span> <span class="id">s1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_pres">DSForall_pres</a></span> <span class="id">Q</span> <span class="id">s2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_2pres">DSForall_2pres</a></span> (<span class="kwd">fun</span> <span class="id">x</span> <span class="id">y</span> =&gt; <span class="id">P</span> <span class="id">x</span> -&gt; <span class="id">Q</span> <span class="id">y</span> -&gt; <span class="id">R</span> <span class="id">x</span> <span class="id">y</span>) (<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#ZIP">ZIP</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#pair">pair</a></span> <span class="id">s1</span> <span class="id">s2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_2pres">DSForall_2pres</a></span> <span class="id">R</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#ZIP">ZIP</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#pair">pair</a></span> <span class="id">s1</span> <span class="id">s2</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> *.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_2pres">DSForall_2pres</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_pres">DSForall_pres</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">remember_ds</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#ZIP">ZIP</a></span> _ _ _) <span class="kwd">as</span> <span class="id">t</span>.<br/>
+&nbsp;&nbsp;<span class="id">revert</span> <span class="id">Ht</span>. <span class="id">revert</span> <span class="id">s1</span> <span class="id">s2</span> <span class="id">t</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">cofix</span> <span class="id">Cof</span>; <span class="id">intros</span> * <span class="id">Ht</span> <span class="id">Hps1</span> <span class="id">Hqs2</span> <span class="id">Hpq</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">t</span> <span class="kwd">as</span> [| []].<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>. <span class="id">rewrite</span> &lt;- <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_streams_type.html#eqEps">eqEps</a></span> <span class="kwd">in</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#symmetry">symmetry</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#zip_uncons">zip_uncons</a></span> <span class="kwd">in</span> <span class="id">Ht</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp;?&amp; <span class="id">Hs1</span> &amp; <span class="id">Hs2</span> &amp;?&amp; <span class="id">Hp</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hs1</span>, <span class="id">Hs2</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hps1</span>. <span class="id">inv</span> <span class="id">Hqs2</span>. <span class="id">inv</span> <span class="id">Hpq</span>. <span class="id">inv</span> <span class="id">Hp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">eauto</span>; <span class="id">cases</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="OP_ERR.Norte_node">Norte_node</a></span>.<br/>
+<br/>
+<span class="kwd">Context</span> {<span class="id"><a name="OP_ERR.Norte_node.PSyn">PSyn</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.decl">decl</a></span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.block">block</a></span> -&gt; <span class="kwd">Prop</span>}.<br/>
+<span class="kwd">Context</span> {<span class="id"><a name="OP_ERR.Norte_node.Prefs">Prefs</a></span> : <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>}.<br/>
+<br/>
+<span class="kwd">Variables</span><br/>
+&nbsp;&nbsp;(<span class="id"><a name="OP_ERR.Norte_node.G">G</a></span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.PSyn">PSyn</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.Prefs">Prefs</a></span>)<br/>
+&nbsp;&nbsp;(<span class="id"><a name="OP_ERR.Norte_node.ins">ins</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>)<br/>
+&nbsp;&nbsp;(<span class="id"><a name="OP_ERR.Norte_node.envG">envG</a></span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.FI">FI</a></span>)<br/>
+&nbsp;&nbsp;(<span class="id"><a name="OP_ERR.Norte_node.envI">envI</a></span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>)<br/>
+&nbsp;&nbsp;(<span class="id"><a name="OP_ERR.Norte_node.env">env</a></span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>).<br/>
+<br/>
+<span class="kwd">Inductive</span> <span class="id"><a name="OP_ERR.no_rte_exp">no_rte_exp</a></span> : <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.exp">exp</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+| <span class="id"><a name="OP_ERR.opc_Econst">opc_Econst</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">c</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Econst">Econst</a></span> <span class="id">c</span>)<br/>
+| <span class="id"><a name="OP_ERR.opc_Eenum">opc_Eenum</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">c</span> <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Eenum">Eenum</a></span> <span class="id">c</span> <span class="id">ty</span>)<br/>
+| <span class="id"><a name="OP_ERR.opc_Evar">opc_Evar</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ann</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Evar">Evar</a></span> <span class="id">x</span> <span class="id">ann</span>)<br/>
+| <span class="id"><a name="OP_ERR.opc_Eunop">opc_Eunop</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">op</span> <span class="id">e</span> <span class="id">ann</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span>  <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.typeof">typeof</a></span> <span class="id">e</span> = [<span class="id">ty</span>] -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html#forall_nprod">forall_nprod</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_pres">DSForall_pres</a></span> (<span class="kwd">fun</span> <span class="id">v</span> =&gt; <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">ty</span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op.sem_unop">sem_unop</a></span> <span class="id">op</span> <span class="id">v</span> <span class="id">ty</span> &lt;&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>)) (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.denot_exp">denot_exp</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.G">G</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.ins">ins</a></span> <span class="id">e</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.envG">envG</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.envI">envI</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.env">env</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Eunop">Eunop</a></span> <span class="id">op</span> <span class="id">e</span> <span class="id">ann</span>)<br/>
+| <span class="id"><a name="OP_ERR.opc_Ebinop">opc_Ebinop</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">op</span> <span class="id">e1</span> <span class="id">e2</span> <span class="id">ann</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> <span class="id">e1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> <span class="id">e2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">ty1</span> <span class="id">ty2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.typeof">typeof</a></span> <span class="id">e1</span> = [<span class="id">ty1</span>] -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.typeof">typeof</a></span> <span class="id">e2</span> = [<span class="id">ty2</span>] -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">ss1</span> := <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.denot_exp">denot_exp</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.G">G</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.ins">ins</a></span> <span class="id">e1</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.envG">envG</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.envI">envI</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.env">env</a></span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">ss2</span> := <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.denot_exp">denot_exp</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.G">G</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.ins">ins</a></span> <span class="id">e2</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.envG">envG</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.envI">envI</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.env">env</a></span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_2pres">DSForall_2pres</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">fun</span> <span class="id">v1</span> <span class="id">v2</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op.wt_value">wt_value</a></span> <span class="id">v1</span> <span class="id">ty1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op.wt_value">wt_value</a></span> <span class="id">v2</span> <span class="id">ty2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op.sem_binop">sem_binop</a></span> <span class="id">op</span> <span class="id">v1</span> <span class="id">ty1</span> <span class="id">v2</span> <span class="id">ty2</span> &lt;&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#ZIP">ZIP</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#pair">pair</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html#nprod_hd_def">nprod_hd_def</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.errTy">errTy</a></span> <span class="id">ss1</span>) (<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html#nprod_hd_def">nprod_hd_def</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.errTy">errTy</a></span> <span class="id">ss2</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Ebinop">Ebinop</a></span> <span class="id">op</span> <span class="id">e1</span> <span class="id">e2</span> <span class="id">ann</span>)<br/>
+| <span class="id"><a name="OP_ERR.opc_Efby">opc_Efby</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e0s</span> <span class="id">es</span> <span class="id">anns</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">no_rte_exp</span> <span class="id">e0s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">no_rte_exp</span> <span class="id">es</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Efby">Efby</a></span> <span class="id">e0s</span> <span class="id">es</span> <span class="id">anns</span>)<br/>
+| <span class="id"><a name="OP_ERR.opc_Ewhen">opc_Ewhen</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">es</span> <span class="id">x</span> <span class="id">k</span> <span class="id">anns</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">no_rte_exp</span> <span class="id">es</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Ewhen">Ewhen</a></span> <span class="id">es</span> <span class="id">x</span> <span class="id">k</span> <span class="id">anns</span>)<br/>
+| <span class="id"><a name="OP_ERR.opc_Merge">opc_Merge</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ess</span> <span class="id">x</span> <span class="id">anns</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">es</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">no_rte_exp</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">es</span>)) <span class="id">ess</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Emerge">Emerge</a></span> <span class="id">x</span> <span class="id">ess</span> <span class="id">anns</span>)<br/>
+| <span class="id"><a name="OP_ERR.opc_Case">opc_Case</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span> <span class="id">ess</span> <span class="id">anns</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">es</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">no_rte_exp</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">es</span>)) <span class="id">ess</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Ecase">Ecase</a></span> <span class="id">e</span> <span class="id">ess</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> <span class="id">anns</span>)<br/>
+| <span class="id"><a name="OP_ERR.opc_Case_def">opc_Case_def</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span> <span class="id">ess</span> <span class="id">eds</span> <span class="id">anns</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">es</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">no_rte_exp</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">es</span>)) <span class="id">ess</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">no_rte_exp</span> <span class="id">eds</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Ecase">Ecase</a></span> <span class="id">e</span> <span class="id">ess</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">eds</span>) <span class="id">anns</span>)<br/>
+| <span class="id"><a name="OP_ERR.opc_Eapp">opc_Eapp</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">es</span> <span class="id">er</span> <span class="id">anns</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">no_rte_exp</span> <span class="id">es</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">no_rte_exp</span> <span class="id">er</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">no_rte_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Eapp">Eapp</a></span> <span class="id">f</span> <span class="id">es</span> <span class="id">er</span> <span class="id">anns</span>)<br/>
+.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="OP_ERR.no_rte_block">no_rte_block</a></span> (<span class="id">b</span> : <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.block">block</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">b</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Beq">Beq</a></span> (<span class="id">xs</span>,<span class="id">es</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> <span class="id">es</span><br/>
+&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span><br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="OP_ERR.no_rte_node">no_rte_node</a></span> (<span class="id">n</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.node">node</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.PSyn">PSyn</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node.Prefs">Prefs</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">n</span>.(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_block">n_block</a></span>) <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Blocal">Blocal</a></span> (<span class="kwd">Scope</span> <span class="id">vars</span> <span class="id">blks</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span> <span class="id">blks</span><br/>
+&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span><br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.Norte_node">Norte_node</a></span>.<br/>
+<br/>
+<br/>
+<div class="doc">A first definition of <span class="bracket"><span class="id">no_rte</span></span> for global programs:
+    it is very strong (and thus not satisfactory) because <span class="bracket"><span class="id">no_rte_node</span></span>
+    must hold for every input in every node </div>
+<span class="kwd">Definition</span> <span class="id"><a name="OP_ERR.no_rte_global">no_rte_global</a></span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">envG</span> := <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.denot_global">denot_global</a></span> <span class="id">G</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">n</span> =&gt; <span class="kwd">forall</span> <span class="id">envI</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">ins</span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">n</span>.(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_in">n_in</a></span>) <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> (<span class="id">envG</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_name">n_name</a></span> <span class="id">n</span>) <span class="id">envI</span>) <span class="id">n</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.nodes">nodes</a></span> <span class="id">G</span>).<br/>
+<br/>
+<div class="doc"><span class="bracket"><span class="id">no_rte_node</span></span> should hold with inputs <span class="bracket"><span class="id">envI</span></span> for the main node,
+    and with any inputs for other nodes. </div>
+<span class="kwd">Definition</span> <span class="id"><a name="OP_ERR.no_rte_global_main">no_rte_global_main</a></span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>) <span class="id">main</span> <span class="id">envI</span> :=<br/>
+&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">envG</span> := <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.denot_global">denot_global</a></span> <span class="id">G</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">n</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">ins</span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">n</span>.(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_in">n_in</a></span>) <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> <span class="id"><a href="Velus.Common.Common.html#ident_eqb">ident_eqb</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_name">n_name</a></span> <span class="id">n</span>) <span class="id">main</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">then</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> (<span class="id">envG</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_name">n_name</a></span> <span class="id">n</span>) <span class="id">envI</span>) <span class="id">n</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">else</span> <span class="kwd">forall</span> <span class="id">envI</span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> (<span class="id">envG</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_name">n_name</a></span> <span class="id">n</span>) <span class="id">envI</span>) <span class="id">n</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.nodes">nodes</a></span> <span class="id">G</span>).<br/>
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_global_main_global">no_rte_global_main_global</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_global">no_rte_global</a></span> <span class="id">G</span> -&gt; <span class="kwd">forall</span> <span class="id">f</span> <span class="id">envI</span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_global_main">no_rte_global_main</a></span> <span class="id">G</span> <span class="id">f</span> <span class="id">envI</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_global">no_rte_global</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_global_main">no_rte_global_main</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hf</span> *.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_impl">Forall_impl</a></span>, <span class="id">Hf</span>; <span class="id">intros</span>; <span class="id">cases</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<h2> Facts about no_rte  </h2>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_exp_cons">no_rte_exp_cons</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">nd</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.node">node</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span> <span class="id">nds</span> <span class="id">tys</span> <span class="id">exts</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in_exp">Is_node_in_exp</a></span> <span class="id">nd</span>.(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_name">n_name</a></span>) <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> (<span class="id">nd</span> :: <span class="id">nds</span>)) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> (<span class="id">nds</span>)) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">e</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">e</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.exp_ind2">exp_ind2</a></span>; <span class="id">intros</span> * <span class="id">Hnin</span> <span class="id">Hop</span>; <span class="id">inv</span> <span class="id">Hop</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">using</span> @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Eunop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> &lt;- <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.denot_exp_cons">denot_exp_cons</a></span> <span class="kwd">in</span> <span class="id">H3</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> 6 <span class="kwd">using</span> @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in_exp">Is_node_in_exp</a></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Ebinop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> &lt;- <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.denot_exp_cons">denot_exp_cons</a></span> <span class="kwd">in</span> <span class="id">H5</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> 12 <span class="kwd">using</span> @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in_exp">Is_node_in_exp</a></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Efby&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">left</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">H0</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">right</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Ewhen&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Emerge&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Case&nbsp;total&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHe</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">right</span>; <span class="id">left</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Case&nbsp;defaut&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHe</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">right</span>; <span class="id">left</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H0</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">right</span>; <span class="id">right</span>; <span class="id">esplit</span>; <span class="id">split</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Eapp&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">left</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H0</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">right</span>; <span class="id">solve_Exists</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_block_cons">no_rte_block_cons</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">nd</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.node">node</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">b</span> <span class="id">nds</span> <span class="id">tys</span> <span class="id">exts</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in_block">Is_node_in_block</a></span> <span class="id">nd</span>.(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_name">n_name</a></span>) <span class="id">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> (<span class="id">nd</span> :: <span class="id">nds</span>)) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> (<span class="id">nds</span>)) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">b</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnin</span> <span class="id">Hop</span>; <span class="id">cases</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_impl_In">Forall_impl_In</a></span> <span class="kwd">in</span> <span class="id">Hop</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp_cons">no_rte_exp_cons</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in_eq">Is_node_in_eq</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">solve_Exists</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_node_cons">no_rte_node_cons</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">nd</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.node">node</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span> <span class="id">nds</span> <span class="id">tys</span> <span class="id">exts</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in_block">Is_node_in_block</a></span> <span class="id">nd</span>.(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_name">n_name</a></span>) <span class="id">n</span>.(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_block">n_block</a></span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> (<span class="id">nd</span> :: <span class="id">nds</span>)) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> <span class="id">nds</span>) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">n</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnin</span> <span class="id">Hop</span>; <span class="id">cases</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_impl_In">Forall_impl_In</a></span> <span class="kwd">in</span> <span class="id">Hop</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block_cons">no_rte_block_cons</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;<span class="id">solve_Exists</span>.<br/>
+Qed.</div></details>
+<br/>
+<h3> The other way </h3>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_exp_uncons">no_rte_exp_uncons</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">nd</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.node">node</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span> <span class="id">nds</span> <span class="id">tys</span> <span class="id">exts</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in_exp">Is_node_in_exp</a></span> <span class="id">nd</span>.(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_name">n_name</a></span>) <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> (<span class="id">nds</span>)) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> (<span class="id">nd</span> :: <span class="id">nds</span>)) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">e</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">e</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.exp_ind2">exp_ind2</a></span>; <span class="id">intros</span> * <span class="id">Hnin</span> <span class="id">Hop</span>; <span class="id">inv</span> <span class="id">Hop</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">using</span> @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Eunop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.denot_exp_cons">denot_exp_cons</a></span> <span class="kwd">in</span> <span class="id">H3</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> 6 <span class="kwd">using</span> @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in_exp">Is_node_in_exp</a></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Ebinop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.denot_exp_cons">denot_exp_cons</a></span> <span class="kwd">in</span> <span class="id">H5</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> 12 <span class="kwd">using</span> @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in_exp">Is_node_in_exp</a></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Efby&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">left</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">H0</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">right</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Ewhen&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Emerge&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Case&nbsp;total&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHe</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">right</span>; <span class="id">left</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Case&nbsp;defaut&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHe</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">right</span>; <span class="id">left</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H0</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">right</span>; <span class="id">right</span>; <span class="id">esplit</span>; <span class="id">split</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Eapp&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">left</span>; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">H0</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>; <span class="id">constructor</span>; <span class="id">right</span>; <span class="id">solve_Exists</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_block_uncons">no_rte_block_uncons</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">nd</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.node">node</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">b</span> <span class="id">nds</span> <span class="id">tys</span> <span class="id">exts</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in_block">Is_node_in_block</a></span> <span class="id">nd</span>.(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_name">n_name</a></span>) <span class="id">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> (<span class="id">nds</span>)) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> (<span class="id">nd</span> :: <span class="id">nds</span>)) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">b</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnin</span> <span class="id">Hop</span>; <span class="id">cases</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_impl_In">Forall_impl_In</a></span> <span class="kwd">in</span> <span class="id">Hop</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp_uncons">no_rte_exp_uncons</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in_eq">Is_node_in_eq</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">solve_Exists</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_node_uncons">no_rte_node_uncons</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">nd</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.node">node</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span> <span class="id">nds</span> <span class="id">tys</span> <span class="id">exts</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in">Is_node_in</a></span> <span class="id">nd</span>.(<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.n_name">n_name</a></span>) <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> <span class="id">nds</span>) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.Global">Global</a></span> <span class="id">tys</span> <span class="id">exts</span> (<span class="id">nd</span> :: <span class="id">nds</span>)) <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">n</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Is_node_in">Is_node_in</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnin</span> <span class="id">Hop</span>; <span class="id">cases</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_impl_In">Forall_impl_In</a></span> <span class="kwd">in</span> <span class="id">Hop</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block_uncons">no_rte_block_uncons</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;<span class="id">solve_Exists</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_exp_oeq_compat">no_rte_exp_oeq_compat</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envG'</span> <span class="id">envI</span> <span class="id">envI'</span> <span class="id">env</span> <span class="id">env'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envG'</span> == <span class="id">envG</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env'</span> == <span class="id">env</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envI'</span> == <span class="id">envI</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG'</span> <span class="id">envI'</span> <span class="id">env'</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">e</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Eq1</span> * <span class="id">Eq2</span> * <span class="id">Eq3</span> <span class="id">e</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">e</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.exp_ind2">exp_ind2</a></span>; <span class="id">intro</span> <span class="id">Hoc</span>; <span class="id">inv</span> <span class="id">Hoc</span>.<br/>
+&nbsp;&nbsp;<span class="id">all</span>: <span class="id">try</span> <span class="id">now</span> (<span class="id">constructor</span>; <span class="id">eauto</span>).<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Eunop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> _ _ _ _ _ _) <span class="id">and</span> <span class="id">apply</span> <span class="id">IHe</span> <span class="kwd">in</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">intros</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id">Eq1</span>, &lt;- <span class="id">Eq2</span>, &lt;- <span class="id">Eq3</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Ebinop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> _ _ _ _ _ <span class="id">e1</span>) <span class="id">and</span> <span class="id">apply</span> <span class="id">IHe1</span> <span class="kwd">in</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> _ _ _ _ _ <span class="id">e2</span>) <span class="id">and</span> <span class="id">apply</span> <span class="id">IHe2</span> <span class="kwd">in</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">intros</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">subst</span> <span class="id">ss1</span> <span class="id">ss2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id">Eq1</span>, &lt;- <span class="id">Eq2</span>, &lt;- <span class="id">Eq3</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Efby&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Ewhen&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Emerge&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Case&nbsp;total&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Case&nbsp;defaut&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Eapp&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_block_oeq_compat">no_rte_block_oeq_compat</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envG'</span> <span class="id">envI</span> <span class="id">envI'</span> <span class="id">env</span> <span class="id">env'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envG'</span> == <span class="id">envG</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env'</span> == <span class="id">env</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envI'</span> == <span class="id">envI</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG'</span> <span class="id">envI'</span> <span class="id">env'</span> <span class="id">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">b</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * ????.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">try</span> <span class="id">tauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Hf</span>; <span class="id">simpl_Forall</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp_oeq_compat">no_rte_exp_oeq_compat</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_node_oeq_compat">no_rte_node_oeq_compat</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envG'</span> <span class="id">envI</span> <span class="id">envI'</span> <span class="id">env</span> <span class="id">env'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envG'</span> == <span class="id">envG</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env'</span> == <span class="id">env</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envI'</span> == <span class="id">envI</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG'</span> <span class="id">envI'</span> <span class="id">env'</span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">n</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Eq1</span> * <span class="id">Eq2</span> * <span class="id">Eq3</span> *.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">try</span> <span class="id">tauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">intro</span> <span class="id">HH</span>; <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block_oeq_compat">no_rte_block_oeq_compat</a></span> <span class="kwd">in</span> <span class="id">HH</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>) <span class="id">ins</span> : (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> <span class="id">G</span> <span class="id">ins</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.FI">FI</a></span>) ==&gt; @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>) ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>) ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.exp">exp</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">no_rte_exp_morph_impl</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">intro</span> <span class="id">Hop</span>; <span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp_oeq_compat">no_rte_exp_oeq_compat</a></span>, <span class="id">Hop</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>) <span class="id">ins</span> : (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> <span class="id">G</span> <span class="id">ins</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.FI">FI</a></span>) ==&gt; @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>) ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>) ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.exp">exp</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">no_rte_exp_morph</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intro</span> <span class="id">Hop</span>; <span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp_oeq_compat">no_rte_exp_oeq_compat</a></span>, <span class="id">Hop</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>) <span class="id">ins</span> : (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span> <span class="id">G</span> <span class="id">ins</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.FI">FI</a></span>) ==&gt; @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>) ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>) ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.block">block</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">no_rte_block_morph</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intro</span> <span class="id">Hop</span>; <span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block_oeq_compat">no_rte_block_oeq_compat</a></span>, <span class="id">Hop</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>) <span class="id">ins</span> : (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> <span class="id">G</span> <span class="id">ins</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.FI">FI</a></span>) ==&gt; @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>) ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>) ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.node">node</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">no_rte_node_morph</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intro</span> <span class="id">Hop</span>; <span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node_oeq_compat">no_rte_node_oeq_compat</a></span>, <span class="id">Hop</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_exp_le_compat">no_rte_exp_le_compat</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envG'</span> <span class="id">envI</span> <span class="id">envI'</span> <span class="id">env</span> <span class="id">env'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envG</span> &lt;= <span class="id">envG'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env</span> &lt;= <span class="id">env'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envI</span> &lt;= <span class="id">envI'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG'</span> <span class="id">envI'</span> <span class="id">env'</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">e</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Le1</span> <span class="id">Le2</span> <span class="id">Le3</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">e</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.exp_ind2">exp_ind2</a></span>; <span class="id">intros</span> <span class="id">Hop</span>; <span class="id">inv</span> <span class="id">Hop</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html#Forall_impl_inside">Forall_impl_inside</a></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;unop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ty</span> <span class="id">Hty</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">H3</span> <span class="id">ty</span> <span class="id">Hty</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html#forall_nprod_k_iff">forall_nprod_k_iff</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">k</span> <span class="id">d</span> <span class="id">Hk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DSForall_le">DSForall_le</a></span>, (<span class="id">H3</span> <span class="id">k</span> <span class="id">d</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_monotonic">fcont_monotonic</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#fcont_le_compat3">fcont_le_compat3</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;binop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ty1</span> <span class="id">ty2</span> <span class="id">Hty1</span> <span class="id">Hty2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DSForall_le">DSForall_le</a></span> <span class="kwd">in</span> <span class="id">H5</span>. <span class="id">apply</span> <span class="id">H5</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>: <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_le_compat2">fcont_le_compat2</a></span>; <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_monotonic">fcont_monotonic</a></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#fcont_le_compat3">fcont_le_compat3</a></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;merge&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;case&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;case&nbsp;défaut&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_block_le_compat">no_rte_block_le_compat</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envG'</span> <span class="id">envI</span> <span class="id">envI'</span> <span class="id">env</span> <span class="id">env'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envG</span> &lt;= <span class="id">envG'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env</span> &lt;= <span class="id">env'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envI</span> &lt;= <span class="id">envI'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG'</span> <span class="id">envI'</span> <span class="id">env'</span> <span class="id">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">b</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Le1</span> <span class="id">Le2</span> <span class="id">Le3</span> ?.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">cases</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_impl">Forall_impl</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp_le_compat">no_rte_exp_le_compat</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.no_rte_node_le_compat">no_rte_node_le_compat</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envG'</span> <span class="id">envI</span> <span class="id">envI'</span> <span class="id">env</span> <span class="id">env'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envG</span> &lt;= <span class="id">envG'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">env</span> &lt;= <span class="id">env'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">envI</span> &lt;= <span class="id">envI'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG'</span> <span class="id">envI'</span> <span class="id">env'</span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">n</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * ????; <span class="id">cases</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_impl">Forall_impl</a></span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block_le_compat">no_rte_block_le_compat</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>) <span class="id">ins</span> : (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> <span class="id">G</span> <span class="id">ins</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole">Ole</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.FI">FI</a></span>) ==&gt; @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole">Ole</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>) ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole">Ole</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Systems.html#DS_prod">DS_prod</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.SI">SI</a></span>) ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.node">node</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#flip">Basics.flip</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">no_rte_node_le_morph</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">intro</span> <span class="id">Hop</span>; <span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node_le_compat">no_rte_node_le_compat</a></span>, <span class="id">Hop</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<h2> Correction of the <span class="bracket"><span class="id">CheckOp</span></span> procedure </h2>
+<br/>
+<span class="kwd">Theorem</span> <span class="id"><a name="OP_ERR.check_exp_ok">check_exp_ok</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">Γ</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Restr.restr_exp">restr_exp</a></span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Typ.wt_exp">wt_exp</a></span> <span class="id">G</span> <span class="id">Γ</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ckop.check_exp">check_exp</a></span> <span class="id">e</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_exp">no_rte_exp</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">e</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> *.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">e</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.exp_ind2">exp_ind2</a></span>; <span class="id">simpl</span>; <span class="id">intros</span> <span class="id">Hr</span> <span class="id">Hwt</span> <span class="id">Hchk</span>; <span class="id">inv</span> <span class="id">Hr</span>; <span class="id">inv</span> <span class="id">Hwt</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Econst&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Eenum&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Evar&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Eunop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.typeof">typeof</a></span> <span class="id">e</span>) <span class="kwd">as</span> [|? []] <span class="id">eqn</span>:<span class="id">Hty</span>; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hchk</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F2</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ty'</span> <span class="id">Hty'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hty'</span> <span class="kwd">in</span> <span class="id">Hty</span>; <span class="id">inv</span> <span class="id">Hty</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;c'est&nbsp;très&nbsp;très&nbsp;simple&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Nprod.html#nprod_forall_Forall">nprod_forall_Forall</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">s</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DSForall_all">DSForall_all</a></span>; <span class="id">intros</span> [| <span class="id">v</span> |]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Wtv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op.check_unop_correct">check_unop_correct</a></span>; <span class="id">eauto</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Ebinop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.typeof">typeof</a></span> <span class="id">e1</span> = _) <span class="id">and</span> <span class="id">rewrite</span> <span class="id">it</span> <span class="kwd">in</span> <span class="id">Hchk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.typeof">typeof</a></span> <span class="id">e2</span> = _) <span class="id">and</span> <span class="id">rewrite</span> <span class="id">it</span> <span class="kwd">in</span> <span class="id">Hchk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;récurrence&nbsp;pour&nbsp;e1,&nbsp;e2&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1,2: <span class="id">cases</span>; <span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#andb_true_iff">Bool.andb_true_iff</a></span> <span class="kwd">in</span> *; <span class="id">tauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">ty1'</span> <span class="id">ty2'</span> <span class="id">Hty1'</span> <span class="id">Hty2'</span> <span class="id">ss1</span> <span class="id">ss2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hty1'</span> <span class="kwd">in</span> *; <span class="id">take</span> ([_] = [_]) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hty2'</span> <span class="kwd">in</span> *; <span class="id">take</span> ([_] = [_]) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;cas&nbsp;sur&nbsp;la&nbsp;tête&nbsp;de&nbsp;e2&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">inv</span> <span class="id">Hty2'</span>; <span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#andb_true_iff">Bool.andb_true_iff</a></span>, ?<span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#orb_true_iff">Bool.orb_true_iff</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;membre&nbsp;droit&nbsp;constant&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id">subst</span> <span class="id">ss2</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.denot_exp_eq">denot_exp_eq</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.SDfuns.html#sconst">sconst</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.DSForall_2pres">DSForall_2pres</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#ID_simpl">ID_simpl</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Id_simpl">Id_simpl</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#MAP_map">MAP_map</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.DS_ext.html#zip_map">zip_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DSForall_zip">DSForall_zip</a></span> <span class="kwd">with</span> (<span class="id">P</span> := <span class="kwd">fun</span> _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span>) (<span class="id">Q</span> := <span class="kwd">fun</span> _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span>); <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DSForall_all">DSForall_all</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [] [] _ _; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Wt1</span> <span class="id">Wt2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Hchk</span> <span class="kwd">as</span> [? []];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op.check_binop_correct">check_binop_correct</a></span>; <span class="id">eauto</span>; <span class="id">simpl</span>; <span class="id">auto</span>; <span class="id">congruence</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;autres&nbsp;cas&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>: <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.CommonDS.html#DSForall_all">DSForall_all</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>: <span class="id">intros</span> [[|<span class="id">v1</span>|] [|<span class="id">v2</span>|]]; <span class="id">auto</span>; <span class="id">intros</span> <span class="id">Wt1</span> <span class="id">Wt2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>: <span class="id">destruct</span> <span class="id">Hchk</span> <span class="kwd">as</span> [[<span class="id">Hck</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>: <span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op.check_binop_correct">check_binop_correct</a></span> <span class="kwd">in</span> <span class="id">Hck</span>; <span class="id">eauto</span>; <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Efby&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hchk</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F2</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">F1</span>, <span class="id">F2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Ewhen&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">Hchk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Emerge&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">Hchk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hchk</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Ecase&nbsp;default&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hchk</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F2</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">F2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">F2</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Ecase&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hchk</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F3</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">F1</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F2</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">F2</span>,<span class="id">F3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">F2</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Eapp&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hchk</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F2</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">F1</span>, <span class="id">F2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.check_block_ok">check_block_ok</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">Γ</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">b</span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Restr.restr_block">restr_block</a></span> <span class="id">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Typ.wt_block">wt_block</a></span> <span class="id">G</span> <span class="id">Γ</span> <span class="id">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ckop.check_block">check_block</a></span> <span class="id">b</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_block">no_rte_block</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">b</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">b</span>; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hr</span> <span class="id">Hwt</span> <span class="id">Hc</span>; <span class="id">try</span> <span class="id">tauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">e</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">Hc</span>.<br/>
+&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hr</span>; <span class="id">inv</span> <span class="id">Hwt</span>.<br/>
+&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.check_exp_ok">check_exp_ok</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="OP_ERR.check_node_ok">check_node_ok</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span>,<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">n</span> : <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.node">node</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Restr.restr_node">restr_node</a></span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Typ.wt_node">wt_node</a></span> <span class="id">G</span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ckop.check_node">check_node</a></span> <span class="id">n</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span> <span class="id">G</span> <span class="id">ins</span> <span class="id">envG</span> <span class="id">envI</span> <span class="id">env</span> <span class="id">n</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ckop.check_node">check_node</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ckop.check_top_block">check_top_block</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node">no_rte_node</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hr</span> <span class="id">Hwt</span> <span class="id">Hc</span>.<br/>
+&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hr</span>; <span class="id">inv</span> <span class="id">Hwt</span>.<br/>
+&nbsp;&nbsp;<span class="id">cases</span>.<br/>
+&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Restr.restr_top_block">restr_top_block</a></span> _) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Typ.wt_block">wt_block</a></span> _ _ _) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Typ.wt_scope">wt_scope</a></span> _ _ _ _) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">Hc</span>.<br/>
+&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.check_block_ok">check_block_ok</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Theorem</span> <span class="id"><a name="OP_ERR.check_global_ok">check_global_ok</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Restr.restr_global">restr_global</a></span> <span class="id">G</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Typ.wt_global">wt_global</a></span> <span class="id">G</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ckop.check_global">check_global</a></span> <span class="id">G</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_global">no_rte_global</a></span> <span class="id">G</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ckop.check_global">check_global</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_global">no_rte_global</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Restr.restr_global">restr_global</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hr</span> <span class="id">Hwt</span> <span class="id">Hc</span>%<span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">generalize</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den.denot_global">denot_global</a></span> <span class="id">G</span>); <span class="id">intro</span> <span class="id">envG</span>.<br/>
+&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Ordered_nodes">Ordered_nodes</a></span> <span class="id">G</span>) <span class="kwd">as</span> <span class="id">Hord</span>.<br/>
+&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.wl_global_Ordered_nodes">wl_global_Ordered_nodes</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Typ.wt_global_wl_global">wt_global_wl_global</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">G</span> <span class="kwd">as</span> [<span class="id">tys</span> <span class="id">exts</span> <span class="id">nds</span>]; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">nds</span> <span class="kwd">as</span> [|<span class="id">nd</span> <span class="id">nds</span>]; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hr</span>. <span class="id">inv</span> <span class="id">Hc</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Typ.wt_global_uncons">wt_global_uncons</a></span> <span class="kwd">in</span> <span class="id">Hwt</span> <span class="kwd">as</span> <span class="id">Hwtn</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">intros</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.check_node_ok">check_node_ok</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node_uncons">no_rte_node_uncons</a></span> <span class="kwd">in</span> <span class="id">Hwtn</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.find_node_not_Is_node_in">find_node_not_Is_node_in</a></span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn.find_node_now">find_node_now</a></span>.<br/>
+&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id">IHnds</span> <span class="kwd">in</span> <span class="id">H2</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Typ.wt_global_cons">wt_global_cons</a></span>, <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Ordered_nodes_cons">Ordered_nodes_cons</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR.no_rte_node_uncons">no_rte_node_uncons</a></span> <span class="kwd">in</span> <span class="id">H2</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord.Ordered_nodes_nin">Ordered_nodes_nin</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR">OP_ERR</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="OpErrFun">OpErrFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Senv</span>  : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV">STATICENV</a></span>     <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Syn</span>   : <span class="id"><a href="Velus.Lustre.LSyntax.html#LSYNTAX">LSYNTAX</a></span>       <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Typ</span>   : <span class="id"><a href="Velus.Lustre.LTyping.html#LTYPING">LTYPING</a></span>       <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Restr</span> : <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR">LRESTR</a></span>        <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Lord</span>  : <span class="id"><a href="Velus.Lustre.LOrdered.html#LORDERED">LORDERED</a></span>      <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Den</span>   : <span class="id"><a href="Velus.Lustre.Denot.SD.html#SD">SD</a></span>            <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord">Lord</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ckop</span>  : <span class="id"><a href="Velus.Lustre.Denot.CheckOp.html#CHECKOP">CHECKOP</a></span>       <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span>)<br/>
+&lt;: <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR">OP_ERR</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Typ">Typ</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Restr">Restr</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord">Lord</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den">Den</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ckop">Ckop</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OP_ERR">OP_ERR</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Syn">Syn</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Typ">Typ</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Restr">Restr</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Lord">Lord</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Den">Den</a></span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#Ckop">Ckop</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Lustre.Denot.OpErr.html#OpErrFun">OpErrFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

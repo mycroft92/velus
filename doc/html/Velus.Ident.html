@@ -1,0 +1,560 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module Ident</title>
+<meta name="description" content="Documentation of Coq module Ident" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module Ident</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.String.html">String</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.Ascii.html">Ascii</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">bool_scope</span>.<br/>
+<br/>
+<h3> ident &lt;-&gt; string conversion </h3>
+<span class="kwd">Axiom</span> <span class="id"><a name="pos_to_str">pos_to_str</a></span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.String.html#string">string</a></span>. <br/>
+<span class="kwd">Axiom</span> <span class="id"><a name="str_to_pos">str_to_pos</a></span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.String.html#string">string</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>. <br/>
+<br/>
+<span class="kwd">Axiom</span> <span class="id"><a name="str_to_pos_injective">str_to_pos_injective</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">x'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="id">x</span> = <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="id">x'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x</span> = <span class="id">x'</span>.<br/>
+<span class="kwd">Axiom</span> <span class="id"><a name="pos_to_str_equiv">pos_to_str_equiv</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Ident.html#pos_to_str">pos_to_str</a></span> (<span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="id">x</span>) = <span class="id">x</span>.<br/>
+<br/>
+<span class="kwd">Fixpoint</span> <span class="id"><a name="In_str">In_str</a></span> (<span class="id">x</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.Ascii.html#ascii">ascii</a></span>) (<span class="id">s</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.String.html#string">string</a></span>): <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">s</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.String.html#EmptyString">EmptyString</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#False">False</a></span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.String.html#String">String</a></span> <span class="id">x'</span> <span class="id">s</span> =&gt; <span class="id">x'</span> = <span class="id">x</span> \/ <span class="id">In_str</span> <span class="id">x</span> <span class="id">s</span><br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">Scheme</span> <span class="id">Equality</span> <span class="kwd">for</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.Ascii.html#ascii">ascii</a></span>.<br/>
+<span class="kwd">Fixpoint</span> <span class="id"><a name="mem_str">mem_str</a></span> (<span class="id">x</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.Ascii.html#ascii">ascii</a></span>) (<span class="id">s</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.String.html#string">string</a></span>): <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span> :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">s</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.String.html#EmptyString">EmptyString</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.String.html#String">String</a></span> <span class="id">x'</span> <span class="id">s</span> =&gt; (<span class="id"><a href="Velus.Ident.html#ascii_beq">ascii_beq</a></span> <span class="id">x'</span> <span class="id">x</span> || <span class="id">mem_str</span> <span class="id">x</span> <span class="id">s</span>)%<span class="id">bool</span><br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="mem_In_str">mem_In_str</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">s</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#In_str">In_str</a></span> <span class="id">x</span> <span class="id">s</span> &lt;-&gt; <span class="id"><a href="Velus.Ident.html#mem_str">mem_str</a></span> <span class="id">x</span> <span class="id">s</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">s</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>; <span class="id">discriminate</span>.<br/>
+&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">intro</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#orb_true_iff">Bool.orb_true_iff</a></span>; <span class="id">destruct</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">left</span>; <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Ident.html#internal_ascii_dec_lb">internal_ascii_dec_lb</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">right</span>; <span class="id">now</span> <span class="id">apply</span> <span class="id">IHs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#orb_true_iff">Bool.orb_true_iff</a></span> <span class="kwd">in</span> <span class="id">H</span>; <span class="id">destruct</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">left</span>; <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Ident.html#internal_ascii_dec_bl">internal_ascii_dec_bl</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">right</span>; <span class="id">now</span> <span class="id">apply</span> <span class="id">IHs</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="not_mem_In_str">not_mem_In_str</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">s</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Ident.html#In_str">In_str</a></span> <span class="id">x</span> <span class="id">s</span> &lt;-&gt; <span class="id"><a href="Velus.Ident.html#mem_str">mem_str</a></span> <span class="id">x</span> <span class="id">s</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">s</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">intro</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#orb_false_iff">Bool.orb_false_iff</a></span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Logic.Decidable.html#not_or">Decidable.not_or</a></span> <span class="kwd">in</span> <span class="id">H</span>; <span class="id">destruct</span> <span class="id">H</span>; <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#not_true_is_false">Bool.not_true_is_false</a></span>; <span class="id">intro</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Ident.html#internal_ascii_dec_bl">internal_ascii_dec_bl</a></span> <span class="kwd">in</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">now</span> <span class="id">apply</span> <span class="id">IHs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#orb_false_iff">Bool.orb_false_iff</a></span> <span class="kwd">in</span> <span class="id">H</span>; <span class="id">destruct</span> <span class="id">H</span>; <span class="id">intros</span> [<span class="id">E</span>|<span class="id">E</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#not_true_iff_false">Bool.not_true_iff_false</a></span> <span class="kwd">in</span> <span class="id">H</span>; <span class="id">apply</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Ident.html#internal_ascii_dec_lb">internal_ascii_dec_lb</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">now</span> <span class="id">apply</span> <span class="id">IHs</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="sep">sep</a></span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Strings.Ascii.html#ascii">ascii</a></span> := <span class="string">"$"</span>%<span class="id">char</span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Export</span> <span class="id"><a name="Ids">Ids</a></span> &lt;: <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.bool_id">bool_id</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"bool"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.true_id">true_id</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"True"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.false_id">false_id</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"False"</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.self">self</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"self"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.out">out</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"out"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.temp">temp</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"temp"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.fun_id">fun_id</a></span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>  := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"fun"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.sync_id">sync_id</a></span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"sync"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.main_id">main_id</a></span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"main"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.main_proved_id">main_proved_id</a></span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"main_proved"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.main_sync_id">main_sync_id</a></span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"main_sync"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.step">step</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"step"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.reset">reset</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"reset"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.glob">glob</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"glob"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.elab">elab</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"elab"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.auto">auto</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"auto"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.switch">switch</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"swi"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.local">local</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"local"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.norm1">norm1</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"norm"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.last">last</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"last"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.fby_id">fby_id</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"fby"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.stc">stc</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"stc"</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.obc2c">obc2c</a></span> := <span class="id"><a href="Velus.Ident.html#str_to_pos">str_to_pos</a></span> <span class="string">"obc2c"</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.default">default</a></span> := 1%<span class="id">positive</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Ltac</span> <span class="id">prove_str_to_pos_neq</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- ?<span class="id">x1</span> &lt;&gt; ?<span class="id">x2</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Heq</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Ident.html#str_to_pos_injective">str_to_pos_injective</a></span> <span class="kwd">in</span> <span class="id">Heq</span>; <span class="id">inv</span> <span class="id">Heq</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.elab_prefs">elab_prefs</a></span> := <span class="id"><a href="Velus.Common.Common.html#PS.singleton">PS.singleton</a></span> <span class="id"><a href="Velus.Ident.html#Ids.elab">elab</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.auto_prefs">auto_prefs</a></span> := <span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id"><a href="Velus.Ident.html#Ids.auto">auto</a></span> <span class="id"><a href="Velus.Ident.html#Ids.elab_prefs">elab_prefs</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.switch_prefs">switch_prefs</a></span> := <span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id"><a href="Velus.Ident.html#Ids.switch">switch</a></span> <span class="id"><a href="Velus.Ident.html#Ids.auto_prefs">auto_prefs</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.local_prefs">local_prefs</a></span> := <span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id"><a href="Velus.Ident.html#Ids.local">local</a></span> <span class="id"><a href="Velus.Ident.html#Ids.switch_prefs">switch_prefs</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.norm1_prefs">norm1_prefs</a></span> := <span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id"><a href="Velus.Ident.html#Ids.norm1">norm1</a></span> <span class="id"><a href="Velus.Ident.html#Ids.local_prefs">local_prefs</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.last_prefs">last_prefs</a></span> := <span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id"><a href="Velus.Ident.html#Ids.last">last</a></span> <span class="id"><a href="Velus.Ident.html#Ids.norm1_prefs">norm1_prefs</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.fby_prefs">fby_prefs</a></span> := <span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id"><a href="Velus.Ident.html#Ids.fby_id">fby_id</a></span> <span class="id"><a href="Velus.Ident.html#Ids.last_prefs">last_prefs</a></span>.<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.lustre_prefs">lustre_prefs</a></span> := [<span class="id"><a href="Velus.Ident.html#Ids.elab">elab</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.auto">auto</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.switch">switch</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.local">local</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.norm1">norm1</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.last">last</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.fby_id">fby_id</a></span>].<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.gensym_prefs">gensym_prefs</a></span> := [<span class="id"><a href="Velus.Ident.html#Ids.elab">elab</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.auto">auto</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.switch">switch</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.local">local</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.norm1">norm1</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.last">last</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.fby_id">fby_id</a></span>; <span class="id"><a href="Velus.Ident.html#Ids.stc">stc</a></span>].<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.lustre_prefs_NoDup">lustre_prefs_NoDup</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> <span class="id"><a href="Velus.Ident.html#Ids.lustre_prefs">lustre_prefs</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.lustre_prefs">lustre_prefs</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#not_in_cons">not_in_cons</a></span>; <span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">prove_str_to_pos_neq</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.gensym_prefs_NoDup">gensym_prefs_NoDup</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> <span class="id"><a href="Velus.Ident.html#Ids.gensym_prefs">gensym_prefs</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.gensym_prefs">gensym_prefs</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#not_in_cons">not_in_cons</a></span>; <span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">prove_str_to_pos_neq</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.self_not_out">self_not_out</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.self">self</a></span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.out">out</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_str_to_pos_neq</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">self_not_out</span> : <span class="id">ident</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.reset_not_step">reset_not_step</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.reset">reset</a></span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.step">step</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_str_to_pos_neq</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">reset_not_step</span> : <span class="id">ident</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.fun_not_out">fun_not_out</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.fun_id">fun_id</a></span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.out">out</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_str_to_pos_neq</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">fun_not_out</span> : <span class="id">ident</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.fun_not_glob">fun_not_glob</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.fun_id">fun_id</a></span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.glob">glob</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_str_to_pos_neq</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">fun_not_glob</span> : <span class="id">ident</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Ids.obc2c_not_in_gensym_prefs">obc2c_not_in_gensym_prefs</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id"><a href="Velus.Ident.html#Ids.obc2c">obc2c</a></span> <span class="id"><a href="Velus.Ident.html#Ids.gensym_prefs">gensym_prefs</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.gensym_prefs">gensym_prefs</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#not_in_cons">not_in_cons</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>; <span class="id">prove_str_to_pos_neq</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">obc2c_not_in_gensym_prefs</span> : <span class="id">ident</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Ids.self_not_in_gensym_prefs">self_not_in_gensym_prefs</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id"><a href="Velus.Ident.html#Ids.self">self</a></span> <span class="id"><a href="Velus.Ident.html#Ids.gensym_prefs">gensym_prefs</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.gensym_prefs">gensym_prefs</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#not_in_cons">not_in_cons</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>; <span class="id">prove_str_to_pos_neq</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">self_not_in_gensym_prefs</span> : <span class="id">ident</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Ids.temp_not_in_gensym_prefs">temp_not_in_gensym_prefs</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id"><a href="Velus.Ident.html#Ids.temp">temp</a></span> <span class="id"><a href="Velus.Ident.html#Ids.gensym_prefs">gensym_prefs</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.gensym_prefs">gensym_prefs</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#not_in_cons">not_in_cons</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>; <span class="id">prove_str_to_pos_neq</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">temp_not_in_gensym_prefs</span> : <span class="id">ident</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.atom">atom</a></span> <span class="id">x</span> := ~<span class="id"><a href="Velus.Ident.html#In_str">In_str</a></span> <span class="id"><a href="Velus.Ident.html#sep">sep</a></span> (<span class="id"><a href="Velus.Ident.html#pos_to_str">pos_to_str</a></span> <span class="id">x</span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.is_atom">is_atom</a></span> <span class="id">x</span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> (<span class="id"><a href="Velus.Ident.html#mem_str">mem_str</a></span> <span class="id"><a href="Velus.Ident.html#sep">sep</a></span> (<span class="id"><a href="Velus.Ident.html#pos_to_str">pos_to_str</a></span> <span class="id">x</span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.is_atom_spec">is_atom_spec</a></span> : <span class="kwd">forall</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.is_atom">is_atom</a></span> <span class="id">x</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.is_atom">is_atom</a></span>, <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#negb_true_iff">Bool.negb_true_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Ident.html#not_mem_In_str">not_mem_In_str</a></span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Local</span> <span class="kwd">Ltac</span> <span class="id">prove_atom</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> ?<span class="id">x</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span>, <span class="id">x</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Ident.html#pos_to_str_equiv">pos_to_str_equiv</a></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Ident.html#not_mem_In_str">not_mem_In_str</a></span>; <span class="id">reflexivity</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.self_atom">self_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.self">self</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.out_atom">out_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.out">out</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.temp_atom">temp_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.temp">temp</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.fun_id_atom">fun_id_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.fun_id">fun_id</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.sync_id_atom">sync_id_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.sync_id">sync_id</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.main_id_atom">main_id_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.main_id">main_id</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.main_proved_id_atom">main_proved_id_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.main_proved_id">main_proved_id</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.main_sync_id_atom">main_sync_id_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.main_sync_id">main_sync_id</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.step_atom">step_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.step">step</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.reset_atom">reset_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.reset">reset</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.glob_atom">glob_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.glob">glob</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.elab_atom">elab_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.elab">elab</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.auto_atom">auto_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.auto">auto</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.switch_atom">switch_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.switch">switch</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.local_atom">local_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.local">local</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.norm1_atom">norm1_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.norm1">norm1</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.last_atom">last_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.last">last</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.fby_atom">fby_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.fby_id">fby_id</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.stc_atom">stc_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.stc">stc</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.obc2c_atom">obc2c_atom</a></span>: <span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id"><a href="Velus.Ident.html#Ids.obc2c">obc2c</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">prove_atom</span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">step_atom</span> <span class="id">reset_atom</span> <span class="id">fun_id_atom</span> <span class="id">sync_id_atom</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">out_atom</span> <span class="id">main_id_atom</span> <span class="id">main_proved_id_atom</span> <span class="id">main_sync_id_atom</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">self_atom</span> <span class="id">glob_atom</span> <span class="id">elab_atom</span> <span class="id">norm1_atom</span> <span class="id">fby_atom</span> <span class="id">obc2c_atom</span> : <span class="id">ident</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="Ids.prefix">prefix</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="Ids.prefix_not_atom">prefix_not_atom</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">pref</span> <span class="id">id</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> (<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id">pref</span> <span class="id">id</span>).<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">prefix_not_atom</span> : <span class="id">ident</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id">prefix_injective'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">pref</span> <span class="id">id</span> <span class="id">pref'</span> <span class="id">id'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pref</span> &lt;&gt; <span class="id">pref'</span> \/ <span class="id">id</span> &lt;&gt; <span class="id">id'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id">pref</span> <span class="id">id</span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id">pref'</span> <span class="id">id'</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="Ids.prefix_injective">prefix_injective</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">pref</span> <span class="id">id</span> <span class="id">pref'</span> <span class="id">id'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id">pref</span> <span class="id">id</span> = <span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id">pref'</span> <span class="id">id'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pref</span> = <span class="id">pref'</span> /\ <span class="id">id</span> = <span class="id">id'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">pref</span> <span class="id">pref'</span>), (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">id</span> <span class="id">id'</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1-3:<span class="id">exfalso</span>; <span class="id">eapply</span> <span class="id">prefix_injective'</span> <span class="kwd">in</span> <span class="id">Heq</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.prefix_fun">prefix_fun</a></span> (<span class="id">f</span> <span class="id">c</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>): <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id"><a href="Velus.Ident.html#Ids.fun_id">fun_id</a></span> (<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id">f</span> <span class="id">c</span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.prefix_out">prefix_out</a></span> (<span class="id">f</span> <span class="id">o</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>): <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id"><a href="Velus.Ident.html#Ids.out">out</a></span> (<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id">f</span> <span class="id">o</span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.prefix_temp">prefix_temp</a></span> (<span class="id">f</span> <span class="id">c</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>): <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id"><a href="Velus.Ident.html#Ids.temp">temp</a></span> (<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id">f</span> <span class="id">c</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.prefix_fun_injective">prefix_fun_injective</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">c</span> <span class="id">c'</span> <span class="id">f</span> <span class="id">f'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.prefix_fun">prefix_fun</a></span> <span class="id">c</span> <span class="id">f</span> = <span class="id"><a href="Velus.Ident.html#Ids.prefix_fun">prefix_fun</a></span> <span class="id">c'</span> <span class="id">f'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">c</span> = <span class="id">c'</span> /\ <span class="id">f</span> = <span class="id">f'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_fun">prefix_fun</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_injective">prefix_injective</a></span>, <span class="id"><a href="Velus.Ident.html#Ids.prefix_injective">prefix_injective</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.prefix_out_injective">prefix_out_injective</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">c</span> <span class="id">c'</span> <span class="id">f</span> <span class="id">f'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.prefix_out">prefix_out</a></span> <span class="id">c</span> <span class="id">f</span> = <span class="id"><a href="Velus.Ident.html#Ids.prefix_out">prefix_out</a></span> <span class="id">c'</span> <span class="id">f'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">c</span> = <span class="id">c'</span> /\ <span class="id">f</span> = <span class="id">f'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_out">prefix_out</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hneq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_injective">prefix_injective</a></span>, <span class="id"><a href="Velus.Ident.html#Ids.prefix_injective">prefix_injective</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.prefix_fun_not_out">prefix_fun_not_out</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">c</span> <span class="id">f</span> <span class="id">c'</span> <span class="id">f'</span>, <span class="id"><a href="Velus.Ident.html#Ids.prefix_fun">prefix_fun</a></span> <span class="id">c</span> <span class="id">f</span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.prefix_out">prefix_out</a></span> <span class="id">c'</span> <span class="id">f'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">prefix_injective'</span>. <span class="id">left</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">prove_str_to_pos_neq</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.prefix_glob">prefix_glob</a></span> (<span class="id">id</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>): <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id"><a href="Velus.Ident.html#Ids.glob">glob</a></span> <span class="id">id</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.main_not_glob">main_not_glob</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> <span class="id">x</span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.main_id">main_id</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_not_atom">prefix_not_atom</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">ident</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.main_proved_not_glob">main_proved_not_glob</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> <span class="id">x</span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.main_proved_id">main_proved_id</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_not_atom">prefix_not_atom</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">ident</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.sync_not_glob">sync_not_glob</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> <span class="id">x</span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.sync_id">sync_id</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_not_atom">prefix_not_atom</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">ident</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.main_sync_not_glob">main_sync_not_glob</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> <span class="id">x</span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.main_sync_id">main_sync_id</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_not_atom">prefix_not_atom</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">ident</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.self_not_glob">self_not_glob</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> <span class="id">x</span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.self">self</a></span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_not_atom">prefix_not_atom</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">ident</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.prefix_glob_injective">prefix_glob_injective</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">x'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> <span class="id">x</span> = <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> <span class="id">x'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x</span> = <span class="id">x'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hneq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_injective">prefix_injective</a></span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">ident</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.glob_not_in_prefixed">glob_not_in_prefixed</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">xs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id">A</span>)) <span class="id">ps</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="kwd">exists</span> <span class="id">m</span> <span class="id">c</span>, <span class="id">x</span> = <span class="id"><a href="Velus.Ident.html#Ids.prefix_fun">prefix_fun</a></span> <span class="id">m</span> <span class="id">c</span>) <span class="id">ps</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">z</span> =&gt; ~ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">z</span> <span class="id">ps</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> <span class="id">xt</span> =&gt; <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xt</span>)) <span class="id">xs</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span> <span class="kwd">as</span> [|(<span class="id">x</span>, <span class="id">t</span>)]; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Pref</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hin</span>; <span class="id">eauto</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Hin</span> <span class="kwd">as</span> (?&amp;?&amp;<span class="id">Hpre</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_injective">prefix_injective</a></span> <span class="kwd">in</span> <span class="id">Hpre</span> <span class="kwd">as</span> (<span class="id">Heq</span>&amp;?); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradict</span> <span class="id">Heq</span>. <span class="id">prove_str_to_pos_neq</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Ids.NoDupMembers_glob">NoDupMembers_glob</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">ys</span> <span class="id">xs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id">A</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> (<span class="id">xs</span> ++ <span class="id">ys</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">z</span> =&gt; ~ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">z</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> <span class="id">xt</span> =&gt; <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xt</span>)) <span class="id">xs</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> <span class="id">xt</span> =&gt; <span class="id"><a href="Velus.Ident.html#Ids.prefix_glob">prefix_glob</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xt</span>)) <span class="id">ys</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ys</span> <span class="kwd">as</span> [|(<span class="id">y</span>, <span class="id">t</span>)]; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Nodup</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers_app_cons">NoDupMembers_app_cons</a></span> <span class="kwd">in</span> <span class="id">Nodup</span>; <span class="id">destruct</span> <span class="id">Nodup</span> <span class="kwd">as</span> [<span class="id">Notin</span> <span class="id">Nodup</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map_iff">in_map_iff</a></span>; <span class="id">intros</span> ((<span class="id">x</span>, <span class="id">t'</span>) &amp; <span class="id">E</span> &amp; <span class="id">Hin</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Ident.html#Ids.prefix_injective">prefix_injective</a></span> <span class="kwd">in</span> <span class="id">E</span> <span class="kwd">as</span> (?&amp;?); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Notin</span>, <span class="id"><a href="Velus.Common.CommonList.html#In_InMembers">In_InMembers</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#in_app">in_app</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h3> Name generation with fresh identifiers </h3>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="Ids.gensym">gensym</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id"><a name="Ids.gensym_not_atom">gensym_not_atom</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">pref</span> <span class="id">hint</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> (<span class="id"><a href="Velus.Ident.html#Ids.gensym">gensym</a></span> <span class="id">pref</span> <span class="id">hint</span> <span class="id">x</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id">gensym_injective'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">pref</span> <span class="id">hint</span> <span class="id">id</span> <span class="id">pref'</span> <span class="id">hint'</span> <span class="id">id'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pref</span> &lt;&gt; <span class="id">pref'</span> \/ <span class="id">id</span> &lt;&gt; <span class="id">id'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.gensym">gensym</a></span> <span class="id">pref</span> <span class="id">hint</span> <span class="id">id</span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.gensym">gensym</a></span> <span class="id">pref'</span> <span class="id">hint'</span> <span class="id">id'</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="Ids.gensym_injective">gensym_injective</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">pref</span> <span class="id">hint</span> <span class="id">id</span> <span class="id">pref'</span> <span class="id">hint'</span> <span class="id">id'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.gensym">gensym</a></span> <span class="id">pref</span> <span class="id">hint</span> <span class="id">id</span> = <span class="id"><a href="Velus.Ident.html#Ids.gensym">gensym</a></span> <span class="id">pref'</span> <span class="id">hint'</span> <span class="id">id'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pref</span> = <span class="id">pref'</span> /\ <span class="id">id</span> = <span class="id">id'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">pref</span> <span class="id">pref'</span>), (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">id</span> <span class="id">id'</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1-3:<span class="id">exfalso</span>; <span class="id">eapply</span> <span class="id">gensym_injective'</span> <span class="kwd">in</span> <span class="id">Heq</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Ids.AtomOrGensym">AtomOrGensym</a></span> (<span class="id">prefs</span> : <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>) (<span class="id">id</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.atom">atom</a></span> <span class="id">id</span> \/ <span class="id"><a href="Velus.Common.Common.html#PS.Exists">PS.Exists</a></span> (<span class="kwd">fun</span> <span class="id">pre</span> =&gt; <span class="kwd">exists</span> <span class="id">n</span> <span class="id">hint</span>, <span class="id">id</span> = <span class="id"><a href="Velus.Ident.html#Ids.gensym">gensym</a></span> <span class="id">pre</span> <span class="id">hint</span> <span class="id">n</span>) <span class="id">prefs</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Axiom</span> <span class="id">prefix_gensym_injective'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">pref</span> <span class="id">id</span> <span class="id">pref'</span> <span class="id">hint'</span> <span class="id">id'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pref</span> &lt;&gt; <span class="id">pref'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id">pref</span> <span class="id">id</span> &lt;&gt; <span class="id"><a href="Velus.Ident.html#Ids.gensym">gensym</a></span> <span class="id">pref'</span> <span class="id">hint'</span> <span class="id">id'</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="Ids.prefix_gensym_injective">prefix_gensym_injective</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">pref</span> <span class="id">id</span> <span class="id">pref'</span> <span class="id">hint'</span> <span class="id">id'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Ident.html#Ids.prefix">prefix</a></span> <span class="id">pref</span> <span class="id">id</span> = <span class="id"><a href="Velus.Ident.html#Ids.gensym">gensym</a></span> <span class="id">pref'</span> <span class="id">hint'</span> <span class="id">id'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pref</span> = <span class="id">pref'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Heq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">pref</span> <span class="id">pref'</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exfalso</span>. <span class="id">eapply</span> <span class="id">prefix_gensym_injective'</span> <span class="kwd">in</span> <span class="id">n</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Ident.html#Ids">Ids</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

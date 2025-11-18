@@ -1,0 +1,808 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module Fresh</title>
+<meta name="description" content="Documentation of Coq module Fresh" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module Fresh</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html">Sorting.Permutation</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html">Classes.RelationClasses</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Setoids.Setoid.html">Setoid</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html">Morphisms</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Environment.html">Environment</a></span>.<br/>
+<br/>
+<h1> Fresh name generation </h1>
+<br/>
+<div class="doc">The fresh monad (with memory) : generates new names and keeps
+    a record of each name generated along with some information
+    The file is structured as such:
+    - a signature FRESHKERNEL, which exposes the kernel features of the monad
+    - a functor FreshKernel which implements the previous signature,
+      and contains some gruesome definitions details that we prefer to hide
+    - a functor Fresh that includes FreshKernel and also offers some additional lemmas.
+      This module should be instanciated using an IDS module that contains, among other things,
+      the gensym function used for name generation
+ </div>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="FRESHKERNEL">FRESHKERNEL</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span> : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>).<br/>
+<br/>
+<div class="doc">The Monad manipulates a state, parameterized by a prefix with which to generate identifiers.
+      The state exposes a list of the identifiers generated
+      by the monad, paired with some data </div>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FRESHKERNEL.st">st</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="FRESHKERNEL.st.fresh_st">fresh_st</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="kwd">Type</span> -&gt; <span class="kwd">Type</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FRESHKERNEL.st.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FRESHKERNEL.st.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="FRESHKERNEL.st.st_anns">st_anns</a></span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st.B">B</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st.B">B</a></span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FRESHKERNEL.st_ids">st_ids</a></span> (<span class="id">st</span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st.B">B</a></span>) := <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_anns">st_anns</a></span> <span class="id">st</span>).<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st">st</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Unfold</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_ids">st_ids</a></span> : <span class="id">list</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FRESHKERNEL.Fresh">Fresh</a></span> <span class="id">pref</span> (<span class="id">A</span> <span class="id">B</span> : <span class="kwd">Type</span>) : <span class="kwd">Type</span> := <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_st">fresh_st</a></span> <span class="id">pref</span> <span class="id">B</span> -&gt; <span class="id">A</span> * <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_st">fresh_st</a></span> <span class="id">pref</span> <span class="id">B</span>.<br/>
+<br/>
+<div class="doc">By construction, the state only contains
+      identifier prefixed by <span class="bracket"><span class="id">prefix</span></span> and that are all distinct </div>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FRESHKERNEL.validity">validity</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FRESHKERNEL.validity.prefix">prefix</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FRESHKERNEL.validity.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.validity.st_valid_NoDup">st_valid_NoDup</a></span> : <span class="kwd">forall</span> (<span class="id">st</span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.validity.prefix">prefix</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.validity.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> (<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_ids">st_ids</a></span> <span class="id">st</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.validity.st_valid_prefixed">st_valid_prefixed</a></span> : <span class="kwd">forall</span> (<span class="id">st</span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.validity.prefix">prefix</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.validity.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="kwd">exists</span> <span class="id">n</span> <span class="id">hint</span>, <span class="id">x</span> = <span class="id"><a href="Velus.Fresh.html#Ids.gensym">gensym</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.validity.prefix">prefix</a></span> <span class="id">hint</span> <span class="id">n</span>) (<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_ids">st_ids</a></span> <span class="id">st</span>).<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.validity">validity</a></span>.<br/>
+<br/>
+<div class="doc"><span class="bracket"><span class="id">st_follows</span></span> forms an inclusion relation over the contents of the states.
+      We show below that every primimitive Fresh operation produces a new state
+      that follows the previous one </div>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FRESHKERNEL.follows">follows</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FRESHKERNEL.follows.prefix">prefix</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FRESHKERNEL.follows.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="FRESHKERNEL.follows.st_follows">st_follows</a></span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.follows.prefix">prefix</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.follows.B">B</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.follows.prefix">prefix</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.follows.B">B</a></span> -&gt; <span class="kwd">Prop</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.follows.st_follows_refl">st_follows_refl</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_follows">st_follows</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.follows.st_follows_trans">st_follows_trans</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_follows">st_follows</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.follows.st_follows_incl">st_follows_incl</a></span> : <span class="kwd">forall</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> (<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_anns">st_anns</a></span> <span class="id">st</span>) (<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_anns">st_anns</a></span> <span class="id">st'</span>).<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.follows">follows</a></span>.<br/>
+<br/>
+<div class="doc">The initial state is empty. </div>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FRESHKERNEL.init">init</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FRESHKERNEL.init.prefix">prefix</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FRESHKERNEL.init.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="FRESHKERNEL.init.init_st">init_st</a></span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.init.prefix">prefix</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.init.B">B</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.init.init_st_anns">init_st_anns</a></span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_anns">st_anns</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.init_st">init_st</a></span> = [].<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.init">init</a></span>.<br/>
+<br/>
+<div class="doc">The central function for fresh identifier generation,
+      <span class="bracket"><span class="id">fresh_ident</span> <span class="id">prefix</span> <span class="id">hint</span> <span class="id">d</span></span> generates a new identifier prefixed by <span class="bracket"><span class="id">prefix</span></span> and
+      associated with data <span class="bracket"><span class="id">d</span></span> in the new state.
+      If a value is passed for <span class="bracket"><span class="id">hint</span></span>, it will show up in the generated identifier.
+      <span class="bracket"><span class="id">fresh_ident</span> <span class="id">prefix</span> <span class="id">d</span></span> preserves validity as long as <span class="bracket"><span class="id">prefix</span></span> is the correct one </div>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FRESHKERNEL.fresh_ident">fresh_ident</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FRESHKERNEL.fresh_ident.prefix">prefix</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FRESHKERNEL.fresh_ident.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="FRESHKERNEL.fresh_ident.fresh_ident">fresh_ident</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_ident.B">B</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_ident.prefix">prefix</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_ident.B">B</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.fresh_ident.fresh_ident_anns">fresh_ident_anns</a></span> : <span class="kwd">forall</span> <span class="id">hint</span> <span class="id">b</span> <span class="id">id</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> <span class="id">b</span> <span class="id">st</span> = (<span class="id">id</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_anns">st_anns</a></span> <span class="id">st'</span> = (<span class="id">id</span>, <span class="id">b</span>)::(<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_anns">st_anns</a></span> <span class="id">st</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.fresh_ident.fresh_ident_st_follows">fresh_ident_st_follows</a></span> : <span class="kwd">forall</span> <span class="id">hint</span> <span class="id">b</span> <span class="id">id</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> <span class="id">b</span> <span class="id">st</span> = (<span class="id">id</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st'</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.fresh_ident.fresh_ident_prefixed">fresh_ident_prefixed</a></span> : <span class="kwd">forall</span> <span class="id">hint</span> <span class="id">b</span> <span class="id">id</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> <span class="id">b</span> <span class="id">st</span> = (<span class="id">id</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">n</span> <span class="id">hint</span>, <span class="id">id</span> = <span class="id"><a href="Velus.Fresh.html#Ids.gensym">gensym</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_ident.prefix">prefix</a></span> <span class="id">hint</span> <span class="id">n</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.fresh_ident">fresh_ident</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FRESHKERNEL.ret">ret</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FRESHKERNEL.ret.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FRESHKERNEL.ret.A">A</a></span> <span class="id"><a name="FRESHKERNEL.ret.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="FRESHKERNEL.ret.ret">ret</a></span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.ret.A">A</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.ret.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.ret.A">A</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.ret.B">B</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.ret.ret_spec">ret_spec</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">st</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.ret">ret</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a</span>, <span class="id">st</span>).<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.ret">ret</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FRESHKERNEL.bind">bind</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FRESHKERNEL.bind.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FRESHKERNEL.bind.A">A</a></span> <span class="id">A'</span> <span class="id"><a name="FRESHKERNEL.bind.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="FRESHKERNEL.bind.bind">bind</a></span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.A">A</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.B">B</a></span> -&gt; (<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.A">A</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.B">B</a></span>) -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.B">B</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.bind.bind_spec">bind_spec</a></span> : <span class="kwd">forall</span> (<span class="id">x</span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.A">A</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.B">B</a></span>) (<span class="id">k</span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.A">A</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind.B">B</a></span>) <span class="id">st</span> <span class="id">a'</span> <span class="id">st''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind">bind</a></span> <span class="id">x</span> <span class="id">k</span>) <span class="id">st</span> = (<span class="id">a'</span>, <span class="id">st''</span>) &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">a</span>, <span class="kwd">exists</span> <span class="id">st'</span>, (<span class="id">x</span> <span class="id">st</span> = (<span class="id">a</span>, <span class="id">st'</span>) /\ <span class="id">k</span> <span class="id">a</span> <span class="id">st'</span> = (<span class="id">a'</span>, <span class="id">st''</span>)).<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind">bind</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FRESHKERNEL.bind2">bind2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FRESHKERNEL.bind2.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FRESHKERNEL.bind2.A1">A1</a></span> <span class="id"><a name="FRESHKERNEL.bind2.A2">A2</a></span> <span class="id">A'</span> <span class="id"><a name="FRESHKERNEL.bind2.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="FRESHKERNEL.bind2.bind2">bind2</a></span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.pref">pref</a></span> (<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.A1">A1</a></span> * <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.A2">A2</a></span>) <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.B">B</a></span> -&gt; (<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.A1">A1</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.A2">A2</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.B">B</a></span>) -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.B">B</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Conjecture</span> <span class="id"><a name="FRESHKERNEL.bind2.bind2_spec">bind2_spec</a></span> : <span class="kwd">forall</span> (<span class="id">x</span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.pref">pref</a></span> (<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.A1">A1</a></span> * <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.A2">A2</a></span>) <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.B">B</a></span>) (<span class="id">k</span> : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.A1">A1</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.A2">A2</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2.B">B</a></span>) <span class="id">st</span> <span class="id">a'</span> <span class="id">st''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2">bind2</a></span> <span class="id">x</span> <span class="id">k</span>) <span class="id">st</span> = (<span class="id">a'</span>, <span class="id">st''</span>) &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">a1</span>, <span class="kwd">exists</span> <span class="id">a2</span>, <span class="kwd">exists</span> <span class="id">st'</span>, (<span class="id">x</span> <span class="id">st</span> = ((<span class="id">a1</span>, <span class="id">a2</span>), <span class="id">st'</span>) /\ <span class="id">k</span> <span class="id">a1</span> <span class="id">a2</span> <span class="id">st'</span> = (<span class="id">a'</span>, <span class="id">st''</span>)).<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL.bind2">bind2</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL">FRESHKERNEL</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="FreshKernel">FreshKernel</a></span>(<span class="kwd">Import</span> <span class="id">Ids</span> : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>) : <span class="id"><a href="Velus.Fresh.html#FRESHKERNEL">FRESHKERNEL</a></span>(<span class="id"><a href="Velus.Fresh.html#Ids">Ids</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FreshKernel.st">st</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Record</span> <span class="id">fresh_st'</span> (<span class="id">pref</span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">B</span> : <span class="kwd">Type</span>) : <span class="kwd">Type</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id"><a name="FreshKernel.st_next">st_next</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="FreshKernel.st_anns">st_anns</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id">B</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="FreshKernel.st_nodup">st_nodup</a></span> : <span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">st_anns</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="FreshKernel.st_prefs">st_prefs</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">id</span> =&gt; <span class="kwd">exists</span> <span class="id">x</span> <span class="id">hint</span>, <span class="id">id</span> = <span class="id"><a href="Velus.Fresh.html#Ids.gensym">gensym</a></span> <span class="id">pref</span> <span class="id">hint</span> <span class="id">x</span> /\ <span class="id"><a href="https://coq.inria.fr/library/Coq.PArith.BinPos.html#Pos.lt">Pos.lt</a></span> <span class="id">x</span> <span class="id">st_next</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">st_anns</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FreshKernel.fresh_st">fresh_st</a></span> <span class="id">pref</span> <span class="id">B</span> := <span class="id">fresh_st'</span> <span class="id">pref</span> <span class="id">B</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FreshKernel.st.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FreshKernel.st.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FreshKernel.st_ids">st_ids</a></span> (<span class="id">st</span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.st.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.st.B">B</a></span>) := <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> _ _ <span class="id">st</span>).<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.st">st</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Arguments</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> {_} {_}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FreshKernel.Fresh">Fresh</a></span> <span class="id">pref</span> (<span class="id">A</span> <span class="id">B</span> : <span class="kwd">Type</span>) : <span class="kwd">Type</span> := <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_st">fresh_st</a></span> <span class="id">pref</span> <span class="id">B</span> -&gt; <span class="id">A</span> * <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_st">fresh_st</a></span> <span class="id">pref</span> <span class="id">B</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FreshKernel.ret">ret</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FreshKernel.ret.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FreshKernel.ret.A">A</a></span> <span class="id"><a name="FreshKernel.ret.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FreshKernel.ret">ret</a></span> (<span class="id">a</span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.ret.A">A</a></span>) : <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.ret.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.ret.A">A</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.ret.B">B</a></span> := <span class="kwd">fun</span> <span class="id">st</span> =&gt; (<span class="id">a</span>, <span class="id">st</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FreshKernel.ret_spec">ret_spec</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">st</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FreshKernel.ret">ret</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a</span>, <span class="id">st</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">a</span> <span class="id">st</span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.ret">ret</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FreshKernel.validity">validity</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FreshKernel.validity.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FreshKernel.validity.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FreshKernel.AtomOrGensym_gensym_injective">AtomOrGensym_gensym_injective</a></span> : <span class="kwd">forall</span> <span class="id">prefs</span> <span class="id">pref</span> <span class="id">hint</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Ids.AtomOrGensym">AtomOrGensym</a></span> <span class="id">prefs</span> (<span class="id"><a href="Velus.Fresh.html#Ids.gensym">gensym</a></span> <span class="id">pref</span> <span class="id">hint</span> <span class="id">x</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">pref</span> <span class="id">prefs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * [<span class="id">Hat</span>|(?&amp;?&amp;?&amp;?&amp;<span class="id">Hgen</span>)].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">exfalso</span>. <span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Ids.gensym_not_atom">gensym_not_atom</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Ids.gensym_injective">gensym_injective</a></span> <span class="kwd">in</span> <span class="id">Hgen</span> <span class="kwd">as</span> (?&amp;?); <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FreshKernel.st_valid_NoDup">st_valid_NoDup</a></span> : <span class="kwd">forall</span> (<span class="id">st</span>: <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.validity.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.validity.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_ids">st_ids</a></span> <span class="id">st</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#fst_NoDupMembers">fst_NoDupMembers</a></span>, <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_nodup">st_nodup</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FreshKernel.st_valid_prefixed">st_valid_prefixed</a></span> : <span class="kwd">forall</span> (<span class="id">st</span>: <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.validity.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.validity.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="kwd">exists</span> <span class="id">n</span> <span class="id">hint</span>, <span class="id">x</span> = <span class="id"><a href="Velus.Fresh.html#Ids.gensym">gensym</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.validity.pref">pref</a></span> <span class="id">hint</span> <span class="id">n</span>) (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_ids">st_ids</a></span> <span class="id">st</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_ids">st_ids</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_prefs">st_prefs</a></span> _ _ <span class="id">st</span>) <span class="kwd">as</span> <span class="id">Hprefs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">subst</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.validity">validity</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FreshKernel.follows">follows</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FreshKernel.follows.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FreshKernel.follows.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FreshKernel.st_follows">st_follows</a></span> (<span class="id">st</span> <span class="id">st'</span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.follows.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.follows.B">B</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> <span class="id">st</span>) (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> <span class="id">st'</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FreshKernel.st_follows_refl">st_follows_refl</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_follows">st_follows</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">intros</span> <span class="id">st</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_follows">st_follows</a></span>. <span class="id">reflexivity</span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FreshKernel.st_follows_trans">st_follows_trans</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_follows">st_follows</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span>. <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_follows">st_follows</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FreshKernel.st_follows_incl">st_follows_incl</a></span> : <span class="kwd">forall</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl">incl</a></span> (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> <span class="id">st</span>) (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> <span class="id">st'</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">auto</span> <span class="kwd">with</span> *. Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.follows">follows</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FreshKernel.init">init</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FreshKernel.init.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FreshKernel.init.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Program</span> <span class="kwd">Definition</span> <span class="id"><a name="FreshKernel.init_st">init_st</a></span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.init.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.init.B">B</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_next">st_next</a></span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#xH">xH</a></span>; <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> := []; |}.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+ <span class="id">constructor</span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FreshKernel.init_st_anns">init_st_anns</a></span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.init_st">init_st</a></span> = [].<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">intros</span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.init">init</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FreshKernel.fresh_ident">fresh_ident</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FreshKernel.fresh_ident.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FreshKernel.fresh_ident.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Program</span> <span class="kwd">Definition</span> <span class="id"><a name="FreshKernel.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> (<span class="id">b</span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_ident.B">B</a></span>) : <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_ident.pref">pref</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_ident.B">B</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">st</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">id</span> := <span class="id"><a href="Velus.Fresh.html#Ids.gensym">gensym</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_ident.pref">pref</a></span> <span class="id">hint</span> (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_next">st_next</a></span> _ _ <span class="id">st</span>) <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">id</span>, {| <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_next">st_next</a></span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.PArith.BinPos.html#Pos.succ">Pos.succ</a></span> (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_next">st_next</a></span> _ _ <span class="id">st</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> := (<span class="id">id</span>, <span class="id">b</span>)::<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> <span class="id">st</span> |}).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>. 2:<span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_nodup">st_nodup</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_prefs">st_prefs</a></span> _ _ <span class="id">st</span>) <span class="kwd">as</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#fst_InMembers">fst_InMembers</a></span>. <span class="id">intros</span> <span class="id">Hin</span>. <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Ids.gensym_injective">gensym_injective</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> (_&amp;?); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.PArith.BinPos.html#Pos.lt_irrefl">Pos.lt_irrefl</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_prefs">st_prefs</a></span> _ _ <span class="id">st</span>) <span class="kwd">as</span> <span class="id">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">repeat</span> <span class="id">esplit</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.PArith.BinPos.html#Pos.lt_succ_diag_r">Pos.lt_succ_diag_r</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">etransitivity</span>; <span class="id">eauto</span>. <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.PArith.BinPos.html#Pos.lt_succ_diag_r">Pos.lt_succ_diag_r</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FreshKernel.fresh_ident_anns">fresh_ident_anns</a></span> : <span class="kwd">forall</span> <span class="id">hint</span> <span class="id">b</span> <span class="id">id</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> <span class="id">b</span> <span class="id">st</span> = (<span class="id">id</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> <span class="id">st'</span> = (<span class="id">id</span>, <span class="id">b</span>)::(<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_anns">st_anns</a></span> <span class="id">st</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">st</span>. <span class="id">inv</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FreshKernel.fresh_ident_st_follows">fresh_ident_st_follows</a></span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">hint</span> (<span class="id">b</span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_ident.B">B</a></span>) <span class="id">id</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> <span class="id">b</span> <span class="id">st</span> = (<span class="id">id</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FreshKernel.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ??? [] [] <span class="id">Hfresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">inv</span> <span class="id">Hfresh</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.st_follows">st_follows</a></span> <span class="kwd">in</span> *; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#incl_tl">incl_tl</a></span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="FreshKernel.fresh_ident_prefixed">fresh_ident_prefixed</a></span> : <span class="kwd">forall</span> <span class="id">hint</span> <span class="id">b</span> <span class="id">id</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> <span class="id">b</span> <span class="id">st</span> = (<span class="id">id</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">x</span> <span class="id">hint</span>, <span class="id">id</span> = <span class="id"><a href="Velus.Fresh.html#Ids.gensym">gensym</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_ident.pref">pref</a></span> <span class="id">hint</span> <span class="id">x</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ??? [] ? <span class="id">Hfresh</span>. <span class="id">inv</span> <span class="id">Hfresh</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.fresh_ident">fresh_ident</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FreshKernel.bind">bind</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FreshKernel.bind.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FreshKernel.bind.A">A</a></span> <span class="id">A'</span> <span class="id"><a name="FreshKernel.bind.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FreshKernel.bind">bind</a></span> (<span class="id">x</span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.A">A</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.B">B</a></span>) (<span class="id">k</span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.A">A</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.B">B</a></span>) : <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.B">B</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">st</span> =&gt; <span class="kwd">let</span> '(<span class="id">a</span>, <span class="id">st'</span>) := <span class="id">x</span> <span class="id">st</span> <span class="kwd">in</span> <span class="id">k</span> <span class="id">a</span> <span class="id">st'</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FreshKernel.bind_spec">bind_spec</a></span> : <span class="kwd">forall</span> (<span class="id">x</span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.A">A</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.B">B</a></span>) (<span class="id">k</span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.A">A</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind.B">B</a></span>) <span class="id">st</span> <span class="id">a'</span> <span class="id">st''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Fresh.html#FreshKernel.bind">bind</a></span> <span class="id">x</span> <span class="id">k</span>) <span class="id">st</span> = (<span class="id">a'</span>, <span class="id">st''</span>) &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">a</span>, <span class="kwd">exists</span> <span class="id">st'</span>, (<span class="id">x</span> <span class="id">st</span> = (<span class="id">a</span>, <span class="id">st'</span>) /\ <span class="id">k</span> <span class="id">a</span> <span class="id">st'</span> = (<span class="id">a'</span>, <span class="id">st''</span>)).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> <span class="id">k</span> <span class="id">st</span> <span class="id">a'</span> <span class="id">st''</span>. <span class="id">split</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind">bind</a></span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">x</span> <span class="id">st</span>) <span class="kwd">as</span> [<span class="id">a</span> <span class="id">st'</span>]. <span class="kwd">exists</span> <span class="id">a</span>. <span class="kwd">exists</span> <span class="id">st'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> [<span class="id">a</span> [<span class="id">st'</span> [<span class="id">H1</span> <span class="id">H2</span>]]]. <span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind">bind</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H1</span>. <span class="id">assumption</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind">bind</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="FreshKernel.bind2">bind2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="FreshKernel.bind2.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="FreshKernel.bind2.A1">A1</a></span> <span class="id"><a name="FreshKernel.bind2.A2">A2</a></span> <span class="id">A'</span> <span class="id"><a name="FreshKernel.bind2.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="FreshKernel.bind2">bind2</a></span> (<span class="id">x</span>: <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.pref">pref</a></span> (<span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.A1">A1</a></span> * <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.A2">A2</a></span>) <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.B">B</a></span>) (<span class="id">k</span>: <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.A1">A1</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.A2">A2</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.B">B</a></span>) : <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.B">B</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">fun</span> <span class="id">n</span> =&gt; <span class="kwd">let</span> '((<span class="id">a1</span>, <span class="id">a2</span>), <span class="id">n'</span>) := <span class="id">x</span> <span class="id">n</span> <span class="kwd">in</span> <span class="id">k</span> <span class="id">a1</span> <span class="id">a2</span> <span class="id">n'</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="FreshKernel.bind2_spec">bind2_spec</a></span> : <span class="kwd">forall</span> (<span class="id">x</span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.pref">pref</a></span> (<span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.A1">A1</a></span> * <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.A2">A2</a></span>) <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.B">B</a></span>) (<span class="id">k</span> : <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.A1">A1</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.A2">A2</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#FreshKernel.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.pref">pref</a></span> <span class="id">A'</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2.B">B</a></span>) <span class="id">st</span> <span class="id">a'</span> <span class="id">st''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2">bind2</a></span> <span class="id">x</span> <span class="id">k</span>) <span class="id">st</span> = (<span class="id">a'</span>, <span class="id">st''</span>) &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">a1</span>, <span class="kwd">exists</span> <span class="id">a2</span>, <span class="kwd">exists</span> <span class="id">st'</span>, (<span class="id">x</span> <span class="id">st</span> = ((<span class="id">a1</span>, <span class="id">a2</span>), <span class="id">st'</span>) /\ <span class="id">k</span> <span class="id">a1</span> <span class="id">a2</span> <span class="id">st'</span> = (<span class="id">a'</span>, <span class="id">st''</span>)).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> <span class="id">k</span> <span class="id">st</span> <span class="id">a'</span> <span class="id">st''</span>. <span class="id">split</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2">bind2</a></span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">x</span> <span class="id">st</span>) <span class="kwd">as</span> [[<span class="id">a1</span> <span class="id">a2</span>] <span class="id">st'</span>]. <span class="kwd">exists</span> <span class="id">a1</span>. <span class="kwd">exists</span> <span class="id">a2</span>. <span class="kwd">exists</span> <span class="id">st'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> [<span class="id">a1</span> [<span class="id">a2</span> [<span class="id">st'</span> [<span class="id">H1</span> <span class="id">H2</span>]]]]. <span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2">bind2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H1</span>. <span class="id">assumption</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel.bind2">bind2</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#FreshKernel">FreshKernel</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="Fresh">Fresh</a></span>(<span class="id">Ids</span> : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Module</span> <span class="id"><a name="Fresh.Ker">Ker</a></span> := <span class="id"><a href="Velus.Fresh.html#FreshKernel">FreshKernel</a></span>(<span class="id"><a href="Velus.Fresh.html#Ids">Ids</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Ker">Ker</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="Fresh.Instances">Instances</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="Fresh.Instances.prefix">prefix</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="Fresh.Instances.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="Fresh.st_follows_Reflexive">st_follows_Reflexive</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Reflexive">Reflexive</a></span> (@<span class="id"><a href="Velus.Fresh.html#Fresh.st_follows">st_follows</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Instances.prefix">prefix</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Instances.B">B</a></span>) := <span class="id"><a href="Velus.Fresh.html#Fresh.st_follows_refl">st_follows_refl</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Instance</span> <span class="id"><a name="Fresh.st_follows_Transitive">st_follows_Transitive</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.RelationClasses.html#Transitive">Transitive</a></span> (@<span class="id"><a href="Velus.Fresh.html#Fresh.st_follows">st_follows</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Instances.prefix">prefix</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Instances.B">B</a></span>) := <span class="id"><a href="Velus.Fresh.html#Fresh.st_follows_trans">st_follows_trans</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Instances">Instances</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Module</span> <span class="id"><a name="Fresh.Facts">Facts</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="Fresh.Facts.st">st</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="Fresh.Facts.st.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="Fresh.Facts.st.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.Facts.st_anns_ids_In">st_anns_ids_In</a></span> : <span class="kwd">forall</span> (<span class="id">st</span> : <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.st.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.st.B">B</a></span>) <span class="id">id</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">exists</span> <span class="id">b</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">id</span>, <span class="id">b</span>) (<span class="id"><a href="Velus.Fresh.html#Fresh.st_anns">st_anns</a></span> <span class="id">st</span>)) &lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">id</span> (<span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span> <span class="id">st</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> [<span class="id">b</span> <span class="id">H</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span>. <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map_iff">in_map_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id">id</span>, <span class="id">b</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span> <span class="kwd">in</span> <span class="id">H</span>. <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map_iff">in_map_iff</a></span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> [[? <span class="id">b</span>] [? <span class="id">H</span>]]; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">b</span>. <span class="id">assumption</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.st">st</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.Facts.contradict_AtomOrGensym">contradict_AtomOrGensym</a></span> : <span class="kwd">forall</span> <span class="id">pref</span> <span class="id">prefs</span> <span class="id">hint</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">pref</span> <span class="id">prefs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Fresh.html#Ids.AtomOrGensym">Ids.AtomOrGensym</a></span> <span class="id">prefs</span> (<span class="id"><a href="Velus.Fresh.html#Ids.gensym">Ids.gensym</a></span> <span class="id">pref</span> <span class="id">hint</span> <span class="id">n</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnin</span> [<span class="id">Hat</span>|(?&amp;?&amp;?&amp;?&amp;<span class="id">Hgen</span>)].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Ids.gensym_not_atom">Ids.gensym_not_atom</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Ids.gensym_injective">Ids.gensym_injective</a></span> <span class="kwd">in</span> <span class="id">Hgen</span> <span class="kwd">as</span> (?&amp;?); <span class="id">subst</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="Fresh.Facts.st_valid">st_valid</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="Fresh.Facts.st_valid.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="Fresh.Facts.st_valid.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.Facts.st_valid_AtomOrGensym_nIn">st_valid_AtomOrGensym_nIn</a></span> : <span class="kwd">forall</span> <span class="id">prefs</span> (<span class="id">st</span> : <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.st_valid.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.st_valid.B">B</a></span>) <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.st_valid.pref">pref</a></span> <span class="id">prefs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Ids.AtomOrGensym">Ids.AtomOrGensym</a></span> <span class="id">prefs</span> <span class="id">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span> <span class="id">st</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnin</span> <span class="id">Hat</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id"><a href="Velus.Fresh.html#Fresh.st_valid_prefixed">st_valid_prefixed</a></span> <span class="id">st</span>) <span class="kwd">as</span> <span class="id">Hst</span>. <span class="id">simpl_Forall</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.contradict_AtomOrGensym">contradict_AtomOrGensym</a></span> <span class="kwd">in</span> <span class="id">Hat</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.st_valid">st_valid</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="Fresh.Facts.fresh_ident">fresh_ident</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="Fresh.Facts.fresh_ident.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="Fresh.Facts.fresh_ident.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.Facts.fresh_ident_In">fresh_ident_In</a></span> : <span class="kwd">forall</span> <span class="id">hint</span> (<span class="id">b</span> : <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.B">B</a></span>) <span class="id">id</span> (<span class="id">st</span> <span class="id">st'</span>: <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> <span class="id">b</span> <span class="id">st</span> = (<span class="id">id</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">id</span>, <span class="id">b</span>) (<span class="id"><a href="Velus.Fresh.html#Fresh.st_anns">st_anns</a></span> <span class="id">st'</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident_anns">fresh_ident_anns</a></span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">H</span>. <span class="id">constructor</span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="Fresh.Facts.fresh_ident_Inids">fresh_ident_Inids</a></span> : <span class="kwd">forall</span> <span class="id">hint</span> (<span class="id">b</span> : <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.B">B</a></span>) <span class="id">id</span> (<span class="id">st</span> <span class="id">st'</span>: <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> <span class="id">b</span> <span class="id">st</span> = (<span class="id">id</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">id</span> (<span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span> <span class="id">st'</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident_In">fresh_ident_In</a></span> <span class="kwd">in</span> <span class="id">Hfresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span>. <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map_iff">in_map_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id">id</span>, <span class="id">b</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.Facts.fresh_ident_vars_perm">fresh_ident_vars_perm</a></span> : <span class="kwd">forall</span> <span class="id">hint</span> (<span class="id">b</span> : <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.B">B</a></span>) <span class="id">id</span> (<span class="id">st</span> <span class="id">st'</span>: <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> <span class="id">b</span> <span class="id">st</span> = (<span class="id">id</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id">id</span>::(<span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span> <span class="id">st</span>)) (<span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span> <span class="id">st'</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident_anns">fresh_ident_anns</a></span> <span class="kwd">in</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span> <span class="kwd">in</span> *. <span class="id">rewrite</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.Facts.fresh_ident_nIn">fresh_ident_nIn</a></span> : <span class="kwd">forall</span> <span class="id">hint</span> (<span class="id">b</span> : <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.B">B</a></span>) <span class="id">id</span> (<span class="id">st</span> <span class="id">st'</span>: <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> <span class="id">b</span> <span class="id">st</span> = (<span class="id">id</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">id</span> (<span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span> <span class="id">st</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id"><a href="Velus.Fresh.html#Fresh.st_valid_NoDup">st_valid_NoDup</a></span> <span class="id">st'</span>) <span class="kwd">as</span> <span class="id">Hvalid</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident_vars_perm">fresh_ident_vars_perm</a></span> <span class="kwd">in</span> <span class="id">Hfresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id">Hfresh</span> <span class="kwd">in</span> <span class="id">Hvalid</span>. <span class="id">inv</span> <span class="id">Hvalid</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assumption</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id">fresh_ident_nIn'</span> : <span class="kwd">forall</span> <span class="id">prefs</span> <span class="id">hint</span> (<span class="id">b</span> : <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.B">B</a></span>) <span class="id">id</span> (<span class="id">st</span> <span class="id">st'</span>: <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_st">fresh_st</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.B">B</a></span>) <span class="id">aft</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident.pref">pref</a></span> <span class="id">prefs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="id"><a href="Velus.Fresh.html#Ids.AtomOrGensym">Ids.AtomOrGensym</a></span> <span class="id">prefs</span>) <span class="id">aft</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident">fresh_ident</a></span> <span class="id">hint</span> <span class="id">b</span> <span class="id">st</span> = (<span class="id">id</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">id</span> <span class="id">aft</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnin</span> <span class="id">Hat</span> <span class="id">Hfresh</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.st_valid_AtomOrGensym_nIn">st_valid_AtomOrGensym_nIn</a></span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident_Inids">fresh_ident_Inids</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts.fresh_ident">fresh_ident</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Facts">Facts</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Module</span> <span class="id"><a name="Fresh.Tactics">Tactics</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Ltac</span> <span class="id">inv_bind</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span> : <span class="id">context</span> <span class="id">c</span> [<span class="id"><a href="Velus.Fresh.html#Fresh.ret">ret</a></span> _ _] |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Fresh.html#Fresh.ret_spec">ret_spec</a></span> <span class="kwd">in</span> <span class="id">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span> : (_, _) = (_, _) |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span> : <span class="id"><a href="Velus.Fresh.html#Fresh.bind">bind</a></span> _ _ _ = (_, _) |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.bind_spec">bind_spec</a></span> <span class="kwd">in</span> <span class="id">H</span>; <span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> [? [? [? ?]]]; <span class="id">simpl</span> <span class="kwd">in</span> *<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span> : <span class="id"><a href="Velus.Fresh.html#Fresh.bind2">bind2</a></span> _ _ _ = (_, _) |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.bind2_spec">bind2_spec</a></span> <span class="kwd">in</span> <span class="id">H</span>; <span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> [? [? [? [? ?]]]]; <span class="id">simpl</span> <span class="kwd">in</span> *<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- <span class="id">context</span> <span class="id">c</span> [<span class="id"><a href="Velus.Fresh.html#Fresh.ret">ret</a></span> _ _] =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Fresh.html#Fresh.ret_spec">ret_spec</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- <span class="id"><a href="Velus.Fresh.html#Fresh.bind">bind</a></span> _ _ _ = (_, _) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Fresh.html#Fresh.bind_spec">bind_spec</a></span>; <span class="id">repeat</span> <span class="id">esplit</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- <span class="id"><a href="Velus.Fresh.html#Fresh.bind2">bind2</a></span> _ _ _ = (_, _) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Fresh.html#Fresh.bind2_spec">bind2_spec</a></span>; <span class="id">repeat</span> <span class="id">esplit</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Tactics">Tactics</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Module</span> <span class="id"><a name="Fresh.Notations">Notations</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Declare</span> <span class="kwd">Scope</span> <span class="id">fresh_monad_scope</span>.<br/>
+<br/>
+<div class="doc"><span class="bracket"><span class="id">do</span></span> notation, inspired by CompCert's error monad </div>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Notation</span> <span class="string">"'do' X &lt;- A ; B"</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Fresh.html#Fresh.bind">bind</a></span> <span class="id">A</span> (<span class="kwd">fun</span> <span class="id">X</span> =&gt; <span class="id">B</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">at</span> <span class="id">level</span> 200, <span class="id">X</span> <span class="id">name</span>, <span class="id">A</span> <span class="kwd">at</span> <span class="id">level</span> 100, <span class="id">B</span> <span class="kwd">at</span> <span class="id">level</span> 200): <span class="id">fresh_monad_scope</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Notation</span> <span class="string">"'do' ( X , Y ) &lt;- A ; B"</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Fresh.html#Fresh.bind2">bind2</a></span> <span class="id">A</span> (<span class="kwd">fun</span> <span class="id">X</span> <span class="id">Y</span> =&gt; <span class="id">B</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">at</span> <span class="id">level</span> 200, <span class="id">X</span> <span class="id">name</span>, <span class="id">Y</span> <span class="id">name</span>, <span class="id">A</span> <span class="kwd">at</span> <span class="id">level</span> 100, <span class="id">B</span> <span class="kwd">at</span> <span class="id">level</span> 200): <span class="id">fresh_monad_scope</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Notations">Notations</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="Fresh.mmap">mmap</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Import</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Tactics">Tactics</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Notations">Notations</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">fresh_monad_scope</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="Fresh.mmap.pref">pref</a></span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="Fresh.mmap.A">A</a></span> <span class="id"><a name="Fresh.mmap.A1">A1</a></span> <span class="id"><a name="Fresh.mmap.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="Fresh.mmap.k">k</a></span> : <span class="id"><a href="Velus.Fresh.html#Fresh.mmap.A">A</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#Fresh.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.mmap.pref">pref</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.mmap.A1">A1</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.mmap.B">B</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="Fresh.mmap">mmap</a></span> <span class="id">a</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">a</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span> =&gt; <span class="id"><a href="Velus.Fresh.html#Fresh.ret">ret</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">hd</span>::<span class="id">tl</span> =&gt; <span class="id">do</span> <span class="id">a1</span> &lt;- <span class="id"><a href="Velus.Fresh.html#Fresh.mmap.k">k</a></span> <span class="id">hd</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> <span class="id">a1s</span> &lt;- <span class="id">mmap</span> <span class="id">tl</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.ret">ret</a></span> (<span class="id">a1</span>::<span class="id">a1s</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.mmap_values">mmap_values</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">st</span> <span class="id">a1s</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.mmap">mmap</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a1s</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="kwd">fun</span> <span class="id">a</span> <span class="id">a1</span> =&gt; <span class="kwd">exists</span> <span class="id">st''</span>, <span class="kwd">exists</span> <span class="id">st'''</span>, <span class="id"><a href="Velus.Fresh.html#Fresh.mmap.k">k</a></span> <span class="id">a</span> <span class="id">st''</span> = (<span class="id">a1</span>, <span class="id">st'''</span>)) <span class="id">a</span> <span class="id">a1s</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">a</span>; <span class="id">intros</span> <span class="id">st</span> <span class="id">a1s</span> <span class="id">st'</span> <span class="id">Hfold</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">repeat</span> <span class="id">inv_bind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">IHa</span> _ _ _ <span class="id">H0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.mmap_st_follows">mmap_st_follows</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">a1s</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.mmap">mmap</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a1s</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">a</span> =&gt; <span class="kwd">forall</span> <span class="id">a1</span> <span class="id">st</span> <span class="id">st'</span>, <span class="id"><a href="Velus.Fresh.html#Fresh.mmap.k">k</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a1</span>, <span class="id">st'</span>) -&gt; <span class="id"><a href="Velus.Fresh.html#Fresh.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st'</span>) <span class="id">a</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">a</span>; <span class="id">intros</span> * <span class="id">Hmap</span> <span class="id">Hforall</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">repeat</span> <span class="id">inv_bind</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hforall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.mlength_map">mlength_map</a></span> : <span class="kwd">forall</span> <span class="id">a1s</span> <span class="id">a2s</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.mmap">mmap</a></span> <span class="id">a1s</span> <span class="id">st</span> = (<span class="id">a2s</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">a2s</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">a1s</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">a1s</span>; <span class="id">intros</span> * <span class="id">Hmap</span>; <span class="id">repeat</span> <span class="id">inv_bind</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.mmap_values_follows">mmap_values_follows</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">st</span> <span class="id">a1s</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">a</span> <span class="id">a1</span> <span class="id">st</span> <span class="id">st'</span>, <span class="id"><a href="Velus.Fresh.html#Fresh.mmap.k">k</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a1</span>, <span class="id">st'</span>) -&gt; <span class="id"><a href="Velus.Fresh.html#Fresh.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.mmap">mmap</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a1s</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="kwd">fun</span> <span class="id">a</span> <span class="id">a1</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">st''</span> <span class="id">st'''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st''</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.Fresh.html#Fresh.mmap.k">k</a></span> <span class="id">a</span> <span class="id">st''</span> = (<span class="id">a1</span>, <span class="id">st'''</span>)) <span class="id">a</span> <span class="id">a1s</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">a</span>; <span class="id">intros</span> * <span class="id">Hfollows</span> <span class="id">Hfold</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">repeat</span> <span class="id">inv_bind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">repeat</span> <span class="id">esplit</span>; [|<span class="id">eauto</span>]. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHa</span> <span class="kwd">in</span> <span class="id">H0</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>. <span class="id">repeat</span> <span class="id">esplit</span>; [|<span class="id">eauto</span>]. <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#Fresh.mmap">mmap</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Import</span> <span class="id"><a href="Velus.Fresh.html#Fresh.Tactics">Tactics</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.Notations">Notations</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">fresh_monad_scope</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="Fresh.mmap2">mmap2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="Fresh.mmap2.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="Fresh.mmap2.A">A</a></span> <span class="id"><a name="Fresh.mmap2.A1">A1</a></span> <span class="id"><a name="Fresh.mmap2.A2">A2</a></span> <span class="id"><a name="Fresh.mmap2.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="Fresh.mmap2.k">k</a></span> : <span class="id"><a href="Velus.Fresh.html#Fresh.mmap2.A">A</a></span> -&gt; <span class="id"><a href="Velus.Fresh.html#Fresh.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.mmap2.pref">pref</a></span> (<span class="id"><a href="Velus.Fresh.html#Fresh.mmap2.A1">A1</a></span> * <span class="id"><a href="Velus.Fresh.html#Fresh.mmap2.A2">A2</a></span>) <span class="id"><a href="Velus.Fresh.html#Fresh.mmap2.B">B</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="Fresh.mmap2">mmap2</a></span> <span class="id">a</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">a</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span> =&gt; <span class="id"><a href="Velus.Fresh.html#Fresh.ret">ret</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">hd</span>::<span class="id">tl</span> =&gt; <span class="id">do</span> (<span class="id">a1</span>, <span class="id">a2</span>) &lt;- <span class="id"><a href="Velus.Fresh.html#Fresh.mmap2.k">k</a></span> <span class="id">hd</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> (<span class="id">a1s</span>, <span class="id">a2s</span>) &lt;- <span class="id">mmap2</span> <span class="id">tl</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.ret">ret</a></span> (<span class="id">a1</span>::<span class="id">a1s</span>, <span class="id">a2</span>::<span class="id">a2s</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.mmap2_values">mmap2_values</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">st</span> <span class="id">a1s</span> <span class="id">a2s</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.mmap2">mmap2</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a1s</span>, <span class="id">a2s</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#Forall3">Forall3</a></span> (<span class="kwd">fun</span> <span class="id">a</span> <span class="id">a1</span> <span class="id">a2</span> =&gt; <span class="kwd">exists</span> <span class="id">st''</span>, <span class="kwd">exists</span> <span class="id">st'''</span>, <span class="id"><a href="Velus.Fresh.html#Fresh.mmap2.k">k</a></span> <span class="id">a</span> <span class="id">st''</span> = (<span class="id">a1</span>, <span class="id">a2</span>, <span class="id">st'''</span>)) <span class="id">a</span> <span class="id">a1s</span> <span class="id">a2s</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">a</span>; <span class="id">intros</span> <span class="id">st</span> <span class="id">a1s</span> <span class="id">a2s</span> <span class="id">st'</span> <span class="id">Hfold</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">repeat</span> <span class="id">inv_bind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">specialize</span> (<span class="id">IHa</span> _ _ _ _ <span class="id">H0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.mmap2_values_follows">mmap2_values_follows</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">st</span> <span class="id">a1s</span> <span class="id">a2s</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">a</span> <span class="id">a1</span> <span class="id">a2</span> <span class="id">st</span> <span class="id">st'</span>, <span class="id"><a href="Velus.Fresh.html#Fresh.mmap2.k">k</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a1</span>, <span class="id">a2</span>, <span class="id">st'</span>) -&gt; <span class="id"><a href="Velus.Fresh.html#Fresh.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.mmap2">mmap2</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a1s</span>, <span class="id">a2s</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#Forall3">Forall3</a></span> (<span class="kwd">fun</span> <span class="id">a</span> <span class="id">a1</span> <span class="id">a2</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">st''</span> <span class="id">st'''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st''</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.Fresh.html#Fresh.mmap2.k">k</a></span> <span class="id">a</span> <span class="id">st''</span> = (<span class="id">a1</span>, <span class="id">a2</span>, <span class="id">st'''</span>)) <span class="id">a</span> <span class="id">a1s</span> <span class="id">a2s</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">a</span>; <span class="id">intros</span> * <span class="id">Hfollows</span> <span class="id">Hfold</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">repeat</span> <span class="id">inv_bind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">repeat</span> <span class="id">esplit</span>; [|<span class="id">eauto</span>]. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IHa</span> <span class="kwd">in</span> <span class="id">H0</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall3_impl_In">Forall3_impl_In</a></span>; [|<span class="id">eauto</span>]; <span class="id">intros</span>; <span class="id">destruct_conjs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> 3 <span class="id">esplit</span>; [|<span class="id">eauto</span>]. <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.mmap2_st_follows">mmap2_st_follows</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">a1s</span> <span class="id">a2s</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.mmap2">mmap2</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a1s</span>, <span class="id">a2s</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">a</span> =&gt; <span class="kwd">forall</span> <span class="id">a1</span> <span class="id">a2</span> <span class="id">st</span> <span class="id">st'</span>, <span class="id"><a href="Velus.Fresh.html#Fresh.mmap2.k">k</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a1</span>, <span class="id">a2</span>, <span class="id">st'</span>) -&gt; <span class="id"><a href="Velus.Fresh.html#Fresh.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st'</span>) <span class="id">a</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">a</span>; <span class="id">intros</span> <span class="id">a1s</span> <span class="id">a2s</span> <span class="id">st</span> <span class="id">st'</span> <span class="id">Hmap</span> <span class="id">Hforall</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">repeat</span> <span class="id">inv_bind</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Hforall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.mmap2_length_1">mmap2_length_1</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">st</span> <span class="id">a1s</span> <span class="id">a2s</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.mmap2">mmap2</a></span> <span class="id">a</span> <span class="id">st</span> = (<span class="id">a1s</span>, <span class="id">a2s</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">a1s</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">a</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">a</span>; <span class="id">intros</span> * <span class="id">Map</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Map</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">inv_bind</span>; <span class="id">simpl</span>; <span class="id">f_equal</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#Fresh.mmap2">mmap2</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">fresh_ident_st_follows</span> : <span class="id">fresh</span>.<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">st_follows_incl</span> : <span class="id">fresh</span>.<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">mmap2_st_follows</span> : <span class="id">fresh</span>.<br/>
+<br/>
+<div class="doc">Generate a bunch of fresh identifiers </div>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="Fresh.fresh_idents">fresh_idents</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="Fresh.fresh_idents.pref">pref</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>} {<span class="id"><a name="Fresh.fresh_idents.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="Fresh.fresh_idents">fresh_idents</a></span> (<span class="id">xs</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents.B">B</a></span>)) : <span class="id"><a href="Velus.Fresh.html#Fresh.Fresh">Fresh</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents.pref">pref</a></span> _ <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents.B">B</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.mmap">mmap</a></span> (<span class="kwd">fun</span> '(<span class="id">x</span>, <span class="id">ann</span>) =&gt; <span class="id">do</span> <span class="id">lx</span> &lt;- <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident">fresh_ident</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">x</span>) <span class="id">ann</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.ret">ret</a></span> (<span class="id">x</span>, <span class="id">lx</span>, <span class="id">ann</span>)) <span class="id">xs</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Fresh.fresh_idents_In">fresh_idents_In</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ann</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">ann</span>) <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">lx</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">lx</span>, <span class="id">ann</span>) <span class="id">xs'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfresh</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.mmap_values">mmap_values</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#Forall2_ignore2">Forall2_ignore2</a></span> <span class="kwd">in</span> <span class="id">Hfresh</span>. <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">inv_bind</span>. <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id">fresh_idents_In'</span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">lx</span> <span class="id">ann</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">lx</span>, <span class="id">ann</span>) <span class="id">xs'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">ann</span>) <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfresh</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.mmap_values">mmap_values</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#Forall2_ignore1">Forall2_ignore1</a></span> <span class="kwd">in</span> <span class="id">Hfresh</span>. <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">inv_bind</span>. <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Fresh.fresh_idents_fst">fresh_idents_fst</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xs'</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xs</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfresh</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.mmap_values">mmap_values</a></span> <span class="kwd">in</span> <span class="id">Hfresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hfresh</span>; <span class="id">destruct_conjs</span>; <span class="id">repeat</span> <span class="id">inv_bind</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="Fresh.fresh_idents_InMembers">fresh_idents_InMembers</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span>, <span class="id"><a href="Velus.Common.CommonList.html#InMembers">InMembers</a></span> <span class="id">x</span> <span class="id">xs</span> &lt;-&gt; <span class="id"><a href="Velus.Common.CommonList.html#InMembers">InMembers</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xs'</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfresh</span> ?.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> ? <span class="id"><a href="Velus.Common.CommonList.html#fst_InMembers">fst_InMembers</a></span>, <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents_fst">fresh_idents_fst</a></span>; <span class="id">eauto</span>. <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="Fresh.fresh_idents_NoDupMembers">fresh_idents_NoDupMembers</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xs'</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hnd</span> <span class="id">Hfresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#fst_NoDupMembers">fst_NoDupMembers</a></span> <span class="kwd">in</span> <span class="id">Hnd</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#fst_NoDupMembers">fst_NoDupMembers</a></span>, <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents_fst">fresh_idents_fst</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html">Permutation</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Fresh.fresh_idents_Perm">fresh_idents_Perm</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">sub</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> '((_, <span class="id">lx</span>), _) =&gt; <span class="id">lx</span>) <span class="id">xs'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id"><a href="Velus.Common.Common.html#or_default">or_default</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">x</span> (<span class="id">Env.adds'</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xs'</span>) <span class="id">sub</span>))) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xs</span>)).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span> <span class="kwd">as</span> [|(?&amp;?)]; <span class="id">intros</span> * <span class="id">Nd</span> <span class="id">Fr</span>; <span class="id">inv</span> <span class="id">Nd</span>; <span class="id">repeat</span> <span class="id">inv_bind</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">IHxs</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id">Env.find_gsss'</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:{ <span class="id">intros</span> <span class="id">InM</span>. <span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents_InMembers">fresh_idents_InMembers</a></span> <span class="kwd">in</span> <span class="id">InM</span>; <span class="id">eauto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Fresh.fresh_idents_st_follows">fresh_idents_st_follows</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.st_follows">st_follows</a></span> <span class="id">st</span> <span class="id">st'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.mmap_st_follows">mmap_st_follows</a></span> <span class="kwd">in</span> <span class="id">Hfresh</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>. <span class="id">repeat</span> <span class="id">inv_bind</span>. <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">fresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.fresh_idents_prefixed">fresh_idents_prefixed</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_, <span class="id">lx</span>, _) =&gt; <span class="kwd">exists</span> <span class="id">n</span> <span class="id">hint</span>, <span class="id">lx</span> = <span class="id"><a href="Velus.Fresh.html#Ids.gensym">Ids.gensym</a></span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents.pref">pref</a></span> <span class="id">hint</span> <span class="id">n</span>) <span class="id">xs'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.mmap_values">mmap_values</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#Forall2_ignore1">Forall2_ignore1</a></span> <span class="kwd">in</span> <span class="id">Hfresh</span>. <span class="id">simpl_Forall</span>. <span class="id">repeat</span> <span class="id">inv_bind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident_prefixed">fresh_ident_prefixed</a></span> <span class="kwd">in</span> <span class="id">H1</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.fresh_idents_In_ids">fresh_idents_In_ids</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_, <span class="id">lx</span>, _) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">lx</span> (<span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span> <span class="id">st'</span>)) <span class="id">xs'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">intros</span>; <span class="id">destruct_conjs</span>; <span class="id">repeat</span> <span class="id">inv_bind</span>; <span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident_Inids">Facts.fresh_ident_Inids</a></span> <span class="kwd">in</span> <span class="id">H</span>. <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#incl_map">incl_map</a></span>; [|<span class="id">eauto</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.st_follows_incl">st_follows_incl</a></span>, <span class="id"><a href="Velus.Fresh.html#Fresh.mmap_st_follows">mmap_st_follows</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>. <span class="id">repeat</span> <span class="id">inv_bind</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">fresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fact</span> <span class="id"><a name="Fresh.fresh_idents_nIn_ids">fresh_idents_nIn_ids</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_, <span class="id">lx</span>, _) =&gt; ~<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">lx</span> (<span class="id"><a href="Velus.Fresh.html#Fresh.st_ids">st_ids</a></span> <span class="id">st</span>)) <span class="id">xs'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span>; <span class="id">intros</span>; <span class="id">destruct_conjs</span>; <span class="id">repeat</span> <span class="id">inv_bind</span>; <span class="id">constructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident_nIn">Facts.fresh_ident_nIn</a></span> <span class="kwd">in</span> <span class="id">H</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id">IHxs</span> <span class="kwd">in</span> <span class="id">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>. <span class="id">contradict</span> <span class="id">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#incl_map">incl_map</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Fresh.html#Fresh.st_follows_incl">st_follows_incl</a></span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">fresh</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Fresh.fresh_idents_anns">fresh_idents_anns</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Fresh.html#Fresh.st_anns">st_anns</a></span> <span class="id">st'</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="kwd">fun</span> '(_, <span class="id">lx</span>, <span class="id">ann</span>) =&gt; (<span class="id">lx</span>, <span class="id">ann</span>)) <span class="id">xs'</span>++<span class="id"><a href="Velus.Fresh.html#Fresh.st_anns">st_anns</a></span> <span class="id">st</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">xs</span> <span class="kwd">as</span> [|(?&amp;?)]; <span class="id">intros</span> * <span class="id">Fr</span>; <span class="id">repeat</span> <span class="id">inv_bind</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id">IHxs</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">erewrite</span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_ident_anns">fresh_ident_anns</a></span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">datatypes</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_middle">Permutation_middle</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="Fresh.fresh_idents_In_anns">fresh_idents_In_anns</a></span> : <span class="kwd">forall</span> <span class="id">xs</span> <span class="id">xs'</span> <span class="id">st</span> <span class="id">st'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span> <span class="id">xs</span> <span class="id">st</span> = (<span class="id">xs'</span>, <span class="id">st'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_, <span class="id">lx</span>, <span class="id">ann</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">lx</span>, <span class="id">ann</span>) (<span class="id"><a href="Velus.Fresh.html#Fresh.st_anns">st_anns</a></span> <span class="id">st'</span>)) <span class="id">xs'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Fr</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl_Forall</span>. <span class="id">erewrite</span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents_anns">fresh_idents_anns</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_app_iff">in_app_iff</a></span>. <span class="id">left</span>. <span class="id">solve_In</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#Fresh.fresh_idents">fresh_idents</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Fresh.html#Fresh">Fresh</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

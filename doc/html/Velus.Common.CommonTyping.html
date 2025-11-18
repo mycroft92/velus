@@ -1,0 +1,714 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module CommonTyping</title>
+<meta name="description" content="Documentation of Coq module CommonTyping" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module CommonTyping</h1>
+<div class="coq">
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Setoids.Setoid.html">Setoid</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html">Permutation</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Export</span> <span class="id"><a href="Velus.Common.CommonProgram.html">CommonProgram</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Environment.html">Environment</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.VelusMemory.html">VelusMemory</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="WTProg">WTProg</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="WTProg.U">U</a></span> <span class="id"><a name="WTProg.Prog">Prog</a></span>: <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> `{<span class="id"><a name="WTProg.PU">PU</a></span> : <span class="id"><a href="Velus.Common.CommonProgram.html#ProgramUnit">ProgramUnit</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.U">U</a></span>} `{<span class="id"><a name="WTProg.P">P</a></span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program">Program</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.U">U</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.Prog">Prog</a></span>}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="WTProg.wt_unit">wt_unit</a></span>: <span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.Prog">Prog</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.U">U</a></span> -&gt; <span class="kwd">Prop</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="wt_program">wt_program</a></span> (<span class="id">p</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.Prog">Prog</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Forall'</span> (<span class="kwd">fun</span> <span class="id">us</span> <span class="id">u</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.wt_unit">wt_unit</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span>) <span class="id">u</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">u'</span> =&gt; (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span> &lt;&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>)%<span class="id">type</span>) <span class="id">us</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="wt_program_find_unit">wt_program_find_unit</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">f</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.wt_unit">wt_unit</a></span> <span class="id">p'</span> <span class="id">u</span> /\ <span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">p'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>; <span class="id">induction</span> 1 <span class="kwd">as</span> [|<span class="id">u'</span> ? []]; <span class="id">try</span> <span class="id">discriminate</span>; <span class="id">intros</span> * <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) <span class="id">f</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Find</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Forall'_impl</span>; <span class="id">eauto</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id">wt_program_find_unit'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">f</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.wt_unit">wt_unit</a></span> <span class="id">p'</span> <span class="id">u</span> /\ <span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">p'</span> /\ <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span>. <span class="id">induction</span> 1 <span class="kwd">as</span> [|<span class="id">u'</span> ? []]; <span class="id">try</span> <span class="id">discriminate</span>; <span class="id">intros</span> * <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>) <span class="id">f</span>); <span class="id">auto</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Find</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id">Forall'_impl</span>; <span class="id">eauto</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program_update">equiv_program_update</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="wt_program_app">wt_program_app</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">us</span> <span class="id">us'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">us</span> ++ <span class="id">us'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Forall'</span> (<span class="kwd">fun</span> <span class="id">us</span> <span class="id">u</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">u'</span> =&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span> &lt;&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u'</span>)%<span class="id">type</span> (<span class="id">us</span> ++ <span class="id">us'</span>)) <span class="id">us</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span>; <span class="id">intros</span> * <span class="id">E</span> <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">E</span> <span class="kwd">in</span> <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">clear</span> <span class="id">E</span>; <span class="id">induction</span> <span class="id">us</span>; <span class="id">constructor</span>; <span class="id">auto</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#app_comm_cons">app_comm_cons</a></span> <span class="kwd">in</span> <span class="id">WT</span>; <span class="id">inversion</span> <span class="id">WT</span> <span class="kwd">as</span> [|?? []]; <span class="id">subst</span>; <span class="id">clear</span> <span class="id">WT</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">Forall'_app_r</span> <span class="kwd">in</span> <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Forall'_impl</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="wt_program_find_unit_chained">wt_program_find_unit_chained</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">f</span> <span class="id">g</span> <span class="id">u</span> <span class="id">p'</span> <span class="id">up</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">g</span> <span class="id">p'</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">up</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">g</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">up</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">WTp</span> <span class="id">Hfc</span> <span class="id">Hfc'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">up</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">Hfc'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">p</span> <span class="id">p'</span>) <span class="kwd">by</span> (<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_equiv_program">find_unit_equiv_program</a></span>; <span class="id">eauto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_spec">find_unit_spec</a></span> <span class="kwd">in</span> <span class="id">Hfc</span> <span class="kwd">as</span> (?&amp; <span class="id">us</span> &amp; <span class="id">E</span> &amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;- <span class="id"><a href="Velus.Common.CommonList.html#app_last_app">app_last_app</a></span> <span class="kwd">in</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_later">find_unit_later</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#wt_program_app">wt_program_app</a></span> <span class="kwd">in</span> <span class="id">WTp</span> <span class="kwd">as</span> [<span class="id">Hndp</span>]; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_spec">find_unit_spec</a></span> <span class="kwd">in</span> <span class="id">Hfc'</span> <span class="kwd">as</span> (?&amp; <span class="id">us'</span> &amp; <span class="id">E'</span> &amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">E'</span> <span class="kwd">in</span> <span class="id">Hndp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">subst</span>; <span class="id">clear</span> - <span class="id">Hndp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hndp</span> <span class="kwd">as</span> [|?? <span class="id">Hndp</span>]; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> 2 <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_app_weaken">Forall_app_weaken</a></span> <span class="kwd">in</span> <span class="id">Hndp</span>; <span class="id">inv</span> <span class="id">Hndp</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Remark</span> <span class="id"><a name="find_unit_suffix_same">find_unit_suffix_same</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">p'</span> <span class="id">f</span> <span class="id">up</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">up</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#suffix">suffix</a></span> <span class="id">p</span> <span class="id">p'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p'</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">up</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind</span> <span class="id">WT</span> <span class="id">Sub</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">Sub</span> <span class="kwd">as</span> [??? <span class="id">E'</span> <span class="id">E</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program_sym">equiv_program_sym</a></span> <span class="kwd">in</span> <span class="id">E'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_later">find_unit_later</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#wt_program_app">wt_program_app</a></span> <span class="kwd">in</span> <span class="id">WT</span> <span class="kwd">as</span> [<span class="id">Hndp</span>]; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">up</span>; <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_spec">find_unit_spec</a></span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> (?&amp;?&amp; <span class="id">E''</span> &amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">E''</span> <span class="kwd">in</span> <span class="id">Hndp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">subst</span>; <span class="id">clear</span> - <span class="id">Hndp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Hndp</span> <span class="kwd">as</span> [|?? <span class="id">Hndp</span>]; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> 2 <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_app_weaken">Forall_app_weaken</a></span> <span class="kwd">in</span> <span class="id">Hndp</span>; <span class="id">inv</span> <span class="id">Hndp</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="wt_program_NoDup">wt_program_NoDup</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>)).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Wt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Wt</span>; <span class="id">simpl</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">H</span> <span class="kwd">as</span> (_&amp;<span class="id">Name</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Hin</span>. <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map_iff">in_map_iff</a></span> <span class="kwd">in</span> <span class="id">Hin</span> <span class="kwd">as</span> (?&amp;<span class="id">Hin</span>&amp;<span class="id">Hname</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Name</span>; [|<span class="id">eauto</span>]. <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="WTProg.Is_called_in">Is_called_in</a></span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.U">U</a></span> -&gt; <span class="kwd">Prop</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="WTProg.wt_unit_Is_called_in">wt_unit_Is_called_in</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">u</span> <span class="id">f</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.wt_unit">wt_unit</a></span> <span class="id">p</span> <span class="id">u</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.Is_called_in">Is_called_in</a></span> <span class="id">f</span> <span class="id">u</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> &lt;&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="wt_program_Ordered_program">wt_program_Ordered_program</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.Is_called_in">Is_called_in</a></span> <span class="id">p</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>; <span class="id">induction</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span>) <span class="kwd">as</span> [|<span class="id">u</span> <span class="id">us</span>]; <span class="id">intros</span> * <span class="id">WT</span>; <span class="id">simpl</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">WT</span> <span class="kwd">as</span> [|?? []]; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Called</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#WTProg.wt_unit_Is_called_in">wt_unit_Is_called_in</a></span> <span class="kwd">in</span> <span class="id">Called</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#not_None_is_Some">not_None_is_Some</a></span> <span class="kwd">in</span> <span class="id">Called</span> <span class="kwd">as</span> ((?&amp;?)&amp; <span class="id">Find</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intuition</span> <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_In">find_unit_In</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> [? <span class="id">Hin</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hin</span>; <span class="id">eauto</span>; <span class="id">subst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonTyping.html#WTProg">WTProg</a></span>.<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="TransfoWT">TransfoWT</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="TransfoWT.U">U</a></span> <span class="id">U'</span> <span class="id"><a name="TransfoWT.Prog">Prog</a></span> <span class="id">Prog'</span>: <span class="kwd">Type</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id"><a href="Velus.Common.CommonProgram.html#TransformUnit">TransformUnit</a></span> <span class="id">U</span> <span class="id">U'</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id"><a name="TransfoWT.ProgInst">ProgInst</a></span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program">Program</a></span> <span class="id">U</span> <span class="id">Prog</span>} `{<span class="id"><a href="Velus.Common.CommonProgram.html#Program">Program</a></span> <span class="id">U'</span> <span class="id">Prog'</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{@<span class="id"><a href="Velus.Common.CommonProgram.html#TransformProgramWithoutUnits">TransformProgramWithoutUnits</a></span> <span class="id">Prog</span> <span class="id">Prog'</span> _ <span class="id">ProgInst</span>}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="transform_units_wt_program">transform_units_wt_program</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> (<span class="id">wt_unit</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#TransfoWT.Prog">Prog</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#TransfoWT.U">U</a></span> -&gt; <span class="kwd">Prop</span>) (<span class="id">wt_unit'</span>: <span class="id">Prog'</span> -&gt; <span class="id">U'</span> -&gt; <span class="kwd">Prop</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">p</span> <span class="id">u</span>, <span class="id">wt_unit</span> <span class="id">p</span> <span class="id">u</span> -&gt; <span class="id">wt_unit'</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span> <span class="id">p</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> <span class="id">u</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">wt_unit</span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">wt_unit'</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span> <span class="id">p</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span>; <span class="id">intros</span> * <span class="id">Spec</span> <span class="id">WT</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">WT</span> <span class="kwd">as</span> [|?? (<span class="id">WT</span> &amp; <span class="id">Ndp</span>)]; <span class="id">simpl</span>; <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Spec</span> <span class="kwd">in</span> <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#transform_program_without_units_update">transform_program_without_units_update</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#units_of_update">units_of_update</a></span> <span class="kwd">in</span> <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_map">Forall_map</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hin</span>; <span class="id">eauto</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> 2 <span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit_conservative_name">transform_unit_conservative_name</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id">Forall'_impl</span>; <span class="id">eauto</span>; <span class="id">simpl</span>; <span class="id">intros</span> * (?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#update_idempotent">update_idempotent</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonTyping.html#TransfoWT">TransfoWT</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="COMMONTYPING">COMMONTYPING</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#Op">Op</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="COMMONTYPING.env">env</a></span>  := <span class="id"><a href="Velus.Environment.html#Env.t">Env.t</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#Op.value">value</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="COMMONTYPING.tenv">tenv</a></span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.CommonTyping.html#Op.type">type</a></span>).<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="COMMONTYPING.mem">mem</a></span>  := <span class="id"><a href="Velus.VelusMemory.html#memory">memory</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#Op.value">value</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="COMMONTYPING.wt_env_value">wt_env_value</a></span> (<span class="id">e</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.env">env</a></span>) '((<span class="id">x</span>, <span class="id">ty</span>): <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.CommonTyping.html#Op.type">type</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">x</span> <span class="id">e</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> =&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#Op.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">ty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#True">True</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="COMMONTYPING.wt_env">wt_env</a></span> (<span class="id">e</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.env">env</a></span>) (<span class="id">Γ</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.tenv">tenv</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value">wt_env_value</a></span> <span class="id">e</span>) <span class="id">Γ</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span> : <span class="id">typing</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_env_empty">wt_env_empty</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">Γ</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span> (<span class="id"><a href="Velus.Environment.html#Env.empty">Env.empty</a></span> _) <span class="id">Γ</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Γ</span> <span class="kwd">as</span> [|(?&amp;?)]; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value">wt_env_value</a></span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gempty">Env.gempty</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">wt_env_empty</span> : <span class="id">typing</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.env_find_wt_value">env_find_wt_value</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">Γ</span> <span class="id">e</span> <span class="id">x</span> <span class="id">ty</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span> <span class="id">e</span> <span class="id">Γ</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">ty</span>) <span class="id">Γ</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Environment.html#Env.find">Env.find</a></span> <span class="id">x</span> <span class="id">e</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#Op.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">ty</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">WTe</span> <span class="id">Hin</span> <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">with</span> (1:=<span class="id">WTe</span>) <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value">wt_env_value</a></span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">Hfind</span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">env_find_wt_value</span> : <span class="id">typing</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_env_value_add">wt_env_value_add</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span> <span class="id">v</span> <span class="id">x</span> <span class="id">y</span> <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">y</span> = <span class="id">x</span> /\ <span class="id"><a href="Velus.Common.CommonTyping.html#Op.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">ty</span>) \/ (<span class="id">y</span> &lt;&gt; <span class="id">x</span> /\ <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value">wt_env_value</a></span> <span class="id">e</span> (<span class="id">y</span>, <span class="id">ty</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value">wt_env_value</a></span> (<span class="id"><a href="Velus.Environment.html#Env.add">Env.add</a></span> <span class="id">x</span> <span class="id">v</span> <span class="id">e</span>) (<span class="id">y</span>, <span class="id">ty</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hor</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value">wt_env_value</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">Hor</span> <span class="kwd">as</span> [[<span class="id">Heq</span> <span class="id">Hwt</span>]|[<span class="id">Hne</span> <span class="id">Hwt</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">subst</span>. <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gss">Env.gss</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gso">Env.gso</a></span> <span class="kwd">with</span> (1:=<span class="id">Hne</span>).<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_env_add">wt_env_add</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">Γ</span> <span class="id">e</span> <span class="id">x</span> <span class="id">t</span> <span class="id">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">Γ</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span> <span class="id">e</span> <span class="id">Γ</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">t</span>) <span class="id">Γ</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#Op.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">t</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span> (<span class="id"><a href="Velus.Environment.html#Env.add">Env.add</a></span> <span class="id">x</span> <span class="id">v</span> <span class="id">e</span>) <span class="id">Γ</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hndup</span> <span class="id">WTenv</span> <span class="id">Hin</span> <span class="id">WTv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Γ</span> <span class="kwd">as</span> [|<span class="id">y</span>]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_cons2">Forall_cons2</a></span> <span class="kwd">in</span> <span class="id">WTenv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">WTenv</span> <span class="kwd">as</span> (<span class="id">WTx</span> &amp; <span class="id">WTenv</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">y</span> <span class="kwd">as</span> (<span class="id">y</span> &amp; <span class="id">ty</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers_cons_inv">NoDupMembers_cons_inv</a></span> <span class="kwd">in</span> <span class="id">Hndup</span> <span class="kwd">as</span> (<span class="id">Hnin</span> &amp; <span class="id">Hndup</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span> <span class="id">H</span>:(<span class="id">y</span>, <span class="id">ty</span>) = _ |- _ =&gt; <span class="id">injection</span> <span class="id">H</span>; <span class="id">intros</span>; <span class="id">subst</span> <span class="kwd">end</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value_add">wt_env_value_add</a></span>; <span class="id">left</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_impl_In">Forall_impl_In</a></span> <span class="kwd">with</span> (2:=<span class="id">WTenv</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">a</span> <span class="kwd">as</span> (<span class="id">y</span> &amp; <span class="id">ty</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">Hin</span> <span class="id">HTy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#NotInMembers_NotIn">NotInMembers_NotIn</a></span> <span class="kwd">with</span> (<span class="id">b</span>:=<span class="id">ty</span>) <span class="kwd">in</span> <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value_add">wt_env_value_add</a></span>; <span class="id">right</span>; <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>; <span class="id">subst</span>; <span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id">HTy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value_add">wt_env_value_add</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">x</span> <span class="id">y</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id">subst</span>; <span class="id">left</span>; <span class="id">split</span>|<span class="id">right</span>]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#NotInMembers_NotIn">NotInMembers_NotIn</a></span> <span class="kwd">with</span> (<span class="id">b</span>:=<span class="id">t</span>) <span class="kwd">in</span> <span class="id">Hnin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">wt_env_add</span> : <span class="id">typing</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_env_value_remove">wt_env_value_remove</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">env</span> <span class="id">x</span> <span class="id">y</span> <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value">wt_env_value</a></span> <span class="id">env</span> (<span class="id">y</span>, <span class="id">ty</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value">wt_env_value</a></span> (<span class="id"><a href="Velus.Environment.html#Env.remove">Env.remove</a></span> <span class="id">x</span> <span class="id">env</span>) (<span class="id">y</span>, <span class="id">ty</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value">wt_env_value</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">WTenv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">x</span> <span class="id">y</span>); <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.grs">Env.grs</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.gro">Env.gro</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_env_remove">wt_env_remove</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">env</span> <span class="id">Γv</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span> <span class="id">env</span> <span class="id">Γv</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span> (<span class="id"><a href="Velus.Environment.html#Env.remove">Env.remove</a></span> <span class="id">x</span> <span class="id">env</span>) <span class="id">Γv</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Γv</span> <span class="kwd">as</span> [|(<span class="id">y</span>, <span class="id">yt</span>) <span class="id">Γv</span>]; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">typing</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall_cons2">Forall_cons2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> 1 <span class="kwd">as</span> (<span class="id">Hy</span> &amp; <span class="id">HΓv</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [|<span class="id">now</span> <span class="id">apply</span> <span class="id">IHΓv</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value_remove">wt_env_value_remove</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">wt_env_remove</span> : <span class="id">typing</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_env_adds_opt">wt_env_adds_opt</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">Γv</span> <span class="id">env</span> <span class="id">ys</span> <span class="id">outs</span> <span class="id">rvs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">Γv</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#NoDup">NoDup</a></span> <span class="id">ys</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span> <span class="id">env</span> <span class="id">Γv</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="kwd">fun</span> <span class="id">y</span> (<span class="id">xt</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.CommonTyping.html#Op.type">type</a></span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">y</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">xt</span>) <span class="id">Γv</span>) <span class="id">ys</span> <span class="id">outs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall2">Forall2</a></span> (<span class="kwd">fun</span> <span class="id">vo</span> <span class="id">xt</span> =&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#OpAux.wt_option_value">wt_option_value</a></span> <span class="id">vo</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">xt</span>)) <span class="id">rvs</span> <span class="id">outs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span> (<span class="id"><a href="Velus.Environment.html#Env.adds_opt">Env.adds_opt</a></span> <span class="id">ys</span> <span class="id">rvs</span> <span class="id">env</span>) <span class="id">Γv</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">NodupM</span> <span class="id">Nodup</span> <span class="id">WTenv</span> <span class="id">Hin</span> <span class="id">WTv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">ys</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">rvs</span>) <span class="kwd">as</span> <span class="id">Length</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">by</span> (<span class="id">transitivity</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">outs</span>); [|<span class="id">symmetry</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#Forall2_length">Forall2_length</a></span>; <span class="id">eauto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">revert</span> <span class="id">env0</span> <span class="id">rvs</span> <span class="id">outs</span> <span class="id">WTenv</span> <span class="id">WTv</span> <span class="id">Length</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">ys</span>, <span class="id">rvs</span>, <span class="id">outs</span>; <span class="id">intros</span> * <span class="id">WTenv</span> <span class="id">WTv</span> <span class="id">Length</span> <span class="id">Hin</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Length</span>; <span class="id">inv</span> <span class="id">Nodup</span>; <span class="id">inv</span> <span class="id">Hin</span>; <span class="id">inv</span> <span class="id">WTv</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">o</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id">Env.adds_opt_cons_cons'</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">IHys</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">typing</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> <span class="id"><a href="Velus.Environment.html#Env.adds_opt_cons_cons_None">Env.adds_opt_cons_cons_None</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">IHys</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">typing</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">wt_env_adds_opt</span> : <span class="id">typing</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="COMMONTYPING.WTMemory">WTMemory</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="COMMONTYPING.WTMemory.U">U</a></span> <span class="id"><a name="COMMONTYPING.WTMemory.Prog">Prog</a></span>: <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> `{<span class="id"><a name="COMMONTYPING.WTMemory.PU">PU</a></span> : <span class="id"><a href="Velus.Common.CommonProgram.html#ProgramStateUnit">ProgramStateUnit</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.U">U</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#Op.type">type</a></span>} `{<span class="id"><a name="COMMONTYPING.WTMemory.P">P</a></span> : <span class="id"><a href="Velus.Common.CommonProgram.html#Program">Program</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.U">U</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.Prog">Prog</a></span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="COMMONTYPING.wt_memory">wt_memory</a></span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.mem">mem</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.Prog">Prog</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.tenv">tenv</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a name="COMMONTYPING.wt_mem_intro">wt_mem_intro</a></span>: <span class="kwd">forall</span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span> (<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">M</span>) <span class="id">mems</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="id">wt_inst</span> <span class="id">M</span> <span class="id">p</span>) <span class="id">insts</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_memory</span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id"><a name="COMMONTYPING.wt_inst">wt_inst</a></span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.mem">mem</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.Prog">Prog</a></span> -&gt; (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="COMMONTYPING.wt_inst_empty">wt_inst_empty</a></span>: <span class="kwd">forall</span> <span class="id">M</span> <span class="id">p</span> <span class="id">i</span> <span class="id">f</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">i</span> <span class="id">M</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_inst</span> <span class="id">M</span> <span class="id">p</span> (<span class="id">i</span>, <span class="id">f</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a name="COMMONTYPING.wt_inst_some">wt_inst_some</a></span>: <span class="kwd">forall</span> <span class="id">M</span> <span class="id">p</span> <span class="id">i</span> <span class="id">f</span> <span class="id">Mi</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">i</span> <span class="id">M</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">Mi</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_memory</span> <span class="id">Mi</span> <span class="id">p'</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#state_variables">state_variables</a></span> <span class="id">u</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#instance_variables">instance_variables</a></span> <span class="id">u</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_inst</span> <span class="id">M</span> <span class="id">p</span> (<span class="id">i</span>, <span class="id">f</span>).<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="COMMONTYPING.WTMemory.wt_memory_inst_ind">wt_memory_inst_ind</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="COMMONTYPING.WTMemory.wt_memory_inst_ind.Pmem">Pmem</a></span>  : <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.mem">mem</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.Prog">Prog</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.tenv">tenv</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) -&gt; <span class="kwd">Prop</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Variable</span> <span class="id"><a name="COMMONTYPING.WTMemory.wt_memory_inst_ind.Pinst">Pinst</a></span> : <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.mem">mem</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.Prog">Prog</a></span> -&gt; (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) -&gt; <span class="kwd">Prop</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="COMMONTYPING.WTMemory.wt_memory_inst_ind.wt_mem_intro_Case">wt_mem_intro_Case</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span> (<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">M</span>) <span class="id">mems</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> <span class="id">M</span> <span class="id">p</span>) <span class="id">insts</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.wt_memory_inst_ind.Pinst">Pinst</a></span> <span class="id">M</span> <span class="id">p</span>) <span class="id">insts</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.wt_memory_inst_ind.Pmem">Pmem</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="COMMONTYPING.WTMemory.wt_memory_inst_ind.wt_inst_empty_Case">wt_inst_empty_Case</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">M</span> <span class="id">p</span> <span class="id">i</span> <span class="id">f</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">i</span> <span class="id">M</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.wt_memory_inst_ind.Pinst">Pinst</a></span> <span class="id">M</span> <span class="id">p</span> (<span class="id">i</span>, <span class="id">f</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Hypothesis</span> <span class="id"><a name="COMMONTYPING.WTMemory.wt_memory_inst_ind.wt_inst_some_Case">wt_inst_some_Case</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">M</span> <span class="id">p</span> <span class="id">i</span> <span class="id">f</span> <span class="id">Mi</span> <span class="id">u</span> <span class="id">p'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">i</span> <span class="id">M</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">Mi</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.wt_memory_inst_ind.Pmem">Pmem</a></span> <span class="id">Mi</span> <span class="id">p'</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#state_variables">state_variables</a></span> <span class="id">u</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#instance_variables">instance_variables</a></span> <span class="id">u</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.wt_memory_inst_ind.Pinst">Pinst</a></span> <span class="id">M</span> <span class="id">p</span> (<span class="id">i</span>, <span class="id">f</span>).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="COMMONTYPING.wt_memory_mult">wt_memory_mult</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">M</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.mem">mem</a></span>) (<span class="id">p</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.Prog">Prog</a></span>) (<span class="id">mems</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.tenv">tenv</a></span>) (<span class="id">insts</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">WT</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>) {<span class="id">struct</span> <span class="id">WT</span>} : <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.wt_memory_inst_ind.Pmem">Pmem</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id"><a name="COMMONTYPING.wt_inst_mult">wt_inst_mult</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">M</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.mem">mem</a></span>) (<span class="id">p</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.Prog">Prog</a></span>) (<span class="id">oc</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">WT</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">oc</span>) {<span class="id">struct</span> <span class="id">WT</span>} : <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.wt_memory_inst_ind.Pinst">Pinst</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">oc</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.wt_memory_inst_ind.wt_mem_intro_Case">wt_mem_intro_Case</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> _ _) <span class="id">and</span> <span class="id">induction</span> <span class="id">it</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.wt_memory_inst_ind.wt_inst_empty_Case">wt_inst_empty_Case</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.wt_memory_inst_ind.wt_inst_some_Case">wt_inst_some_Case</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Defined.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Combined</span> <span class="kwd">Scheme</span> <span class="id">wt_memory_inst_ind</span> <span class="id">from</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory_mult">wt_memory_mult</a></span>, <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst_mult">wt_inst_mult</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory.wt_memory_inst_ind">wt_memory_inst_ind</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_memory_empty">wt_memory_empty</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> (<span class="id"><a href="Velus.VelusMemory.html#empty_memory">empty_memory</a></span> _) <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">typing</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">insts</span> <span class="kwd">as</span> [|(?, ?)]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_cons">Forall_cons</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst_empty">wt_inst_empty</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst_gempty">find_inst_gempty</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_memory_mems_cons">wt_memory_mems_cons</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span> <span class="id">x</span> <span class="id">t</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">M</span> <span class="id">p</span> ((<span class="id">x</span>, <span class="id">t</span>) :: <span class="id">mems</span>) <span class="id">insts</span> &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value">wt_env_value</a></span> (<span class="id"><a href="Velus.VelusMemory.html#values">values</a></span> <span class="id">M</span>) (<span class="id">x</span>, <span class="id">t</span>) /\ <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion_clear</span> 1 <span class="kwd">as</span> [???? <span class="id">WTmems</span>]; <span class="id">inv</span> <span class="id">WTmems</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intuition</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> [? <span class="id">WT</span>]; <span class="id">inv</span> <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">typing</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_memory_insts_cons">wt_memory_insts_cons</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span> <span class="id">i</span> <span class="id">f</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> ((<span class="id">i</span>, <span class="id">f</span>) :: <span class="id">insts</span>) &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> <span class="id">M</span> <span class="id">p</span> (<span class="id">i</span>, <span class="id">f</span>) /\ <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion_clear</span> 1 <span class="kwd">as</span> [????? <span class="id">WTinsts</span>]; <span class="id">inv</span> <span class="id">WTinsts</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intuition</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> [? <span class="id">WT</span>]; <span class="id">inv</span> <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_inst_add_val">wt_inst_add_val</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">i</span> <span class="id">x</span> <span class="id">v</span> <span class="id">M</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">i</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id">x</span> <span class="id">v</span> <span class="id">M</span>) <span class="id">p</span> <span class="id">i</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">left</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eright</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_memory_add_val">wt_memory_add_val</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span> <span class="id">x</span> <span class="id">t</span> <span class="id">v</span> <span class="id">M</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">mems</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">t</span>) <span class="id">mems</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#Op.wt_value">wt_value</a></span> <span class="id">v</span> <span class="id">t</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_val">add_val</a></span> <span class="id">x</span> <span class="id">v</span> <span class="id">M</span>) <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 2; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_add">wt_env_add</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span> (?&amp;?) <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst_add_val">wt_inst_add_val</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hin</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_inst_add_inst_neq">wt_inst_add_inst_neq</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">i</span> <span class="id">f</span> <span class="id">j</span> <span class="id">Mj</span> <span class="id">M</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> <span class="id">M</span> <span class="id">p</span> (<span class="id">i</span>, <span class="id">f</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">j</span> &lt;&gt; <span class="id">i</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span> <span class="id">j</span> <span class="id">Mj</span> <span class="id">M</span>) <span class="id">p</span> (<span class="id">i</span>, <span class="id">f</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">left</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst_gso">find_inst_gso</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eright</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst_gso">find_inst_gso</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_inst_add_inst_eq">wt_inst_add_inst_eq</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">f</span> <span class="id">i</span> <span class="id">u</span> <span class="id">p'</span> <span class="id">Mi</span> <span class="id">M</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> <span class="id">M</span> <span class="id">p</span> (<span class="id">i</span>, <span class="id">f</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">Mi</span> <span class="id">p'</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#state_variables">state_variables</a></span> <span class="id">u</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#instance_variables">instance_variables</a></span> <span class="id">u</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span> <span class="id">i</span> <span class="id">Mi</span> <span class="id">M</span>) <span class="id">p</span> (<span class="id">i</span>, <span class="id">f</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1; <span class="id">intros</span>; <span class="id">eright</span>; <span class="id">eauto</span>; <span class="id">apply</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst_gss">find_inst_gss</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_memory_add_inst">wt_memory_add_inst</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span> <span class="id">i</span> <span class="id">f</span> <span class="id">u</span> <span class="id">p'</span> <span class="id">Mi</span> <span class="id">M</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers">NoDupMembers</a></span> <span class="id">insts</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">i</span>, <span class="id">f</span>) <span class="id">insts</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">Mi</span> <span class="id">p'</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#state_variables">state_variables</a></span> <span class="id">u</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#instance_variables">instance_variables</a></span> <span class="id">u</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> (<span class="id"><a href="Velus.VelusMemory.html#add_inst">add_inst</a></span> <span class="id">i</span> <span class="id">Mi</span> <span class="id">M</span>) <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 2 <span class="kwd">as</span> [????? <span class="id">WT</span>]; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span> (<span class="id">i'</span>, <span class="id">f'</span>) <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">WT</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">i</span> <span class="id">i'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id">f'</span> = <span class="id">f</span>) <span class="kwd">as</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">by</span> (<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#NoDupMembers_det">NoDupMembers_det</a></span>; <span class="id">eauto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst_add_inst_eq">wt_inst_add_inst_eq</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst_add_inst_neq">wt_inst_add_inst_neq</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_inst_suffix">wt_inst_suffix</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">p'</span> <span class="id">mem</span> <span class="id">oc</span> <span class="id">wt_unit</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> <span class="id">mem</span> <span class="id">p'</span> <span class="id">oc</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">wt_unit</span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#suffix">suffix</a></span> <span class="id">p'</span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> <span class="id">mem</span> <span class="id">p</span> <span class="id">oc</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">left</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eright</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#find_unit_suffix_same">find_unit_suffix_same</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_memory_suffix">wt_memory_suffix</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">p'</span> <span class="id">mems</span> <span class="id">insts</span> <span class="id">mem</span> <span class="id">wt_unit</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">mem</span> <span class="id">p'</span> <span class="id">mems</span> <span class="id">insts</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">wt_unit</span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#suffix">suffix</a></span> <span class="id">p'</span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">mem</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1 <span class="kwd">as</span> [????? <span class="id">WTmem_inst</span>]; <span class="id">intros</span> * <span class="id">Sub</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">insts</span> <span class="kwd">as</span> [|(<span class="id">o</span>, <span class="id">c</span>)]; <span class="id">inv</span> <span class="id">WTmem_inst</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">eauto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst_suffix">wt_inst_suffix</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_memory_chained">wt_memory_chained</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">p'</span> <span class="id">mems</span> <span class="id">insts</span> <span class="id">mem</span> <span class="id">f</span> <span class="id">u</span> <span class="id">wt_unit</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#wt_program">wt_program</a></span> <span class="id">wt_unit</span> <span class="id">p</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="id">f</span> <span class="id">p</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">u</span>, <span class="id">p'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">mem</span> <span class="id">p'</span> <span class="id">mems</span> <span class="id">insts</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">mem</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory_suffix">wt_memory_suffix</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_suffix">find_unit_suffix</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.wt_memory_other">wt_memory_other</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">M</span> <span class="id">p</span> <span class="id">u</span> <span class="id">us</span> <span class="id">mems</span> <span class="id">insts</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonProgram.html#units">units</a></span> <span class="id">p</span> = <span class="id">u</span> :: <span class="id">us</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">oc</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">oc</span> &lt;&gt; <span class="id"><a href="Velus.Common.CommonProgram.html#name">name</a></span> <span class="id">u</span>) <span class="id">insts</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">M</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span> &lt;-&gt; <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">M</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#update">update</a></span> <span class="id">p</span> <span class="id">us</span>) <span class="id">mems</span> <span class="id">insts</span>).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">E</span> <span class="id">Spec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> * <span class="id">WT</span>; <span class="id">inv</span> <span class="id">WT</span>; <span class="id">constructor</span>; <span class="id">auto</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span> (<span class="id">i</span>, <span class="id">f</span>) <span class="id">Hin</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">do</span> 2 (<span class="id">take</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> _ <span class="id">insts</span>) <span class="id">and</span> <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">it</span>; <span class="id">eauto</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_inst">wt_inst</a></span> _ _ _) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>; <span class="id">try</span> (<span class="id">now</span> <span class="id">left</span>); <span class="id">eright</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">take</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> _ _ = _) <span class="id">and</span> <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_cons">find_unit_cons</a></span> <span class="kwd">in</span> <span class="id">it</span> <span class="kwd">as</span> [[<span class="id">E'</span> <span class="id">Find</span>]|[<span class="id">E'</span> <span class="id">Find</span>]]; <span class="id">eauto</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_cons">find_unit_cons</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> (<span class="id"><a href="Velus.Environment.html#Env.Equal">Env.Equal</a></span> ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.CommonTyping.html#Op.type">type</a></span>) ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">wt_env_permutation</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env">wt_env</a></span>; <span class="id">intros</span> <span class="id">e</span> <span class="id">e'</span> <span class="id">Ee</span> <span class="id">env</span> <span class="id">env'</span> &lt;- <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span> (?&amp;?) <span class="id">Hin</span>; <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">WT</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_env_value">wt_env_value</a></span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> &lt;-<span class="id">Ee</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> (<span class="id"><a href="Velus.VelusMemory.html#equal_memory">equal_memory</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#eq">eq</a></span> ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.CommonTyping.html#Op.type">type</a></span>) ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">wt_memory_permutation</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">M</span>; <span class="id">induction</span> <span class="id">M</span> <span class="kwd">as</span> [? <span class="id">IH</span>] <span class="kwd">using</span> <span class="id">memory_ind'</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">M'</span> <span class="id">EM</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">mems'</span> <span class="id">Emems</span> <span class="id">insts</span> <span class="id">insts'</span> <span class="id">Einsts</span> <span class="id">WT</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">WT</span> <span class="kwd">as</span> [????? <span class="id">Insts</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">now</span> <span class="id">rewrite</span> &lt;-<span class="id">EM</span>, &lt;-<span class="id">Emems</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> &lt;-<span class="id">Einsts</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span> (<span class="id">i</span>, <span class="id">f</span>) <span class="id">Hin</span>; <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Insts</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">i</span> <span class="id">M</span> <span class="id">⌈≋⌉</span> <span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> <span class="id">i</span> <span class="id">M'</span>) <span class="kwd">as</span> <span class="id">E</span> <span class="kwd">by</span> (<span class="id">now</span> <span class="id">rewrite</span> <span class="id">EM</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Insts</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">left</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> _ _ = _) <span class="id">and</span> <span class="id">rewrite</span> <span class="id">it</span> <span class="kwd">in</span> <span class="id">E</span>; <span class="id">inv</span> <span class="id">E</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">take</span> (<span class="id"><a href="Velus.VelusMemory.html#find_inst">find_inst</a></span> _ _ = _) <span class="id">and</span> <span class="id">rewrite</span> <span class="id">it</span> <span class="kwd">in</span> <span class="id">E</span>; <span class="id">inv</span> <span class="id">E</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eright</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">IH</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.WTMemory">WTMemory</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">wt_env_empty</span> <span class="id">wt_env_add</span> <span class="id">wt_env_remove</span> <span class="id">wt_env_adds_opt</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_memory_empty</span> <span class="id">wt_memory_add_val</span> <span class="id">wt_memory_add_inst</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">wt_memory_chained</span> : <span class="id">typing</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="COMMONTYPING.TransfoWT">TransfoWT</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="COMMONTYPING.TransfoWT.U">U</a></span> <span class="id">U'</span> <span class="id"><a name="COMMONTYPING.TransfoWT.Prog">Prog</a></span> <span class="id">Prog'</span>: <span class="kwd">Type</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id"><a name="COMMONTYPING.TransfoWT.PSU">PSU</a></span>: <span class="id"><a href="Velus.Common.CommonProgram.html#ProgramStateUnit">ProgramStateUnit</a></span> <span class="id">U</span> <span class="id"><a href="Velus.Common.CommonTyping.html#Op.type">type</a></span>} `{<span class="id">PSU'</span>: <span class="id"><a href="Velus.Common.CommonProgram.html#ProgramStateUnit">ProgramStateUnit</a></span> <span class="id">U'</span> <span class="id"><a href="Velus.Common.CommonTyping.html#Op.type">type</a></span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id"><a name="COMMONTYPING.TransfoWT.P">P</a></span>: <span class="id"><a href="Velus.Common.CommonProgram.html#Program">Program</a></span> <span class="id">U</span> <span class="id">Prog</span>} `{<span class="id"><a href="Velus.Common.CommonProgram.html#Program">Program</a></span> <span class="id">U'</span> <span class="id">Prog'</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{@<span class="id"><a href="Velus.Common.CommonProgram.html#TransformStateUnit">TransformStateUnit</a></span> _ _ _ <span class="id">PSU</span> <span class="id">PSU'</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{@<span class="id"><a href="Velus.Common.CommonProgram.html#TransformProgramWithoutUnits">TransformProgramWithoutUnits</a></span> <span class="id">Prog</span> <span class="id">Prog'</span> _ <span class="id">P</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="COMMONTYPING.transform_units_wt_memory">transform_units_wt_memory</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">me</span> (<span class="id">p</span>: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.TransfoWT.Prog">Prog</a></span>) <span class="id">mems</span> <span class="id">insts</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">me</span> <span class="id">p</span> <span class="id">mems</span> <span class="id">insts</span> &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">me</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span> <span class="id">p</span>) <span class="id">mems</span> <span class="id">insts</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">me</span> <span class="kwd">as</span> [? <span class="id">IH</span>] <span class="kwd">using</span> <span class="id">memory_ind'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> * <span class="id">WT</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">WT</span> <span class="kwd">as</span> [????? <span class="id">WTinsts</span>]; <span class="id">constructor</span>; <span class="id">auto</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span> (?&amp;?) <span class="id">Hin</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">WTinsts</span>; <span class="id">eauto</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">WTinsts</span>; <span class="id">try</span> <span class="id">now</span> <span class="id">left</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eright</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_transform_units_forward">find_unit_transform_units_forward</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">eapply</span> <span class="id">IH</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">destruct</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit_conservative_state">transform_unit_conservative_state</a></span> <span class="id">u</span>) <span class="kwd">as</span> [-&gt; -&gt;].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">edestruct</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_transform_units_backward">find_unit_transform_units_backward</a></span> <span class="kwd">as</span> (<span class="id">u'</span> &amp;?&amp;?&amp;?&amp;?); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eright</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">IH</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">destruct</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit_conservative_state">transform_unit_conservative_state</a></span> <span class="id">u'</span>) <span class="kwd">as</span> [&lt;- &lt;-].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id">transform_units_wt_memory'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">p</span> <span class="id">u</span> <span class="id">me</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">me</span> <span class="id">p</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#state_variables">state_variables</a></span> <span class="id">u</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#instance_variables">instance_variables</a></span> <span class="id">u</span>) &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.wt_memory">wt_memory</a></span> <span class="id">me</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_units">transform_units</a></span> <span class="id">p</span>) (<span class="id"><a href="Velus.Common.CommonProgram.html#state_variables">state_variables</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> <span class="id">u</span>)) (<span class="id"><a href="Velus.Common.CommonProgram.html#instance_variables">instance_variables</a></span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit">transform_unit</a></span> <span class="id">u</span>)).<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">split</span>; <span class="id">destruct</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#transform_unit_conservative_state">transform_unit_conservative_state</a></span> <span class="id">u</span>) <span class="kwd">as</span> [-&gt; -&gt;];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.transform_units_wt_memory">transform_units_wt_memory</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING.TransfoWT">TransfoWT</a></span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING">COMMONTYPING</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="CommonTypingFun">CommonTypingFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#Op">Op</a></span>)<br/>
+&lt;: <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING">COMMONTYPING</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#Op">Op</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#OpAux">OpAux</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING">COMMONTYPING</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#Op">Op</a></span> <span class="id"><a href="Velus.Common.CommonTyping.html#OpAux">OpAux</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonTyping.html#CommonTypingFun">CommonTypingFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module StcIsFree</title>
+<meta name="description" content="Documentation of Coq module StcIsFree" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module StcIsFree</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.FunctionalEnvironment.html">FunctionalEnvironment</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html">CoreExpr.CESyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Stc.StcSyntax.html">Stc.StcSyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Export</span> <span class="id"><a href="Velus.CoreExpr.CEIsFree.html">CoreExpr.CEIsFree</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="STCISFREE">STCISFREE</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>    <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>  <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Syn</span>   : <span class="id"><a href="Velus.Stc.StcSyntax.html#STCSYNTAX">STCSYNTAX</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#CESyn">CESyn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">CEIsF</span> : <span class="id"><a href="Velus.CoreExpr.CEIsFree.html#CEISFREE">CEISFREE</a></span>  <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#CESyn">CESyn</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="STCISFREE.Is_free_in_tc">Is_free_in_tc</a></span>: <span class="id"><a href="Velus.FunctionalEnvironment.html#var_last">var_last</a></span> -&gt; <span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.trconstr">trconstr</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="STCISFREE.FreeTcDef">FreeTcDef</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ck</span> <span class="id">e</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.Is_free_in_arhs">Is_free_in_arhs</a></span> <span class="id">y</span> <span class="id">ck</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Is_free_in_tc</span> <span class="id">y</span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.TcDef">TcDef</a></span> <span class="id">ck</span> <span class="id">x</span> <span class="id">e</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="STCISFREE.FreeTcReset">FreeTcReset</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ckr</span> <span class="id">rsconstr</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcIsFree.html#Cks.Is_free_in_clock">Is_free_in_clock</a></span> <span class="id">y</span> <span class="id">ckr</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Is_free_in_tc</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">y</span>) (<span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.TcReset">TcReset</a></span> <span class="id">ckr</span> <span class="id">rsconstr</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="STCISFREE.FreeTcUpdLast">FreeTcUpdLast</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">ckrs</span> <span class="id">x</span> <span class="id">e</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.Is_free_in_acexp">Is_free_in_acexp</a></span> <span class="id">y</span> <span class="id">ck</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Is_free_in_tc</span> <span class="id">y</span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.TcUpdate">TcUpdate</a></span> <span class="id">ck</span> <span class="id">ckrs</span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.UpdLast">UpdLast</a></span> <span class="id">x</span> <span class="id">e</span>))<br/>
+&nbsp;&nbsp;| <span class="id"><a name="STCISFREE.FreeTcUpdNext">FreeTcUpdNext</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">ckrs</span> <span class="id">x</span> <span class="id">e</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.Is_free_in_aexp">Is_free_in_aexp</a></span> <span class="id">y</span> <span class="id">ck</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Is_free_in_tc</span> <span class="id">y</span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.TcUpdate">TcUpdate</a></span> <span class="id">ck</span> <span class="id">ckrs</span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.UpdNext">UpdNext</a></span> <span class="id">x</span> <span class="id">e</span>))<br/>
+&nbsp;&nbsp;| <span class="id"><a name="STCISFREE.FreeTcUpdInst">FreeTcUpdInst</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">ck</span> <span class="id">ckrs</span> <span class="id">s</span> <span class="id">xs</span> <span class="id">b</span> <span class="id">es</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.Is_free_in_aexps">Is_free_in_aexps</a></span> <span class="id">y</span> <span class="id">ck</span> <span class="id">es</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Is_free_in_tc</span> <span class="id">y</span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.TcUpdate">TcUpdate</a></span> <span class="id">ck</span> <span class="id">ckrs</span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.UpdInst">UpdInst</a></span> <span class="id">s</span> <span class="id">xs</span> <span class="id">b</span> <span class="id">es</span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STCISFREE.Is_free_in">Is_free_in</a></span> (<span class="id">x</span>: <span class="id"><a href="Velus.FunctionalEnvironment.html#var_last">var_last</a></span>) (<span class="id">tcs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.trconstr">trconstr</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists">Exists</a></span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.Is_free_in_tc">Is_free_in_tc</a></span> <span class="id">x</span>) <span class="id">tcs</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STCISFREE.free_in_tc">free_in_tc</a></span> (<span class="id">tc</span>: <span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.trconstr">trconstr</a></span>) (<span class="id">fvs</span>: (<span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span> * <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>)) : (<span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span> * <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">tc</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.TcDef">TcDef</a></span> <span class="id">ck</span> _ <span class="id">e</span> =&gt; <span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_arhs">free_in_arhs</a></span> <span class="id">ck</span> <span class="id">e</span> <span class="id">fvs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.TcReset">TcReset</a></span> <span class="id">ckr</span> _ =&gt; (<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_clock">free_in_clock</a></span> <span class="id">ckr</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">fvs</span>), (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">fvs</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.TcUpdate">TcUpdate</a></span> <span class="id">ck</span> _ (<span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.UpdLast">UpdLast</a></span> _ <span class="id">e</span>) =&gt; <span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_acexp">free_in_acexp</a></span> <span class="id">ck</span> <span class="id">e</span> <span class="id">fvs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.TcUpdate">TcUpdate</a></span> <span class="id">ck</span> _ (<span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.UpdNext">UpdNext</a></span> _ <span class="id">e</span>) =&gt; <span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_aexp">free_in_aexp</a></span> <span class="id">ck</span> <span class="id">e</span> <span class="id">fvs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.TcUpdate">TcUpdate</a></span> <span class="id">ck</span> _ (<span class="id"><a href="Velus.Stc.StcIsFree.html#Syn.UpdInst">UpdInst</a></span> _ _ _ <span class="id">es</span>) =&gt; <span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_aexps">free_in_aexps</a></span> <span class="id">ck</span> <span class="id">es</span> <span class="id">fvs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Is_free_in_tc">Is_free_in_tc</a></span> : <span class="id">stcfree</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCISFREE.free_in_tc_spec1">free_in_tc_spec1</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">tc</span> <span class="id">m</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.free_in_tc">free_in_tc</a></span> <span class="id">tc</span> <span class="id">m</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; (<span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.Is_free_in_tc">Is_free_in_tc</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) <span class="id">tc</span> \/ <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">m</span>)).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.free_in_tc">free_in_tc</a></span>. <span class="id">cases</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">rewrite</span> ?<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_aexp_spec1">free_in_aexp_spec1</a></span>, ?<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_aexps_spec1">free_in_aexps_spec1</a></span>, ?<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_acexp_spec1">free_in_acexp_spec1</a></span>, ?<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_arhs_spec1">free_in_arhs_spec1</a></span>, ?<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_clock_spec">free_in_clock_spec</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">split</span>; <span class="id">intros</span> [|]; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">stcfree</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">take</span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.Is_free_in_tc">Is_free_in_tc</a></span> _ _) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id">free_in_tc_spec1'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">tc</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.free_in_tc">free_in_tc</a></span> <span class="id">tc</span> (<span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>, <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.Is_free_in_tc">Is_free_in_tc</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) <span class="id">tc</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.free_in_tc_spec1">free_in_tc_spec1</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> [ <span class="id">H</span> | <span class="id">H</span> ]; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span>. <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCISFREE.free_in_tc_spec2">free_in_tc_spec2</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">tc</span> <span class="id">m</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.free_in_tc">free_in_tc</a></span> <span class="id">tc</span> <span class="id">m</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; (<span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.Is_free_in_tc">Is_free_in_tc</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">x</span>) <span class="id">tc</span> \/ <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">m</span>)).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.free_in_tc">free_in_tc</a></span>. <span class="id">cases</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">rewrite</span> ?<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_aexp_spec2">free_in_aexp_spec2</a></span>, ?<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_aexps_spec2">free_in_aexps_spec2</a></span>, ?<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_acexp_spec2">free_in_acexp_spec2</a></span>, ?<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_arhs_spec2">free_in_arhs_spec2</a></span>, ?<span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF.free_in_clock_spec">free_in_clock_spec</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">split</span>; <span class="id">intros</span>; <span class="id">try</span> <span class="id">take</span> (_ \/ _) <span class="id">and</span> <span class="id">destruct</span> <span class="id">it</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">stcfree</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">try</span> <span class="id">take</span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.Is_free_in_tc">Is_free_in_tc</a></span> _ _) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>; <span class="id">auto</span>. <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id">free_in_tc_spec2'</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">tc</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.free_in_tc">free_in_tc</a></span> <span class="id">tc</span> (<span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>, <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.Is_free_in_tc">Is_free_in_tc</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">x</span>) <span class="id">tc</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE.free_in_tc_spec2">free_in_tc_spec2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> [ <span class="id">H</span> | <span class="id">H</span> ]; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span>. <span class="id">left</span>. <span class="id">assumption</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE">STCISFREE</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="StcIsFreeFun">StcIsFreeFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>    <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>  <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Syn</span>   : <span class="id"><a href="Velus.Stc.StcSyntax.html#STCSYNTAX">STCSYNTAX</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#CESyn">CESyn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">CEIsF</span> : <span class="id"><a href="Velus.CoreExpr.CEIsFree.html#CEISFREE">CEISFREE</a></span>  <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#CESyn">CESyn</a></span>)<br/>
+&lt;: <span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE">STCISFREE</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Syn">Syn</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF">CEIsF</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE">STCISFREE</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#Syn">Syn</a></span> <span class="id"><a href="Velus.Stc.StcIsFree.html#CEIsF">CEIsF</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Stc.StcIsFree.html#StcIsFreeFun">StcIsFreeFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module CommonStreams</title>
+<meta name="description" content="Documentation of Coq module CommonStreams" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module CommonStreams</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Setoids.Setoid.html">Setoid</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html">Streams</a></span>.<br/>
+<br/>
+<div class="doc">Additional streams utilities </div>
+<br/>
+<span class="id">Declare</span> <span class="kwd">Scope</span> <span class="id">stream_scope</span>.<br/>
+<span class="id">Delimit</span> <span class="kwd">Scope</span> <span class="id">stream_scope</span> <span class="kwd">with</span> <span class="id">Stream</span>.<br/>
+<span class="kwd">Infix</span> <span class="string">"⋅"</span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Cons">Cons</a></span> (<span class="kwd">at</span> <span class="id">level</span> 60, <span class="id">right</span> <span class="id">associativity</span>) : <span class="id">stream_scope</span>.<br/>
+<span class="kwd">Infix</span> <span class="string">"≡"</span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#EqSt">EqSt</a></span> (<span class="kwd">at</span> <span class="id">level</span> 70, <span class="id">no</span> <span class="id">associativity</span>) : <span class="id">stream_scope</span>.<br/>
+<span class="kwd">Notation</span> <span class="string">"s # n "</span> := (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth">Str_nth</a></span> <span class="id">n</span> <span class="id">s</span>) (<span class="kwd">at</span> <span class="id">level</span> 9) : <span class="id">stream_scope</span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">stream_scope</span>.<br/>
+<br/>
+<span class="kwd">Fact</span> <span class="id"><a name="Str_nth_0">Str_nth_0</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">xs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id">A</span>) <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x</span> <span class="id">⋅</span> <span class="id">xs</span>) # 0 = <span class="id">x</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="kwd">Fact</span> <span class="id"><a name="Str_nth_S">Str_nth_S</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">xs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id">A</span>) <span class="id">x</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x</span> <span class="id">⋅</span> <span class="id">xs</span>) # (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>) = <span class="id">xs</span> # <span class="id">n</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="kwd">Fact</span> <span class="id"><a name="Str_nth_0_hd">Str_nth_0_hd</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">xs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id">A</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">xs</span> # 0 = (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#hd">hd</a></span> <span class="id">xs</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="kwd">Fact</span> <span class="id"><a name="Str_nth_S_tl">Str_nth_S_tl</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">xs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id">A</span>) <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">xs</span> # (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>) = (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#tl">tl</a></span> <span class="id">xs</span>) # <span class="id">n</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="map">map</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="map.A">A</a></span> <span class="id"><a name="map.B">B</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> (<span class="id"><a name="map.f">f</a></span> : (<span class="id"><a href="Velus.Common.CommonStreams.html#map.A">A</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonStreams.html#map.B">B</a></span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="map_Cons">map_Cons</a></span> : <span class="kwd">forall</span> <span class="id">a</span> (<span class="id">sa</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map.A">A</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#map">map</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map.f">f</a></span> (<span class="id">a</span> <span class="id">⋅</span> <span class="id">sa</span>)) = ((<span class="id"><a href="Velus.Common.CommonStreams.html#map.f">f</a></span> <span class="id">a</span>) <span class="id">⋅</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#map">map</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map.f">f</a></span> <span class="id">sa</span>)).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">a</span> <span class="id">sa</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#unfold_Stream">unfold_Stream</a></span> <span class="kwd">at</span> 1; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonStreams.html#map">map</a></span>.<br/>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="map2">map2</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="map2.A">A</a></span> <span class="id"><a name="map2.B">B</a></span> <span class="id"><a name="map2.C">C</a></span> : <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> (<span class="id"><a name="map2.f">f</a></span> : (<span class="id"><a href="Velus.Common.CommonStreams.html#map2.A">A</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonStreams.html#map2.B">B</a></span> -&gt; <span class="id"><a href="Velus.Common.CommonStreams.html#map2.C">C</a></span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">CoFixpoint</span> <span class="id"><a name="map2">map2</a></span> (<span class="id">sa</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.A">A</a></span>) (<span class="id">sb</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.B">B</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.C">C</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">sa</span>, <span class="id">sb</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">hda</span> <span class="id">⋅</span> <span class="id">tla</span>, <span class="id">hdb</span> <span class="id">⋅</span> <span class="id">tlb</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.CommonStreams.html#map2.f">f</a></span> <span class="id">hda</span> <span class="id">hdb</span>) <span class="id">⋅</span> (<span class="id">map2</span> <span class="id">tla</span> <span class="id">tlb</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="map2_Cons">map2_Cons</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">b</span> (<span class="id">sa</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.A">A</a></span>) (<span class="id">sb</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="Velus.Common.CommonStreams.html#map2">map2</a></span> (<span class="id">a</span> <span class="id">⋅</span> <span class="id">sa</span>) (<span class="id">b</span> <span class="id">⋅</span> <span class="id">sb</span>)) = ((<span class="id"><a href="Velus.Common.CommonStreams.html#map2.f">f</a></span> <span class="id">a</span> <span class="id">b</span>) <span class="id">⋅</span> (<span class="id"><a href="Velus.Common.CommonStreams.html#map2">map2</a></span> <span class="id">sa</span> <span class="id">sb</span>)).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">a</span> <span class="id">b</span> <span class="id">sa</span> <span class="id">sb</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#unfold_Stream">unfold_Stream</a></span> <span class="kwd">at</span> 1; <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="map2_hd">map2_hd</a></span> : <span class="kwd">forall</span> (<span class="id">sa</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.A">A</a></span>) (<span class="id">sb</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonStreams.html#map2.f">f</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#hd">hd</a></span> <span class="id">sa</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#hd">hd</a></span> <span class="id">sb</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#hd">hd</a></span> (<span class="id"><a href="Velus.Common.CommonStreams.html#map2">map2</a></span> <span class="id">sa</span> <span class="id">sb</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">intros</span> [<span class="id">a</span> <span class="id">sa</span>] [<span class="id">b</span> <span class="id">sb</span>]; <span class="id">reflexivity</span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="map2_tl">map2_tl</a></span> : <span class="kwd">forall</span> (<span class="id">sa</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.A">A</a></span>) (<span class="id">sb</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonStreams.html#map2">map2</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#tl">tl</a></span> <span class="id">sa</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#tl">tl</a></span> <span class="id">sb</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#tl">tl</a></span> (<span class="id"><a href="Velus.Common.CommonStreams.html#map2">map2</a></span> <span class="id">sa</span> <span class="id">sb</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">intros</span> [<span class="id">a</span> <span class="id">sa</span>] [<span class="id">b</span> <span class="id">sb</span>]; <span class="id">reflexivity</span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Str_nth_tl_map2">Str_nth_tl_map2</a></span> : <span class="kwd">forall</span> <span class="id">n</span> (<span class="id">sa</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.A">A</a></span>) (<span class="id">sb</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth_tl">Str_nth_tl</a></span> <span class="id">n</span> (<span class="id"><a href="Velus.Common.CommonStreams.html#map2">map2</a></span> <span class="id">sa</span> <span class="id">sb</span>) = <span class="id"><a href="Velus.Common.CommonStreams.html#map2">map2</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth_tl">Str_nth_tl</a></span> <span class="id">n</span> <span class="id">sa</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth_tl">Str_nth_tl</a></span> <span class="id">n</span> <span class="id">sb</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">intros</span> <span class="id">sa</span> <span class="id">sb</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">sa</span>. <span class="id">destruct</span> <span class="id">sb</span>. <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="Str_nth_map2">Str_nth_map2</a></span> : <span class="kwd">forall</span> <span class="id">n</span> (<span class="id">sa</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.A">A</a></span>) (<span class="id">sb</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2.B">B</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth">Str_nth</a></span> <span class="id">n</span> (<span class="id"><a href="Velus.Common.CommonStreams.html#map2">map2</a></span> <span class="id">sa</span> <span class="id">sb</span>) = <span class="id"><a href="Velus.Common.CommonStreams.html#map2.f">f</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth">Str_nth</a></span> <span class="id">n</span> <span class="id">sa</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth">Str_nth</a></span> <span class="id">n</span> <span class="id">sb</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth">Str_nth</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">intros</span> [<span class="id">hda</span> <span class="id">tla</span>] [<span class="id">hdb</span> <span class="id">tlb</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl</span>. <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2">map2</a></span>.<br/>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Relation</span> <span class="id">A</span> : (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id">A</span>) (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#EqSt">EqSt</a></span> <span class="id">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span> <span class="id">proved</span> <span class="kwd">by</span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#EqSt_reflex">EqSt_reflex</a></span> <span class="id">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">symmetry</span> <span class="id">proved</span> <span class="kwd">by</span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#sym_EqSt">sym_EqSt</a></span> <span class="id">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">transitivity</span> <span class="id">proved</span> <span class="kwd">by</span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#trans_EqSt">trans_EqSt</a></span> <span class="id">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">EqStrel</span>.<br/>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> <span class="id">A</span> <span class="id">B</span> <span class="id">C</span> <span class="id">f</span> : (@<span class="id"><a href="Velus.Common.CommonStreams.html#map2">map2</a></span> <span class="id">A</span> <span class="id">B</span> <span class="id">C</span> <span class="id">f</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#EqSt">EqSt</a></span> <span class="id">A</span>) ==&gt; (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#EqSt">EqSt</a></span> <span class="id">B</span>) ==&gt; (@<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#EqSt">EqSt</a></span> <span class="id">C</span>) <span class="kwd">as</span> <span class="id">map2_EqSt</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="kwd">cofix</span> <span class="id">map2_EqSt</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> [? ?] [? ?] <span class="id">Eqa</span> [? ?] [? ?] <span class="id">Eqb</span>.<br/>
+&nbsp;&nbsp;<span class="id">inversion</span> <span class="id">Eqa</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">subst</span>; <span class="id">clear</span> <span class="id">Eqa</span>.<br/>
+&nbsp;&nbsp;<span class="id">inversion</span> <span class="id">Eqb</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">subst</span>; <span class="id">clear</span> <span class="id">Eqb</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2_Cons">map2_Cons</a></span>. <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#map2_Cons">map2_Cons</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Section</span> <span class="id"><a name="Forall">Forall</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="Forall.A">A</a></span> : <span class="kwd">Type</span>}.<br/>
+&nbsp;&nbsp;<span class="kwd">Variable</span> (<span class="id"><a name="Forall.P">P</a></span> : <span class="id"><a href="Velus.Common.CommonStreams.html#Forall.A">A</a></span> -&gt; <span class="kwd">Prop</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">CoInductive</span> <span class="id"><a name="SForall">SForall</a></span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Stream">Stream</a></span> <span class="id"><a href="Velus.Common.CommonStreams.html#Forall.A">A</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="Forall_Cons">Forall_Cons</a></span> : <span class="kwd">forall</span> <span class="id">a</span> <span class="id">sa</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonStreams.html#Forall.P">P</a></span> <span class="id">a</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">SForall</span> <span class="id">sa</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">SForall</span> (<span class="id">a</span> <span class="id">⋅</span> <span class="id">sa</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="SForall_forall">SForall_forall</a></span> : <span class="kwd">forall</span> <span class="id">sa</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.CommonStreams.html#SForall">SForall</a></span> <span class="id">sa</span> &lt;-&gt; <span class="kwd">forall</span> <span class="id">n</span>, <span class="id"><a href="Velus.Common.CommonStreams.html#Forall.P">P</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#Str_nth">Str_nth</a></span> <span class="id">n</span> <span class="id">sa</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof with</summary>
+<div class="proofscript">
+ <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">sa</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intro</span> <span class="id">n</span>; <span class="id">revert</span> <span class="id">n</span> <span class="id">sa</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">intros</span> [<span class="id">a</span> <span class="id">sa</span>] <span class="id">Hf</span>; <span class="id">inversion</span> <span class="id">Hf</span>; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#Str_nth_0">Str_nth_0</a></span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#Str_nth_S">Str_nth_S</a></span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">revert</span> <span class="id">sa</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">cofix</span> <span class="id">forall_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [<span class="id">a</span> <span class="id">sa</span>] <span class="id">H</span>. <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">specialize</span> (<span class="id">H</span> 0). <span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#Str_nth_0">Str_nth_0</a></span> <span class="kwd">in</span> <span class="id">H</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id">forall_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">n</span>. <span class="id">specialize</span> (<span class="id">H</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Common.CommonStreams.html#Str_nth_S">Str_nth_S</a></span> <span class="kwd">in</span> <span class="id">H</span>...<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Common.CommonStreams.html#Forall">Forall</a></span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="const_Cons">const_Cons</a></span> : <span class="kwd">forall</span> {<span class="id">A</span>} (<span class="id">a</span> : <span class="id">A</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#const">Streams.const</a></span> <span class="id">a</span> = <span class="id">a</span> <span class="id">⋅</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#const">Streams.const</a></span> <span class="id">a</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.Streams.html#unfold_Stream">unfold_Stream</a></span> <span class="kwd">at</span> 1. <span class="id">reflexivity</span>.<br/>
+Qed.</div></details>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

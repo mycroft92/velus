@@ -1,0 +1,446 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module IsDefined</title>
+<meta name="description" content="Documentation of Coq module IsDefined" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module IsDefined</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.PArith.PArith.html">PArith</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.FunctionalEnvironment.html">FunctionalEnvironment</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html">CoreExpr.CESyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.NLustre.NLSyntax.html">NLustre.NLSyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.NLustre.Memories.html">NLustre.Memories</a></span>.<br/>
+<br/>
+<h1> Defined variables </h1>
+<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="ISDEFINED">ISDEFINED</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>          : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>           : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span>        : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>      <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Syn</span>   : <span class="id"><a href="Velus.NLustre.NLSyntax.html#NLSYNTAX">NLSYNTAX</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span>  <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#CESyn">CESyn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Mem</span>   : <span class="id"><a href="Velus.NLustre.Memories.html#MEMORIES">MEMORIES</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span>  <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn">Syn</a></span>).<br/>
+<br/>
+<h2> Logical predicates: </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Inductive</span> <span class="id"><a name="ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> : <span class="id"><a href="Velus.FunctionalEnvironment.html#var_last">var_last</a></span> -&gt; <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.equation">equation</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id"><a name="ISDEFINED.DefEqDef">DefEqDef</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ck</span> <span class="id">e</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Is_defined_in_eq</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqDef">EqDef</a></span> <span class="id">x</span> <span class="id">ck</span> <span class="id">e</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="ISDEFINED.DefEqLast">DefEqLast</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ty</span> <span class="id">ck</span> <span class="id">c0</span> <span class="id">ckrs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Is_defined_in_eq</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">x</span>) (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqLast">EqLast</a></span> <span class="id">x</span> <span class="id">ty</span> <span class="id">ck</span> <span class="id">c0</span> <span class="id">ckrs</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="ISDEFINED.DefEqApp">DefEqApp</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">xs</span> <span class="id">ck</span> <span class="id">f</span> <span class="id">e</span> <span class="id">r</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Is_defined_in_eq</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqApp">EqApp</a></span> <span class="id">xs</span> <span class="id">ck</span> <span class="id">f</span> <span class="id">e</span> <span class="id">r</span>)<br/>
+&nbsp;&nbsp;| <span class="id"><a name="ISDEFINED.DefEqFby">DefEqFby</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ck</span> <span class="id">v</span> <span class="id">e</span> <span class="id">r</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Is_defined_in_eq</span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqFby">EqFby</a></span> <span class="id">x</span> <span class="id">ck</span> <span class="id">v</span> <span class="id">e</span> <span class="id">r</span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="ISDEFINED.Is_defined_in">Is_defined_in</a></span> <span class="id">x</span> (<span class="id">eqs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.equation">equation</a></span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists">List.Exists</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> <span class="id">x</span>) <span class="id">eqs</span>.<br/>
+<br/>
+<h2> Properties </h2>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Constructors</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Is_defined_in_eq">Is_defined_in_eq</a></span> : <span class="id">nldef</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.not_Is_defined_in_eq_EqDef">not_Is_defined_in_eq_EqDef</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">i</span> <span class="id">ck</span> <span class="id">ce</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqDef">EqDef</a></span> <span class="id">i</span> <span class="id">ck</span> <span class="id">ce</span>) -&gt; <span class="id">x</span> &lt;&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">i</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> <span class="id">i</span> <span class="id">ck</span> <span class="id">ce</span> <span class="id">H0</span> <span class="id">xeqi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">xeqi</span> <span class="kwd">in</span> <span class="id">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">i</span>) (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqDef">EqDef</a></span> <span class="id">i</span> <span class="id">ck</span> <span class="id">ce</span>)) <span class="kwd">by</span> <span class="id">auto</span> <span class="kwd">with</span> <span class="id">nldef</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.not_Is_defined_in_eq_EqApp">not_Is_defined_in_eq_EqApp</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ys</span> <span class="id">ck</span> <span class="id">f</span> <span class="id">le</span> <span class="id">r</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqApp">EqApp</a></span> <span class="id">ys</span> <span class="id">ck</span> <span class="id">f</span> <span class="id">le</span> <span class="id">r</span>) -&gt; ~ <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">x</span> <span class="id">ys</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">H</span>. <span class="id">intro</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exfalso</span>. <span class="id">apply</span> <span class="id">H</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">nldef</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.Is_defined_in_EqApp">Is_defined_in_EqApp</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xs</span> <span class="id">ck</span> <span class="id">f</span> <span class="id">es</span> <span class="id">r</span> <span class="id">d</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 &lt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">xs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#hd">hd</a></span> <span class="id">d</span> <span class="id">xs</span>)) (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqApp">EqApp</a></span> <span class="id">xs</span> <span class="id">ck</span> <span class="id">f</span> <span class="id">es</span> <span class="id">r</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Length</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">xs</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">auto</span>; <span class="id">lia</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.not_Is_defined_in_eq_EqFby">not_Is_defined_in_eq_EqFby</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">i</span> <span class="id">ck</span> <span class="id">v0</span> <span class="id">le</span> <span class="id">r</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqFby">EqFby</a></span> <span class="id">i</span> <span class="id">ck</span> <span class="id">v0</span> <span class="id">le</span> <span class="id">r</span>) -&gt; <span class="id">x</span> &lt;&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">i</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> <span class="id">i</span> <span class="id">ck</span> <span class="id">v0</span> <span class="id">le</span> <span class="id">r</span> <span class="id">H0</span> <span class="id">xeqi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">xeqi</span> <span class="kwd">in</span> <span class="id">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">i</span>) (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqFby">EqFby</a></span> <span class="id">i</span> <span class="id">ck</span> <span class="id">v0</span> <span class="id">le</span> <span class="id">r</span>)) <span class="kwd">by</span> <span class="id">auto</span> <span class="kwd">with</span> <span class="id">nldef</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.not_Is_defined_in_eq_EqLast">not_Is_defined_in_eq_EqLast</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">i</span> <span class="id">ty</span> <span class="id">ck</span> <span class="id">v0</span> <span class="id">r</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqLast">EqLast</a></span> <span class="id">i</span> <span class="id">ty</span> <span class="id">ck</span> <span class="id">v0</span> <span class="id">r</span>) -&gt; <span class="id">x</span> &lt;&gt; <span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">i</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">H0</span> <span class="id">xeqi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">xeqi</span> <span class="kwd">in</span> <span class="id">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">i</span>) (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqLast">EqLast</a></span> <span class="id">i</span> <span class="id">ty</span> <span class="id">ck</span> <span class="id">v0</span> <span class="id">r</span>)) <span class="kwd">by</span> <span class="id">auto</span> <span class="kwd">with</span> <span class="id">nldef</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">contradiction</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.not_Is_defined_in_cons">not_Is_defined_in_cons</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eq</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> <span class="id">x</span> (<span class="id">eq</span> :: <span class="id">eqs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; ~<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> <span class="id">x</span> <span class="id">eq</span> /\ ~<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> <span class="id">x</span> <span class="id">eqs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> <span class="id">eq</span> <span class="id">eqs</span>. <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;==&gt;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Hndef</span>; <span class="id">split</span>; <span class="id">intro</span> <span class="id">His_def</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Hndef</span>. <span class="id">now</span> <span class="id">constructor</span>. <span class="id">now</span> <span class="id">constructor</span> 2.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;&lt;==&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [<span class="id">Hdef_eq</span> <span class="id">Hdef_eqs</span>] <span class="id">Hdef_all</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hdef_all</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.In_memory_eq_In_defined_eq_gen">In_memory_eq_In_defined_eq_gen</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eq</span> <span class="id">S</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#Mem.memory_eq">memory_eq</a></span> <span class="id">S</span> <span class="id">eq</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) <span class="id">eq</span> \/ <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">S</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> <span class="id">eq</span> <span class="id">S</span> <span class="id">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">eq</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.Common.html#PS.add_spec">PS.add_spec</a></span> <span class="kwd">in</span> <span class="id">HH</span> <span class="kwd">as</span> [|]; <span class="id">subst</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">nldef</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="ISDEFINED.In_memory_eq_Is_defined_eq">In_memory_eq_Is_defined_eq</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eq</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#Mem.memory_eq">memory_eq</a></span> (<span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>, <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>) <span class="id">eq</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt; <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) <span class="id">eq</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.In_memory_eq_In_defined_eq_gen">In_memory_eq_In_defined_eq_gen</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> [|]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonPS.html#not_In_empty">not_In_empty</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> [].<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.In_EqFby_Is_defined_in">In_EqFby_Is_defined_in</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ck</span> <span class="id">c0</span> <span class="id">e</span> <span class="id">r</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqFby">EqFby</a></span> <span class="id">x</span> <span class="id">ck</span> <span class="id">c0</span> <span class="id">e</span> <span class="id">r</span>) <span class="id">eqs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) <span class="id">eqs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">eqs</span>; <span class="id">inversion_clear</span> 1; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">repeat</span> <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span> 2; <span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.Is_fby_in_Is_defined_in">Is_fby_in_Is_defined_in</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#Mem.Is_fby_in">Is_fby_in</a></span> <span class="id">x</span> <span class="id">eqs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) <span class="id">eqs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Mem.Is_fby_in">Is_fby_in</a></span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">L</span>. <span class="id">solve_Exists</span>. <span class="id">inv</span> <span class="id">L</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">nldef</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.Is_last_in_Is_defined_in">Is_last_in_Is_defined_in</a></span>: <span class="kwd">forall</span> <span class="id">x</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#Mem.Is_last_in">Is_last_in</a></span> <span class="id">x</span> <span class="id">eqs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">x</span>) <span class="id">eqs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Mem.Is_last_in">Is_last_in</a></span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">L</span>. <span class="id">solve_Exists</span>. <span class="id">inv</span> <span class="id">L</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">nldef</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">Is_fby_in_Is_defined_in</span> <span class="id">Is_last_in_Is_defined_in</span> : <span class="id">nldef</span>.<br/>
+<br/>
+<h2> Decision procedures: </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="ISDEFINED.defined_eq">defined_eq</a></span> (<span class="id">defs</span>: (<span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span> * <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>)) (<span class="id">eq</span>: <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.equation">equation</a></span>) : (<span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span> * <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">eq</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqDef">EqDef</a></span> <span class="id">x</span> _ _   =&gt; (<span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">defs</span>), <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">defs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqLast">EqLast</a></span> <span class="id">x</span> _ _ _ _ =&gt; (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">defs</span>, <span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">defs</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqApp">EqApp</a></span> <span class="id">xs</span> _ _ _ _ =&gt; (<span class="id"><a href="Velus.Common.CommonPS.html#ps_adds">ps_adds</a></span> <span class="id">xs</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">defs</span>), <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">defs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.EqFby">EqFby</a></span> <span class="id">x</span> _ _ _ _ =&gt; (<span class="id"><a href="Velus.Common.Common.html#PS.add">PS.add</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">defs</span>), <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">defs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="ISDEFINED.defined">defined</a></span> (<span class="id">eqs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.equation">equation</a></span>) : (<span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span> * <span class="id"><a href="Velus.Common.Common.html#PS.t">PS.t</a></span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left">List.fold_left</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq">defined_eq</a></span> <span class="id">eqs</span> (<span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>, <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>).<br/>
+<br/>
+<h2> Silly unfolding property: </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.defined_eq1">defined_eq1</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">m</span> <span class="id">eq</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq">defined_eq</a></span> <span class="id">m</span> <span class="id">eq</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq">defined_eq</a></span> (<span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>, <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>) <span class="id">eq</span>)) \/ <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">m</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?? []; <span class="id">simpl</span>; <span class="id">rewrite</span> ?<span class="id"><a href="Velus.Common.Common.html#PS.add_spec">PS.add_spec</a></span>, ?<span class="id"><a href="Velus.Common.CommonPS.html#ps_adds_spec">ps_adds_spec</a></span>, ?<span class="id"><a href="Velus.Common.Common.html#PSF.empty_iff">PSF.empty_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">split</span>; <span class="id">auto</span>; <span class="id">intros</span>; <span class="id">repeat</span> (<span class="id">take</span> (_ \/ _) <span class="id">and</span> <span class="id">destruct</span> <span class="id">it</span>); <span class="id">auto</span>; <span class="id">try</span> <span class="id">now</span> <span class="id">exfalso</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.defined_eq2">defined_eq2</a></span> : <span class="kwd">forall</span> <span class="id">x</span> <span class="id">m</span> <span class="id">eq</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq">defined_eq</a></span> <span class="id">m</span> <span class="id">eq</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq">defined_eq</a></span> (<span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>, <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>) <span class="id">eq</span>)) \/ <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">m</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ?? []; <span class="id">simpl</span>; <span class="id">rewrite</span> ?<span class="id"><a href="Velus.Common.Common.html#PS.add_spec">PS.add_spec</a></span>, ?<span class="id"><a href="Velus.Common.Common.html#PSF.empty_iff">PSF.empty_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">split</span>; <span class="id">auto</span>; <span class="id">intros</span>; <span class="id">repeat</span> (<span class="id">take</span> (_ \/ _) <span class="id">and</span> <span class="id">destruct</span> <span class="id">it</span>); <span class="id">auto</span>; <span class="id">try</span> <span class="id">now</span> <span class="id">exfalso</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.In_fold_left_defined_eq1">In_fold_left_defined_eq1</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eqs</span> <span class="id">m</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left">List.fold_left</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq">defined_eq</a></span> <span class="id">eqs</span> <span class="id">m</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists">Exists</a></span> (<span class="kwd">fun</span> <span class="id">eq</span> =&gt; <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq">defined_eq</a></span> (<span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>, <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>) <span class="id">eq</span>))) <span class="id">eqs</span> \/ <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">m</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">eqs</span> <span class="kwd">as</span> [|<span class="id">eq</span>]; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [<span class="id">Ex</span>|]; <span class="id">auto</span>. <span class="id">inv</span> <span class="id">Ex</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> ?. <span class="id">rewrite</span> <span class="id">IHeqs</span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq1">defined_eq1</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span>; <span class="id">repeat</span> (<span class="id">take</span> (_ \/ _) <span class="id">and</span> <span class="id">destruct</span> <span class="id">it</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">H</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.In_fold_left_defined_eq2">In_fold_left_defined_eq2</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eqs</span> <span class="id">m</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#fold_left">List.fold_left</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq">defined_eq</a></span> <span class="id">eqs</span> <span class="id">m</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists">Exists</a></span> (<span class="kwd">fun</span> <span class="id">eq</span> =&gt; <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq">defined_eq</a></span> (<span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>, <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>) <span class="id">eq</span>))) <span class="id">eqs</span> \/ <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">m</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">eqs</span> <span class="kwd">as</span> [|<span class="id">eq</span>]; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [<span class="id">Ex</span>|]; <span class="id">auto</span>. <span class="id">inv</span> <span class="id">Ex</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> ?. <span class="id">rewrite</span> <span class="id">IHeqs</span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq2">defined_eq2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span>; <span class="id">repeat</span> (<span class="id">take</span> (_ \/ _) <span class="id">and</span> <span class="id">destruct</span> <span class="id">it</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">H</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Reflection lemmas: </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.defined_eq_spec1">defined_eq_spec1</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eq</span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) <span class="id">eq</span> &lt;-&gt; <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq">defined_eq</a></span> (<span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>, <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>) <span class="id">eq</span>)).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> []; <span class="id">simpl</span>; <span class="id">rewrite</span> ?<span class="id"><a href="Velus.Common.Common.html#PS.add_spec">PS.add_spec</a></span>, ?<span class="id"><a href="Velus.Common.CommonPS.html#ps_adds_spec">ps_adds_spec</a></span>, ?<span class="id"><a href="Velus.Common.Common.html#PSF.empty_iff">PSF.empty_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">split</span>; [<span class="id">intros</span> <span class="id">Is</span>; <span class="id">inv</span> <span class="id">Is</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<span class="id">intros</span>; <span class="id">repeat</span> <span class="id">take</span> (_ \/ _) <span class="id">and</span> <span class="id">destruct</span> <span class="id">it</span>; <span class="id">subst</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">auto</span> <span class="kwd">with</span> <span class="id">nldef</span>; <span class="id">try</span> <span class="id">now</span> <span class="id">exfalso</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.defined_eq_spec2">defined_eq_spec2</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eq</span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">x</span>) <span class="id">eq</span> &lt;-&gt; <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq">defined_eq</a></span> (<span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>, <span class="id"><a href="Velus.Common.Common.html#PS.empty">PS.empty</a></span>) <span class="id">eq</span>)).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> []; <span class="id">simpl</span>; <span class="id">rewrite</span> ?<span class="id"><a href="Velus.Common.Common.html#PS.add_spec">PS.add_spec</a></span>, ?<span class="id"><a href="Velus.Common.CommonPS.html#ps_adds_spec">ps_adds_spec</a></span>, ?<span class="id"><a href="Velus.Common.Common.html#PSF.empty_iff">PSF.empty_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">all</span>:<span class="id">split</span>; [<span class="id">intros</span> <span class="id">Is</span>; <span class="id">inv</span> <span class="id">Is</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<span class="id">intros</span>; <span class="id">repeat</span> <span class="id">take</span> (_ \/ _) <span class="id">and</span> <span class="id">destruct</span> <span class="id">it</span>; <span class="id">subst</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">auto</span> <span class="kwd">with</span> <span class="id">nldef</span>; <span class="id">try</span> <span class="id">now</span> <span class="id">exfalso</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.defined_spec1">defined_spec1</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eqs</span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) <span class="id">eqs</span> &lt;-&gt; <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined">defined</a></span> <span class="id">eqs</span>)).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined">defined</a></span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.In_fold_left_defined_eq1">In_fold_left_defined_eq1</a></span>, <span class="id"><a href="Velus.Common.Common.html#PSF.empty_iff">PSF.empty_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [<span class="id">intros</span> <span class="id">In</span>; <span class="id">left</span>|<span class="id">intros</span> [|[]]]; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq_spec1">defined_eq_spec1</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.defined_spec2">defined_spec2</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eqs</span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">x</span>) <span class="id">eqs</span> &lt;-&gt; <span class="id"><a href="Velus.Common.Common.html#PS.In">PS.In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined">defined</a></span> <span class="id">eqs</span>)).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined">defined</a></span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.In_fold_left_defined_eq2">In_fold_left_defined_eq2</a></span>, <span class="id"><a href="Velus.Common.Common.html#PSF.empty_iff">PSF.empty_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; [<span class="id">intros</span> <span class="id">In</span>; <span class="id">left</span>|<span class="id">intros</span> [|[]]]; <span class="id">solve_Exists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1,2:<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq_spec2">defined_eq_spec2</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.Is_defined_in_eq_dec">Is_defined_in_eq_dec</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eq</span>, {<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> <span class="id">x</span> <span class="id">eq</span>}+{~<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> <span class="id">x</span> <span class="id">eq</span>}.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [] *; <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#reflect_dec">Bool.reflect_dec</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#iff_reflect">Bool.iff_reflect</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq_spec1">defined_eq_spec1</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq_spec2">defined_eq_spec2</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.Is_defined_in_dec">Is_defined_in_dec</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eqs</span>, {<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> <span class="id">x</span> <span class="id">eqs</span>}+{~<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> <span class="id">x</span> <span class="id">eqs</span>}.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> [] *; <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#reflect_dec">Bool.reflect_dec</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Bool.Bool.html#iff_reflect">Bool.iff_reflect</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_spec1">defined_spec1</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eapply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_spec2">defined_spec2</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.decidable_Is_defined_in">decidable_Is_defined_in</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Logic.Decidable.html#decidable">Decidable.decidable</a></span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> <span class="id">x</span> <span class="id">eqs</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#decidable_Exists">decidable_Exists</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">eq</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq_dec">Is_defined_in_eq_dec</a></span> <span class="id">x</span> <span class="id">eq</span>); [<span class="id">left</span>|<span class="id">right</span>]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<h2> Properties </h2>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.Is_defined_in_var_defined">Is_defined_in_var_defined</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eq</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) <span class="id">eq</span> &lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.var_defined">var_defined</a></span> <span class="id">eq</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq_spec1">defined_eq_spec1</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">eq</span>; <span class="id">simpl</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> ?<span class="id"><a href="Velus.Common.Common.html#PSF.add_iff">PSF.add_iff</a></span>, ?<span class="id"><a href="Velus.Common.CommonPS.html#ps_adds_spec">ps_adds_spec</a></span>, <span class="id"><a href="Velus.Common.Common.html#PSF.empty_iff">PSF.empty_iff</a></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="ISDEFINED.Is_defined_in_vars_defined">Is_defined_in_vars_defined</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) <span class="id">eqs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.vars_defined">vars_defined</a></span> <span class="id">eqs</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.vars_defined">vars_defined</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl_Exists</span>. <span class="id">solve_In</span>. <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_var_defined">Is_defined_in_var_defined</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl_In</span>. <span class="id">solve_Exists</span>. <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_var_defined">Is_defined_in_var_defined</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.Is_defined_in_last_defined">Is_defined_in_last_defined</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eq</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">x</span>) <span class="id">eq</span> &lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">List.In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.last_defined">last_defined</a></span> <span class="id">eq</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">rewrite</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.defined_eq_spec2">defined_eq_spec2</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">eq</span>; <span class="id">simpl</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> ?<span class="id"><a href="Velus.Common.Common.html#PSF.add_iff">PSF.add_iff</a></span>, ?<span class="id"><a href="Velus.Common.CommonPS.html#ps_adds_spec">ps_adds_spec</a></span>, <span class="id"><a href="Velus.Common.Common.html#PSF.empty_iff">PSF.empty_iff</a></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="ISDEFINED.Is_defined_in_lasts_defined">Is_defined_in_lasts_defined</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Last">Last</a></span> <span class="id">x</span>) <span class="id">eqs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.lasts_defined">lasts_defined</a></span> <span class="id">eqs</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span>. <span class="id">unfold</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span>, <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.lasts_defined">lasts_defined</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl_Exists</span>. <span class="id">solve_In</span>. <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_last_defined">Is_defined_in_last_defined</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl_In</span>. <span class="id">solve_Exists</span>. <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_last_defined">Is_defined_in_last_defined</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.Is_defined_in_cons">Is_defined_in_cons</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eq</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> <span class="id">x</span> (<span class="id">eq</span> :: <span class="id">eqs</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> <span class="id">x</span> <span class="id">eq</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\/ (~<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> <span class="id">x</span> <span class="id">eq</span> /\ <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> <span class="id">x</span> <span class="id">eqs</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">x</span> <span class="id">eq</span> <span class="id">eqs</span> <span class="id">Hdef</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists_cons">List.Exists_cons</a></span> <span class="kwd">in</span> <span class="id">Hdef</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq_dec">Is_defined_in_eq_dec</a></span> <span class="id">x</span> <span class="id">eq</span>); <span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.Is_defined_in_In">Is_defined_in_In</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">eqs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> <span class="id">x</span> <span class="id">eqs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">eq</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">eq</span> <span class="id">eqs</span> /\ <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_eq">Is_defined_in_eq</a></span> <span class="id">x</span> <span class="id">eq</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Def</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists_exists">Exists_exists</a></span> <span class="kwd">in</span> <span class="id">Def</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="ISDEFINED.node_output_defined_in_eqs">node_output_defined_in_eqs</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span> <span class="id">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">x</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.n_out">n_out</a></span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in">Is_defined_in</a></span> (<span class="id"><a href="Velus.FunctionalEnvironment.html#Var">Var</a></span> <span class="id">x</span>) <span class="id">n</span>.(<span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.n_eqs">n_eqs</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ho</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED.Is_defined_in_vars_defined">Is_defined_in_vars_defined</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn.n_defd">n_defd</a></span>. <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_or_app">in_or_app</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED">ISDEFINED</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="IsDefinedFun">IsDefinedFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>      <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Syn</span>   : <span class="id"><a href="Velus.NLustre.NLSyntax.html#NLSYNTAX">NLSYNTAX</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span>  <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#CESyn">CESyn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Mem</span>   : <span class="id"><a href="Velus.NLustre.Memories.html#MEMORIES">MEMORIES</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span>  <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn">Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;: <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED">ISDEFINED</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn">Syn</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Mem">Mem</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#ISDEFINED">ISDEFINED</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Ids">Ids</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Op">Op</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Cks">Cks</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Syn">Syn</a></span> <span class="id"><a href="Velus.NLustre.IsDefined.html#Mem">Mem</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.NLustre.IsDefined.html#IsDefinedFun">IsDefinedFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

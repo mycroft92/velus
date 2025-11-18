@@ -1,0 +1,613 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module StcSchedule</title>
+<meta name="description" content="Documentation of Coq module StcSchedule" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module StcSchedule</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html">Sorting.Permutation</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Mergesort.html">Sorting.Mergesort</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html">Morphisms</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Setoids.Setoid.html">Setoid</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.FSets.FMapPositive.html">FSets.FMapPositive</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.CommonTyping.html">CommonTyping</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CoreExpr.html">CoreExpr</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Stc.StcSyntax.html">Stc.StcSyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Stc.StcOrdered.html">Stc.StcOrdered</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.IndexedStreams.html">IndexedStreams</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Stc.StcSemantics.html">Stc.StcSemantics</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Stc.StcTyping.html">Stc.StcTyping</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Stc.StcClocking.html">Stc.StcClocking</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Stc.StcIsFree.html">Stc.StcIsFree</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Stc.StcWellDefined.html">Stc.StcWellDefined</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.VelusMemory.html">VelusMemory</a></span>.<br/>
+<br/>
+<h1> Scheduling of N-Lustre equations </h1>
+<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="EXT_STCSCHEDULER">EXT_STCSCHEDULER</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>  <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Syn</span>   : <span class="id"><a href="Velus.Stc.StcSyntax.html#STCSYNTAX">STCSYNTAX</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CESyn">CESyn</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Parameter</span> <span class="id"><a name="EXT_STCSCHEDULER.schedule">schedule</a></span> : <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Syn.trconstr">trconstr</a></span> -&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#positive">positive</a></span>.<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#EXT_STCSCHEDULER">EXT_STCSCHEDULER</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="STCSCHEDULE">STCSCHEDULE</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>    : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>     : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span>  : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span>    <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">ComTyp</span> : <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING">COMMONTYPING</a></span>     <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>    : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>           <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Str</span>    : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS">INDEXEDSTREAMS</a></span>   <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">CE</span>     : <span class="id"><a href="Velus.CoreExpr.CoreExpr.html#COREEXPR">COREEXPR</a></span>         <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#ComTyp">ComTyp</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Str">Str</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">StcSyn</span> : <span class="id"><a href="Velus.Stc.StcSyntax.html#STCSYNTAX">STCSYNTAX</a></span>        <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ord</span>    : <span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED">STCORDERED</a></span>       <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">StcSem</span> : <span class="id"><a href="Velus.Stc.StcSemantics.html#STCSEMANTICS">STCSEMANTICS</a></span>     <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ord">Ord</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Str">Str</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Sem">CE.Sem</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">StcTyp</span> : <span class="id"><a href="Velus.Stc.StcTyping.html#STCTYPING">STCTYPING</a></span>        <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Typ">CE.Typ</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">StcClo</span> : <span class="id"><a href="Velus.Stc.StcClocking.html#STCCLOCKING">STCCLOCKING</a></span>      <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ord">Ord</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Clo">CE.Clo</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Free</span>   : <span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE">STCISFREE</a></span>        <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span>                         <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.IsF">CE.IsF</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Wdef</span>   : <span class="id"><a href="Velus.Stc.StcWellDefined.html#STCWELLDEFINED">STCWELLDEFINED</a></span>   <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ord">Ord</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.IsF">CE.IsF</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Free">Free</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Sch</span>    : <span class="id"><a href="Velus.Stc.StcSchedule.html#EXT_STCSCHEDULER">EXT_STCSCHEDULER</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Section</span> <span class="id"><a name="STCSCHEDULE.OCombine">OCombine</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Context</span> {<span class="id"><a name="STCSCHEDULE.OCombine.A">A</a></span> <span class="id"><a name="STCSCHEDULE.OCombine.B">B</a></span>: <span class="kwd">Type</span>}.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Fixpoint</span> <span class="id"><a name="STCSCHEDULE.ocombine">ocombine</a></span> (<span class="id">l</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.OCombine.A">A</a></span>) (<span class="id">l'</span> : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.OCombine.B">B</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option">option</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.OCombine.A">A</a></span> * <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.OCombine.B">B</a></span>)) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">l</span>, <span class="id">l'</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [], [] =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> []<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">x</span>::<span class="id">xs</span>, <span class="id">y</span>::<span class="id">ys</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">ocombine</span> <span class="id">xs</span> <span class="id">ys</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">rs</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> ((<span class="id">x</span>, <span class="id">y</span>) :: <span class="id">rs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _, _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.ocombine_combine">ocombine_combine</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">l</span> <span class="id">l'</span> <span class="id">ll</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.ocombine">ocombine</a></span> <span class="id">l</span> <span class="id">l'</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">ll</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#combine">combine</a></span> <span class="id">l</span> <span class="id">l'</span> = <span class="id">ll</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>, <span class="id">l'</span>; <span class="id">simpl</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span> (<span class="id">now</span> <span class="id">inversion_clear</span> 1; <span class="id">auto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">HH</span>; <span class="id">cases_eqn</span> <span class="id">Hoc</span>; <span class="id">inv</span> <span class="id">HH</span>; <span class="id">auto</span> <span class="kwd">with</span> <span class="id">datatypes</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.olength_combine">olength_combine</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">l</span> <span class="id">l'</span> <span class="id">ll</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.ocombine">ocombine</a></span> <span class="id">l</span> <span class="id">l'</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">ll</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#length">length</a></span> <span class="id">l'</span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">l</span>, <span class="id">l'</span>; <span class="id">simpl</span>; <span class="id">inversion</span> 1; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.ocombine">ocombine</a></span> <span class="id">l</span> <span class="id">l'</span>) <span class="id">eqn</span>:<span class="id">Hoc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> (<span class="id">IHl</span> _ _ <span class="id">Hoc</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.OCombine">OCombine</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Module</span> <span class="id"><a name="STCSCHEDULE.SchTcOrder">SchTcOrder</a></span> &lt;: <span class="id">Orders.TotalLeBool'</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STCSCHEDULE.SchTcOrder.t">t</a></span> : <span class="kwd">Type</span> := (<span class="id"><a href="https://coq.inria.fr/library/Coq.Numbers.BinNums.html#positive">positive</a></span> * <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.trconstr">trconstr</a></span>)%<span class="id">type</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STCSCHEDULE.SchTcOrder.leb">leb</a></span> (<span class="id">s1</span> <span class="id">s2</span> : <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.SchTcOrder.t">t</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#bool">bool</a></span> := ((<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">s2</span>) &lt;=? (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">s1</span>))%<span class="id">positive</span>.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.SchTcOrder.leb_total">leb_total</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">s1</span> <span class="id">s2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.SchTcOrder.leb">leb</a></span> <span class="id">s1</span> <span class="id">s2</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> \/ <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.SchTcOrder.leb">leb</a></span> <span class="id">s2</span> <span class="id">s1</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span>.<br/>
+<details>
+&nbsp;&nbsp;&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">s1</span> <span class="kwd">as</span> (<span class="id">p1</span> &amp; <span class="id">eq1</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">s2</span> <span class="kwd">as</span> (<span class="id">p2</span> &amp; <span class="id">eq2</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.SchTcOrder.leb">leb</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.PArith.POrderedType.html#Positive_as_OT.leb_compare">POrderedType.Positive_as_OT.leb_compare</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id">p1</span> ?= <span class="id">p2</span>)%<span class="id">positive</span> <span class="id">eqn</span>:<span class="id">Hp</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.PArith.BinPos.html#Pos.compare_gt_iff">Pos.compare_gt_iff</a></span> <span class="kwd">in</span> <span class="id">Hp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.PArith.BinPos.html#Pos.compare_lt_iff">Pos.compare_lt_iff</a></span> <span class="kwd">in</span> <span class="id">Hp</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Hp</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">End</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.SchTcOrder">SchTcOrder</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Module</span> <span class="id"><a name="STCSCHEDULE.SchSort">SchSort</a></span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Mergesort.html#Sort">Sort</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.SchTcOrder">SchTcOrder</a></span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STCSCHEDULE.schedule_tcs">schedule_tcs</a></span> (<span class="id">f</span>: <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>) (<span class="id">tcs</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.trconstr">trconstr</a></span>) : <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.trconstr">trconstr</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">sch</span> := <span class="id"><a href="Velus.Stc.StcSchedule.html#Sch.schedule">Sch.schedule</a></span> <span class="id">f</span> <span class="id">tcs</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.ocombine">ocombine</a></span> <span class="id">sch</span> <span class="id">tcs</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>        =&gt; <span class="id">tcs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">schtcs</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.sort">SchSort.sort</a></span> <span class="id">schtcs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">tcs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs">schedule_tcs</a></span> <span class="id">f</span> <span class="id">tcs</span>) <span class="id">tcs</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs">schedule_tcs</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">f</span> <span class="id">tcs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.ocombine">ocombine</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#Sch.schedule">schedule</a></span> <span class="id">f</span> <span class="id">tcs</span>) <span class="id">tcs</span>) <span class="id">eqn</span>:<span class="id">Hoc</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.Permuted_sort">SchSort.Permuted_sort</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.olength_combine">olength_combine</a></span> _ _ _ <span class="id">Hoc</span>) <span class="kwd">as</span> <span class="id">Hlen</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.ocombine_combine">ocombine_combine</a></span> <span class="kwd">in</span> <span class="id">Hoc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id">Hoc</span>, <span class="id"><a href="Velus.Common.CommonList.html#map_snd_combine">map_snd_combine</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.insts_of">insts_of</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.trconstr">trconstr</a></span> ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">steps_of_permutation</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">rewrite</span> <span class="id">IHPermutation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#perm_swap">perm_swap</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.inst_resets_of">inst_resets_of</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.trconstr">trconstr</a></span> ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">iresets_of_permutation</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">rewrite</span> <span class="id">IHPermutation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#perm_swap">perm_swap</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.state_resets_of">state_resets_of</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.trconstr">trconstr</a></span> ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">resets_of_permutation</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">rewrite</span> <span class="id">IHPermutation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#perm_swap">perm_swap</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.lasts_of">lasts_of</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.trconstr">trconstr</a></span> ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Stc.StcSchedule.html#Op.type">type</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">lasts_of_permutation</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">rewrite</span> <span class="id">IHPermutation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#perm_swap">perm_swap</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.nexts_of">nexts_of</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.trconstr">trconstr</a></span> ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> (<span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span> * <span class="id"><a href="Velus.Stc.StcSchedule.html#Op.type">type</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">nexts_of_permutation</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">rewrite</span> <span class="id">IHPermutation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">cases</span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#perm_swap">perm_swap</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> : (<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.variables">variables</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.trconstr">trconstr</a></span> ==&gt; @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> <span class="id"><a href="Velus.Common.Common.html#ident">ident</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">variables_permutation</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.variables">variables</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">now</span> <span class="id">rewrite</span> <span class="id">IHPermutation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">rewrite</span> &lt;-2 <span class="id"><a href="Velus.Common.CommonList.html#Permutation_app_assoc">Permutation_app_assoc</a></span>; <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_app_tail">Permutation_app_tail</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_app_comm">Permutation_app_comm</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">etransitivity</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> <span class="id">A</span> <span class="id">P</span>: (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Exists">Exists</a></span> <span class="id">P</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> <span class="id">A</span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Program.Basics.html#impl">Basics.impl</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">Exists_permutation</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">intros</span> <span class="id">Ex</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inv</span> <span class="id">Ex</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">now</span> <span class="id">left</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">right</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">inversion_clear</span> <span class="id">Ex</span> <span class="kwd">as</span> [|?? <span class="id">Ex'</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">now</span> <span class="id">right</span>; <span class="id">left</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">inv</span> <span class="id">Ex'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">now</span> <span class="id">left</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id">now</span> <span class="id">right</span>; <span class="id">right</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="id">Program</span> <span class="kwd">Definition</span> <span class="id"><a name="STCSCHEDULE.schedule_system">schedule_system</a></span> {<span class="id">prefs</span>} (<span class="id">b</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.system">system</a></span> <span class="id">prefs</span>) : @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.system">system</a></span> <span class="id">prefs</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_name">s_name</a></span>  := <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_name">s_name</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_subs">s_subs</a></span>  := <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_subs">s_subs</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_in">s_in</a></span>    := <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_in">s_in</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_vars">s_vars</a></span>  := <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_vars">s_vars</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_lasts">s_lasts</a></span> := <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_lasts">s_lasts</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_nexts">s_nexts</a></span> := <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_nexts">s_nexts</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_out">s_out</a></span>   := <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_out">s_out</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_tcs">s_tcs</a></span>   := <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs">schedule_tcs</a></span> <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_name">s_name</a></span>) <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_tcs">s_tcs</a></span>);<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_ingt0">s_ingt0</a></span>             := <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_ingt0">s_ingt0</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_nodup">s_nodup</a></span>             := <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_nodup">s_nodup</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_nodup_states_subs">s_nodup_states_subs</a></span> := <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_nodup_states_subs">s_nodup_states_subs</a></span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_good">s_good</a></span>              := <span class="id">b</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_good">s_good</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|}.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>. <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_vars_out_in_tcs">s_vars_out_in_tcs</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>. <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_lasts_in_tcs">s_lasts_in_tcs</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ??.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.last_consistency">last_consistency</a></span>, <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.Last_with_reset_in">Last_with_reset_in</a></span>, <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.Is_reset_state_in">Is_reset_state_in</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_last_consistency">s_last_consistency</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>. <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_nexts_in_tcs">s_nexts_in_tcs</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ??.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.next_consistency">next_consistency</a></span>, <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.Next_with_reset_in">Next_with_reset_in</a></span>, <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.Is_reset_state_in">Is_reset_state_in</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_next_consistency">s_next_consistency</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>. <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_state_reset_incl">s_state_reset_incl</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>. <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_subs_in_tcs">s_subs_in_tcs</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>. <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_subs_insts_of">s_subs_insts_of</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> ??.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.Inst_with_reset_in">Inst_with_reset_in</a></span>, <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.Is_reset_inst_in">Is_reset_inst_in</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">repeat</span> <span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_inst_consistency">s_inst_consistency</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Next Obligation.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>. <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_inst_reset_incl">s_inst_reset_incl</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STCSCHEDULE.schedule">schedule</a></span> {<span class="id">prefs</span>} (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) : <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.Program">Program</a></span> <span class="id">P</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.types">types</a></span>) <span class="id">P</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.externs">externs</a></span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_system">schedule_system</a></span> <span class="id">P</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.systems">systems</a></span>)).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.schedule_system_name">schedule_system_name</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">s</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.system">system</a></span> <span class="id">prefs</span>), (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_system">schedule_system</a></span> <span class="id">s</span>).(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_name">s_name</a></span>) = <span class="id">s</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_name">s_name</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+ <span class="id">destruct</span> <span class="id">s</span>; <span class="id">auto</span>. Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.schedule_map_name">schedule_map_name</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (@<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.system">system</a></span> <span class="id">prefs</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_name">s_name</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_system">schedule_system</a></span> <span class="id">P</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_name">s_name</a></span> <span class="id">P</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">P</span> <span class="kwd">as</span> [|<span class="id">b</span>]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">b</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">now</span> <span class="id">rewrite</span> <span class="id">IHP</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_find_system">scheduler_find_system</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">P'</span> <span class="id">f</span> <span class="id">s</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.find_system">find_system</a></span> <span class="id">f</span> <span class="id">P</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">s</span>, <span class="id">P'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.find_system">find_system</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_system">schedule_system</a></span> <span class="id">s</span>, <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> []; <span class="id">induction</span> <span class="id">systems0</span> <span class="kwd">as</span> [|<span class="id">s'</span>]; [<span class="id">now</span> <span class="id">inversion</span> 1|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_cons">find_unit_cons</a></span>; <span class="id">simpl</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_cons">find_unit_cons</a></span> <span class="kwd">in</span> <span class="id">Hfind</span> <span class="kwd">as</span> [[<span class="id">E</span> <span class="id">Hfind</span>]|[<span class="id">E</span> <span class="id">Hfind</span>]]; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hfind</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id">scheduler_find_system'</span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">f</span> <span class="id">s</span> <span class="id">P'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.find_system">find_system</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">s</span>, <span class="id">P'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">s'</span> <span class="id">P''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.find_system">find_system</a></span> <span class="id">f</span> <span class="id">P</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">s'</span>, <span class="id">P''</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id">s</span> = <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_system">schedule_system</a></span> <span class="id">s'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id">P'</span> = <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P''</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> []; <span class="id">induction</span> <span class="id">systems0</span> <span class="kwd">as</span> [|<span class="id">sys</span>]; [<span class="id">now</span> <span class="id">inversion</span> 1|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hfind</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.find_system">find_system</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit">find_unit</a></span> <span class="kwd">in</span> *; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> (<span class="id"><a href="Velus.Common.Common.html#ident_eq_dec">ident_eq_dec</a></span> <span class="id">sys</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_name">s_name</a></span>) <span class="id">f</span>); <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inv</span> <span class="id">Hfind</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_wt_trconstr">scheduler_wt_trconstr</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">vars</span> <span class="id">tc</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcTyp.wt_trconstr">wt_trconstr</a></span> <span class="id">P</span> <span class="id">vars</span> <span class="id">tc</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcTyp.wt_trconstr">wt_trconstr</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) <span class="id">vars</span> <span class="id">tc</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> []; <span class="id">induction</span> <span class="id">systems0</span> <span class="kwd">as</span> [|<span class="id">b</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">tc</span>; <span class="id">inversion_clear</span> 1; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">stctyping</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">tc</span>; <span class="id">inversion_clear</span> 1; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">stctyping</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span> <span class="id">H</span>:<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.find_system">find_system</a></span> _ _ = _ |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_find_system">scheduler_find_system</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">end</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eauto</span> <span class="kwd">with</span> <span class="id">stctyping</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_wt_system">scheduler_wt_system</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">s</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcTyp.wt_system">wt_system</a></span> <span class="id">P</span> <span class="id">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcTyp.wt_system">wt_system</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_system">schedule_system</a></span> <span class="id">s</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcTyp.wt_system">wt_system</a></span>; <span class="id">simpl</span>; <span class="id">intros</span> * (<span class="id">WT</span>&amp;?); <span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_impl">Forall_impl</a></span> <span class="kwd">with</span> (2 := <span class="id">WT</span>), <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_wt_trconstr">scheduler_wt_trconstr</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_wt_program">scheduler_wt_program</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcTyp.wt_program">wt_program</a></span> <span class="id">P</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcTyp.wt_program">wt_program</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> []; <span class="id">induction</span> <span class="id">systems0</span> <span class="kwd">as</span> [|<span class="id">s</span>]; <span class="id">inversion_clear</span> 1 <span class="kwd">as</span> [|?? []];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span>; <span class="id">simpl</span>; <span class="id">constructor</span>; <span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#StcTyp.wt_system">wt_system</a></span> _ _) <span class="id">and</span> <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_wt_system">scheduler_wt_system</a></span> <span class="kwd">in</span> <span class="id">it</span> <span class="kwd">as</span> <span class="id">WT</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">change</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">s'</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_name">s_name</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_system">schedule_system</a></span> <span class="id">s</span>) &lt;&gt; <span class="id">x</span>) <span class="id">s'</span>.(<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.s_name">s_name</a></span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_system">schedule_system</a></span> <span class="id">systems0</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> &lt;-<span class="id"><a href="Velus.Common.CommonList.html#Forall_map">Forall_map</a></span>, <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_map_name">schedule_map_name</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#Forall_map">Forall_map</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">s</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_wc_trconstr">scheduler_wc_trconstr</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">vars</span> <span class="id">tc</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcClo.wc_trconstr">wc_trconstr</a></span> <span class="id">P</span> <span class="id">vars</span> <span class="id">tc</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcClo.wc_trconstr">wc_trconstr</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) <span class="id">vars</span> <span class="id">tc</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> []; <span class="id">induction</span> <span class="id">systems0</span> <span class="kwd">as</span> [|<span class="id">s</span> <span class="id">P</span> <span class="id">IH</span>]; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> <span class="id">vars</span> <span class="id">tc</span> <span class="id">Hwc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">tc</span>; <span class="id">inv</span> <span class="id">Hwc</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">stcclocking</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_find_system">scheduler_find_system</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_wc_system">scheduler_wc_system</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">s</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcClo.wc_system">wc_system</a></span> <span class="id">P</span> <span class="id">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcClo.wc_system">wc_system</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_system">schedule_system</a></span> <span class="id">s</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1 <span class="kwd">as</span> [? (?&amp;?&amp; <span class="id">Htcs</span>)].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">Htcs</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_wc_trconstr">scheduler_wc_trconstr</a></span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_wc_program">scheduler_wc_program</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcClo.wc_program">wc_program</a></span> <span class="id">P</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcClo.wc_program">wc_program</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> []; <span class="id">induction</span> <span class="id">systems0</span>; <span class="id">intros</span> * <span class="id">WT</span>; <span class="id">inv</span> <span class="id">WT</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span>; <span class="id">simpl</span>; <span class="id">constructor</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">take</span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#StcClo.wc_system">wc_system</a></span> _ _) <span class="id">and</span> <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_wc_system">scheduler_wc_system</a></span> <span class="kwd">in</span> <span class="id">it</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">IHsystems0</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_initial_state">scheduler_initial_state</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">S</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">f</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.initial_state">initial_state</a></span> <span class="id">P</span> <span class="id">f</span> <span class="id">S</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.initial_state">initial_state</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) <span class="id">f</span> <span class="id">S</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">S</span> <span class="kwd">as</span> [? <span class="id">IH</span>] <span class="kwd">using</span> <span class="id">memory_ind'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1 <span class="kwd">as</span> [????? <span class="id">Find</span> ? <span class="id">Insts</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_find_system">scheduler_find_system</a></span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Insts</span> <span class="kwd">in</span> <span class="id">Hin</span> <span class="kwd">as</span> (?&amp;?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eexists</span>; <span class="id">auto</span> <span class="kwd">with</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">scheduler_initial_state</span> : <span class="id">stcsem</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_state_closed">scheduler_state_closed</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">S</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">f</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.state_closed">state_closed</a></span> <span class="id">P</span> <span class="id">f</span> <span class="id">S</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.state_closed">state_closed</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) <span class="id">f</span> <span class="id">S</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> <span class="id">S</span> <span class="kwd">as</span> [? <span class="id">IH</span>] <span class="kwd">using</span> <span class="id">memory_ind'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> 1 <span class="kwd">as</span> [????? <span class="id">Find</span> ? <span class="id">Insts</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_find_system">scheduler_find_system</a></span> <span class="kwd">in</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hin</span>; <span class="id">pose</span> <span class="id">proof</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id">Insts</span> <span class="kwd">in</span> <span class="id">Hin</span> <span class="kwd">as</span> (?&amp;?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eexists</span>; <span class="id">auto</span> <span class="kwd">with</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">scheduler_state_closed</span> : <span class="id">stcsem</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Theorem</span> <span class="id"><a name="STCSCHEDULE.scheduler_sem_system">scheduler_sem_system</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">f</span> <span class="id">xs</span> <span class="id">S</span> <span class="id">S'</span> <span class="id">ys</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.sem_system">sem_system</a></span> <span class="id">P</span> <span class="id">f</span> <span class="id">xs</span> <span class="id">S</span> <span class="id">S'</span> <span class="id">ys</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.sem_system">sem_system</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) <span class="id">f</span> <span class="id">xs</span> <span class="id">S</span> <span class="id">S'</span> <span class="id">ys</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Sem</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.sem_system_mult">sem_system_mult</a></span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">P_system</span> := <span class="kwd">fun</span> <span class="id">f</span> <span class="id">S</span> <span class="id">xs</span> <span class="id">ys</span> <span class="id">S'</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.sem_system">sem_system</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) <span class="id">f</span> <span class="id">S</span> <span class="id">xs</span> <span class="id">ys</span> <span class="id">S'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">P_trconstr</span> := <span class="kwd">fun</span> <span class="id">base</span> <span class="id">R</span> <span class="id">S</span> <span class="id">I</span> <span class="id">S'</span> <span class="id">tc</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.sem_trconstr">sem_trconstr</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) <span class="id">base</span> <span class="id">R</span> <span class="id">S</span> <span class="id">I</span> <span class="id">S'</span> <span class="id">tc</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">in</span> <span class="id">Sem</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">stcsem</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> * ???.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">stcsem</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> * ?????????.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span> <span class="id">H</span>: <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.find_system">find_system</a></span> _ _ = _ |- _ =&gt; <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_find_system">scheduler_find_system</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">end</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.SSystem">SSystem</a></span> <span class="kwd">with</span> (<span class="id">I</span> := <span class="id">I</span>); <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">stcsem</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">stcsem</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+&nbsp;&nbsp;<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Resolve</span> <span class="id">scheduler_sem_system</span> : <span class="id">stcsem</span>.<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="STCSCHEDULE.scheduler_loop">scheduler_loop</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">n</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">f</span> <span class="id">xss</span> <span class="id">yss</span> <span class="id">S</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.loop">loop</a></span> <span class="id">P</span> <span class="id">f</span> <span class="id">xss</span> <span class="id">yss</span> <span class="id">S</span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSem.loop">loop</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) <span class="id">f</span> <span class="id">xss</span> <span class="id">yss</span> <span class="id">S</span> <span class="id">n</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">cofix</span> <span class="id">COFIX</span>; <span class="id">inversion_clear</span> 1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">stcsem</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_ordered">scheduler_ordered</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#Ord.Ordered_systems">Ordered_systems</a></span> <span class="id">P</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#Ord.Ordered_systems">Ordered_systems</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ord.Ordered_systems">Ordered_systems</a></span>, <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1 <span class="kwd">as</span> [|? <span class="id">us</span> [<span class="id">Spec</span> <span class="id">Names</span>]]; <span class="id">simpl</span>; <span class="id">constructor</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">intros</span> * <span class="id">Hin</span>; <span class="id">apply</span> <span class="id">Spec</span> <span class="kwd">in</span> <span class="id">Hin</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp; <span class="id">Find</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">auto</span> <span class="kwd">with</span> *; <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_find_system">scheduler_find_system</a></span> <span class="kwd">in</span> <span class="id">Find</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">clear</span> - <span class="id">Names</span>; <span class="id">induction</span> <span class="id">us</span>; <span class="id">simpl</span>; <span class="id">inv</span> <span class="id">Names</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_normal_args_tc">scheduler_normal_args_tc</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">tc</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#Wdef.normal_args_tc">normal_args_tc</a></span> <span class="id">P</span> <span class="id">tc</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#Wdef.normal_args_tc">normal_args_tc</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) <span class="id">tc</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">induction</span> 1; <span class="id">eauto</span> <span class="kwd">with</span> <span class="id">stcsyn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">econstructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_find_system">scheduler_find_system</a></span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_normal_args_system">scheduler_normal_args_system</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>) <span class="id">s</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#Wdef.normal_args_system">normal_args_system</a></span> <span class="id">P</span> <span class="id">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#Wdef.normal_args_system">normal_args_system</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>) (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_system">schedule_system</a></span> <span class="id">s</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Normal</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule_tcs_permutation">schedule_tcs_permutation</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Normal</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_normal_args_tc">scheduler_normal_args_tc</a></span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="STCSCHEDULE.scheduler_normal_args">scheduler_normal_args</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span>: @<span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn.program">program</a></span> <span class="id">prefs</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#Wdef.normal_args">normal_args</a></span> <span class="id">P</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcSchedule.html#Wdef.normal_args">normal_args</a></span> (<span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.schedule">schedule</a></span> <span class="id">P</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Wdef.normal_args">normal_args</a></span>; <span class="id">simpl</span>; <span class="id">induction</span> 1 <span class="kwd">as</span> [|?? <span class="id">NAS</span>]; <span class="id">simpl</span>; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE.scheduler_normal_args_system">scheduler_normal_args_system</a></span> <span class="kwd">in</span> <span class="id">NAS</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE">STCSCHEDULE</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="StcScheduleFun">StcScheduleFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>    : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>     : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span>  : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span>    <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">ComTyp</span> : <span class="id"><a href="Velus.Common.CommonTyping.html#COMMONTYPING">COMMONTYPING</a></span>     <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>    : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>           <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Str</span>    : <span class="id"><a href="Velus.IndexedStreams.html#INDEXEDSTREAMS">INDEXEDSTREAMS</a></span>   <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">CE</span>     : <span class="id"><a href="Velus.CoreExpr.CoreExpr.html#COREEXPR">COREEXPR</a></span>         <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#ComTyp">ComTyp</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Str">Str</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">StcSyn</span> : <span class="id"><a href="Velus.Stc.StcSyntax.html#STCSYNTAX">STCSYNTAX</a></span>        <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ord</span>    : <span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED">STCORDERED</a></span>       <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Sem</span>    : <span class="id"><a href="Velus.Stc.StcSemantics.html#STCSEMANTICS">STCSEMANTICS</a></span>     <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ord">Ord</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Str">Str</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Sem">CE.Sem</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Typ</span>    : <span class="id"><a href="Velus.Stc.StcTyping.html#STCTYPING">STCTYPING</a></span>        <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Typ">CE.Typ</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Clo</span>    : <span class="id"><a href="Velus.Stc.StcClocking.html#STCCLOCKING">STCCLOCKING</a></span>      <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ord">Ord</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Clo">CE.Clo</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Free</span>   : <span class="id"><a href="Velus.Stc.StcIsFree.html#STCISFREE">STCISFREE</a></span>        <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span>                         <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.IsF">CE.IsF</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Wdef</span>   : <span class="id"><a href="Velus.Stc.StcWellDefined.html#STCWELLDEFINED">STCWELLDEFINED</a></span>   <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ord">Ord</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.IsF">CE.IsF</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Free">Free</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Sch</span>    : <span class="id"><a href="Velus.Stc.StcSchedule.html#EXT_STCSCHEDULER">EXT_STCSCHEDULER</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE.Syn">CE.Syn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span>)<br/>
+&lt;: <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE">STCSCHEDULE</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#ComTyp">ComTyp</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Str">Str</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE">CE</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ord">Ord</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Sem">Sem</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Typ">Typ</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Clo">Clo</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Free">Free</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Wdef">Wdef</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Sch">Sch</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#STCSCHEDULE">STCSCHEDULE</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#ComTyp">ComTyp</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Str">Str</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#CE">CE</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcSyn">StcSyn</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Ord">Ord</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Sem">Sem</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Typ">Typ</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Clo">Clo</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Free">Free</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Wdef">Wdef</a></span> <span class="id"><a href="Velus.Stc.StcSchedule.html#Sch">Sch</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Stc.StcSchedule.html#StcScheduleFun">StcScheduleFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

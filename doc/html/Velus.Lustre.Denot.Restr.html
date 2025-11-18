@@ -1,0 +1,286 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module Restr</title>
+<meta name="description" content="Documentation of Coq module Restr" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module Restr</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html">Permutation</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span> <span class="id"><a href="Velus.Ident.html">Ident</a></span> <span class="id"><a href="Velus.Operators.html">Operators</a></span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span> <span class="id"><a href="Velus.Lustre.StaticEnv.html">StaticEnv</a></span> <span class="id"><a href="Velus.FunctionalEnvironment.html">FunctionalEnvironment</a></span> <span class="id"><a href="Velus.Lustre.LSyntax.html">LSyntax</a></span>.<br/>
+<span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Lustre.Denot.CommonList2.html">CommonList2</a></span>.<br/>
+<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">ListNotations</a></span>.<br/>
+<br/>
+<h1> La restriction syntaxique actuelle du modèle dénotationnel </h1>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="LRESTR">LRESTR</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Senv</span>  : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV">STATICENV</a></span>     <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Syn</span>   : <span class="id"><a href="Velus.Lustre.LSyntax.html#LSYNTAX">LSYNTAX</a></span>       <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Senv">Senv</a></span>).<br/>
+<br/>
+<span class="kwd">Inductive</span> <span class="id"><a name="LRESTR.restr_exp">restr_exp</a></span> : <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.exp">exp</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+| <span class="id"><a name="LRESTR.restr_Econst">restr_Econst</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">c</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Econst">Econst</a></span> <span class="id">c</span>)<br/>
+| <span class="id"><a name="LRESTR.restr_Eenum">restr_Eenum</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">c</span> <span class="id">ty</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Eenum">Eenum</a></span> <span class="id">c</span> <span class="id">ty</span>)<br/>
+| <span class="id"><a name="LRESTR.restr_Evar">restr_Evar</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ann</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Evar">Evar</a></span> <span class="id">x</span> <span class="id">ann</span>)<br/>
+| <span class="id"><a name="LRESTR.restr_Eunop">restr_Eunop</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">op</span> <span class="id">e</span> <span class="id">ann</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Eunop">Eunop</a></span> <span class="id">op</span> <span class="id">e</span> <span class="id">ann</span>)<br/>
+| <span class="id"><a name="LRESTR.restr_Binop">restr_Binop</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">op</span> <span class="id">e1</span> <span class="id">e2</span> <span class="id">ann</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> <span class="id">e1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> <span class="id">e2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Ebinop">Ebinop</a></span> <span class="id">op</span> <span class="id">e1</span> <span class="id">e2</span> <span class="id">ann</span>)<br/>
+| <span class="id"><a name="LRESTR.restr_Efby">restr_Efby</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e0s</span> <span class="id">es</span> <span class="id">anns</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">restr_exp</span> <span class="id">e0s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">restr_exp</span> <span class="id">es</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Efby">Efby</a></span> <span class="id">e0s</span> <span class="id">es</span> <span class="id">anns</span>)<br/>
+| <span class="id"><a name="LRESTR.restr_Ewhen">restr_Ewhen</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">es</span> <span class="id">x</span> <span class="id">k</span> <span class="id">anns</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">restr_exp</span> <span class="id">es</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Ewhen">Ewhen</a></span> <span class="id">es</span> <span class="id">x</span> <span class="id">k</span> <span class="id">anns</span>)<br/>
+| <span class="id"><a name="LRESTR.restr_Emerge">restr_Emerge</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">ess</span> <span class="id">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">restr_exp</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">ess</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Emerge">Emerge</a></span> <span class="id">x</span> <span class="id">ess</span> <span class="id">a</span>)<br/>
+| <span class="id"><a name="LRESTR.restr_Ecase">restr_Ecase</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span> <span class="id">ess</span> <span class="id">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">restr_exp</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">ess</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Ecase">Ecase</a></span> <span class="id">e</span> <span class="id">ess</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> <span class="id">a</span>)<br/>
+| <span class="id"><a name="LRESTR.restr_Ecase_def">restr_Ecase_def</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">e</span> <span class="id">ess</span> <span class="id">des</span> <span class="id">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> <span class="id">e</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">restr_exp</span>) (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">List.map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">ess</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">restr_exp</span> <span class="id">des</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Ecase">Ecase</a></span> <span class="id">e</span> <span class="id">ess</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">des</span>) <span class="id">a</span>)<br/>
+| <span class="id"><a name="LRESTR.restr_Eapp">restr_Eapp</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> <span class="id">es</span> <span class="id">er</span> <span class="id">anns</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">restr_exp</span> <span class="id">es</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id">restr_exp</span> <span class="id">er</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_exp</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Eapp">Eapp</a></span> <span class="id">f</span> <span class="id">es</span> <span class="id">er</span> <span class="id">anns</span>)<br/>
+.<br/>
+<br/>
+<div class="doc">naturellement <span class="bracket"><span class="id">Syn.nolocal_block</span></span>  </div>
+<span class="kwd">Inductive</span> <span class="id"><a name="LRESTR.restr_block">restr_block</a></span> : <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.block">block</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+| <span class="id"><a name="LRESTR.restr_Beq">restr_Beq</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">xs</span> <span class="id">es</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_exp">restr_exp</a></span> <span class="id">es</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_block</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Beq">Beq</a></span> (<span class="id">xs</span>,<span class="id">es</span>)).<br/>
+<br/>
+<div class="doc">encode en même temps <span class="bracket"><span class="id">Syn.nolocal_top_block</span></span> </div>
+<span class="kwd">Inductive</span> <span class="id"><a name="LRESTR.restr_top_block">restr_top_block</a></span> : <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.block">block</a></span> -&gt; <span class="kwd">Prop</span> :=<br/>
+| <span class="id"><a name="LRESTR.restr_Blocal">restr_Blocal</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">locs</span> <span class="id">blks</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_block">restr_block</a></span> <span class="id">blks</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_, (_, _, _, <span class="id">o</span>)) =&gt; <span class="id">o</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>) <span class="id">locs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_top_block</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Blocal">Blocal</a></span> (<span class="kwd">Scope</span> <span class="id">locs</span> <span class="id">blks</span>)).<br/>
+<br/>
+<br/>
+<div class="doc">encode en même temps <span class="bracket"><span class="id">Syn.nolocal</span></span> pour des variables locales
+ à top-level seulement et pas de last dans les variables de sortie
+ FIXME: c'est ce qu'il y avait dans Vélus avant le commit 2370699a </div>
+<span class="kwd">Inductive</span> <span class="id"><a name="LRESTR.restr_node">restr_node</a></span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} : @<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.node">node</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span> -&gt; <span class="kwd">Prop</span> :=<br/>
+| <span class="id"><a name="LRESTR.restr_N">restr_N</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">nd</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> '(_, (_, _, _, <span class="id">o</span>)) =&gt; <span class="id">o</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>) <span class="id">nd</span>.(<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.n_out">n_out</a></span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_top_block">restr_top_block</a></span> <span class="id">nd</span>.(<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.n_block">n_block</a></span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">exists</span> <span class="id">xs</span>, <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.VarsDefinedComp">VarsDefinedComp</a></span> <span class="id">nd</span>.(<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.n_block">n_block</a></span>) <span class="id">xs</span> /\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation">Permutation</a></span> <span class="id">xs</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">nd</span>.(<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.n_out">n_out</a></span>))) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">restr_node</span> <span class="id">nd</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="LRESTR.restr_global">restr_global</a></span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>) : <span class="kwd">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_node">restr_node</a></span> <span class="id">G</span>.(<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.nodes">nodes</a></span>).<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="LRESTR.restr_global_find">restr_global_find</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>) <span class="id">f</span> <span class="id">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_global">restr_global</a></span> <span class="id">G</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.find_node">find_node</a></span> <span class="id">f</span> <span class="id">G</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">n</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_node">restr_node</a></span> <span class="id">n</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">G</span> <span class="kwd">as</span> [?? <span class="id">nds</span>].<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">nds</span>; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hr</span> <span class="id">Hf</span>; <span class="id">inv</span> <span class="id">Hf</span>; <span class="id">inv</span> <span class="id">Hr</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.find_node_cons">find_node_cons</a></span> <span class="kwd">in</span> <span class="id">H0</span> <span class="kwd">as</span> [[]|[]]; <span class="id">subst</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<div class="doc">Procédure de décision pour établir l'appartenance à la restriction </div>
+<br/>
+<span class="kwd">Fixpoint</span> <span class="id"><a name="LRESTR.check_exp">check_exp</a></span> (<span class="id">e</span> : <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.exp">exp</a></span>) :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">e</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Econst">Econst</a></span> _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Eenum">Eenum</a></span> _ _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Evar">Evar</a></span> _ _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Elast">Elast</a></span> _ _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span> <br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Eunop">Eunop</a></span> <span class="id">op</span> <span class="id">e</span> <span class="id">ann</span> =&gt; <span class="id">check_exp</span> <span class="id">e</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Ebinop">Ebinop</a></span> <span class="id">op</span> <span class="id">e1</span> <span class="id">e2</span> <span class="id">ann</span> =&gt; <span class="id">check_exp</span> <span class="id">e1</span> &amp;&amp; <span class="id">check_exp</span> <span class="id">e2</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Eextcall">Eextcall</a></span> _ _ _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span> <br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Efby">Efby</a></span> <span class="id">e0s</span> <span class="id">es</span> <span class="id">ann</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id">check_exp</span> <span class="id">e0s</span> &amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id">check_exp</span> <span class="id">es</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Earrow">Earrow</a></span> <span class="id">e0s</span> <span class="id">es</span> <span class="id">ann</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span> <br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Ewhen">Ewhen</a></span> <span class="id">es</span> _ <span class="id">t</span> <span class="id">ann</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id">check_exp</span> <span class="id">es</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Emerge">Emerge</a></span> _ <span class="id">ess</span> <span class="id">ann</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> (<span class="kwd">fun</span> '(<span class="id">t</span>,<span class="id">es</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id">check_exp</span> <span class="id">es</span>) <span class="id">ess</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Ecase">Ecase</a></span> <span class="id">e</span> <span class="id">ess</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> <span class="id">ann</span> =&gt; <span class="id">check_exp</span> <span class="id">e</span> &amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> (<span class="kwd">fun</span> '(<span class="id">t</span>,<span class="id">es</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id">check_exp</span> <span class="id">es</span>) <span class="id">ess</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Ecase">Ecase</a></span> <span class="id">e</span> <span class="id">ess</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">des</span>) <span class="id">ann</span> =&gt; <span class="id">check_exp</span> <span class="id">e</span> &amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> (<span class="kwd">fun</span> '(<span class="id">t</span>,<span class="id">es</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id">check_exp</span> <span class="id">es</span>) <span class="id">ess</span> &amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id">check_exp</span> <span class="id">des</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Eapp">Eapp</a></span> <span class="id">f</span> <span class="id">es</span> <span class="id">er</span> <span class="id">ann</span> =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id">check_exp</span> <span class="id">es</span> &amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id">check_exp</span> <span class="id">er</span><br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="LRESTR.check_block">check_block</a></span> <span class="id">b</span> :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">b</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Beq">Beq</a></span> (_, <span class="id">es</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_exp">check_exp</a></span> <span class="id">es</span><br/>
+&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span><br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="LRESTR.check_top_block">check_top_block</a></span> <span class="id">b</span> :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">b</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;| <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.Blocal">Blocal</a></span> (<span class="kwd">Scope</span> <span class="id">locs</span> <span class="id">blks</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_block">check_block</a></span> <span class="id">blks</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> (<span class="kwd">fun</span> '(_, (_, _, _, <span class="id">o</span>)) =&gt; <span class="id"><a href="Velus.Common.Common.html#isNone">isNone</a></span> <span class="id">o</span>) <span class="id">locs</span><br/>
+&nbsp;&nbsp;| _ =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#false">false</a></span><br/>
+&nbsp;&nbsp;<span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="LRESTR.check_node">check_node</a></span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">n</span> : @<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.node">node</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>) :=<br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_top_block">check_top_block</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.n_block">n_block</a></span> <span class="id">n</span>)<br/>
+&nbsp;&nbsp;&amp;&amp; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> (<span class="kwd">fun</span> '(_, (_, _, _, <span class="id">o</span>)) =&gt; <span class="id"><a href="Velus.Common.Common.html#isNone">isNone</a></span> <span class="id">o</span>) (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.n_out">n_out</a></span> <span class="id">n</span>).<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="LRESTR.check_global">check_global</a></span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>) := <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#forallb">forallb</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_node">check_node</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.nodes">nodes</a></span> <span class="id">G</span>).<br/>
+<br/>
+<br/>
+<div class="doc">Correction de la procédure </div>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="LRESTR.check_exp_ok">check_exp_ok</a></span> : <span class="kwd">forall</span> <span class="id">e</span>, <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_exp">check_exp</a></span> <span class="id">e</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_exp">restr_exp</a></span> <span class="id">e</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">e</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.exp_ind2">exp_ind2</a></span>; <span class="id">simpl</span>; <span class="id">intro</span> <span class="id">Hc</span>; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;- <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hc</span> <span class="kwd">as</span> []; <span class="id">constructor</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hc</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F2</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">F1</span>, <span class="id">F2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">Hc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">Hc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hc</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="id">destruct</span> <span class="id">d</span>; <span class="id">simpl</span> <span class="kwd">in</span> <span class="id">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hc</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F3</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">F1</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F2</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">F2</span>,<span class="id">F3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">F2</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hc</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F2</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">F2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">F2</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Eapp&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hc</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F2</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">F1</span>, <span class="id">F2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">simpl_Forall</span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="LRESTR.check_block_ok">check_block_ok</a></span> : <span class="kwd">forall</span> <span class="id">b</span>, <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_block">check_block</a></span> <span class="id">b</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_block">restr_block</a></span> <span class="id">b</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">b</span>; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hc</span>; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">e</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">Hc</span>.<br/>
+&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_exp_ok">check_exp_ok</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="LRESTR.check_top_block_ok">check_top_block_ok</a></span> : <span class="kwd">forall</span> <span class="id">b</span>, <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_top_block">check_top_block</a></span> <span class="id">b</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_top_block">restr_top_block</a></span> <span class="id">b</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">b</span>; <span class="id">simpl</span>; <span class="id">intros</span> * <span class="id">Hc</span>; <span class="id">try</span> <span class="id">congruence</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">s</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hc</span> <span class="kwd">as</span> [<span class="id">F1</span> <span class="id">F2</span>].<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">F1</span>, <span class="id">F2</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;- <span class="id">simpl_Forall</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_block_ok">check_block_ok</a></span>.<br/>
+&nbsp;&nbsp;- <span class="id">simpl_Forall</span>; <span class="id">destruct</span> <span class="id">o</span>; <span class="id">now</span> <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="LRESTR.check_node_ok">check_node_ok</a></span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">n</span> : @<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.node">node</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>), <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_node">check_node</a></span> <span class="id">n</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_node">restr_node</a></span> <span class="id">n</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hc</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#andb_prop">andb_prop</a></span> <span class="kwd">in</span> <span class="id">Hc</span> <span class="kwd">as</span> [<span class="id">Hc</span> <span class="id">F2</span>].<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">F2</span>.<br/>
+&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_top_block_ok">check_top_block_ok</a></span>.<br/>
+&nbsp;&nbsp;- <span class="id">simpl_Forall</span>; <span class="id">destruct</span> <span class="id">o</span>; <span class="id">now</span> <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;- <span class="id">pose</span> <span class="id">proof</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.n_defd">n_defd</a></span> <span class="id">n</span>) <span class="kwd">as</span> (<span class="id">xs</span> &amp; <span class="id">Vd</span> &amp; <span class="id">Perm</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_top_block_ok">check_top_block_ok</a></span> <span class="kwd">in</span> <span class="id">Hc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">revert</span> <span class="id">Vd</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">Hc</span> <span class="kwd">as</span> [??? <span class="id">Hnoloc</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span>; <span class="id">inv</span> <span class="id">Vd</span>; <span class="id">inv</span> <span class="id">H1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">H4</span> <span class="kwd">as</span> (<span class="id">xss</span> &amp; <span class="id">Vds</span> &amp; <span class="id">Perm2</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span> <span class="id">xs</span>); <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constructor</span>; <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span>) <span class="id">xss</span>); <span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">simpl_Forall</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_block">restr_block</a></span> _) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">take</span> (<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.VarsDefined">VarsDefined</a></span> _ _) <span class="id">and</span> <span class="id">inv</span> <span class="id">it</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">subst</span>; <span class="id">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_map">Permutation_map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span>) <span class="kwd">in</span> <span class="id">Perm2</span>; <span class="id">revert</span> <span class="id">Perm2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#concat_map">concat_map</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map_app">map_app</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Senv.map_fst_senv_of_decls">map_fst_senv_of_decls</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id">apply</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Sorting.Permutation.html#Permutation_map">Permutation_map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#fst">fst</a></span>) <span class="kwd">in</span> <span class="id">Perm</span>; <span class="id">revert</span> <span class="id">Perm</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Senv.map_fst_senv_of_decls">map_fst_senv_of_decls</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="LRESTR.check_global_ok">check_global_ok</a></span> {<span class="id">PSyn</span> <span class="id">Prefs</span>} :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">G</span> : @<span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn.global">global</a></span> <span class="id">PSyn</span> <span class="id">Prefs</span>), <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_global">check_global</a></span> <span class="id">G</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#true">true</a></span> -&gt; <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.restr_global">restr_global</a></span> <span class="id">G</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hc</span>; <span class="id">red</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonList.html#forallb_Forall">forallb_Forall</a></span> <span class="kwd">in</span> <span class="id">Hc</span>.<br/>
+&nbsp;&nbsp;<span class="id">simpl_Forall</span>; <span class="id">auto</span> <span class="kwd">using</span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR.check_node_ok">check_node_ok</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR">LRESTR</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="RestrFun">RestrFun</a></span><br/>
+&nbsp;&nbsp;(<span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;(<span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;(<span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>        <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;(<span class="id">Senv</span>  : <span class="id"><a href="Velus.Lustre.StaticEnv.html#STATICENV">STATICENV</a></span>     <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;(<span class="id">Syn</span>   : <span class="id"><a href="Velus.Lustre.LSyntax.html#LSYNTAX">LSYNTAX</a></span>       <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Senv">Senv</a></span>)<br/>
+&lt;: <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR">LRESTR</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn">Syn</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#LRESTR">LRESTR</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Op">Op</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Senv">Senv</a></span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#Syn">Syn</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Lustre.Denot.Restr.html#RestrFun">RestrFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

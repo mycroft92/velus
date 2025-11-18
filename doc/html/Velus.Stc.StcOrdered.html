@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module StcOrdered</title>
+<meta name="description" content="Documentation of Coq module StcOrdered" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module StcOrdered</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.Common.html">Common</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Common.CommonProgram.html">CommonProgram</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Operators.html">Operators</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.CoreExpr.CESyntax.html">CoreExpr.CESyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Stc.StcSyntax.html">Stc.StcSyntax</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Clocks.html">Clocks</a></span>.<br/>
+<br/>
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">List.ListNotations</a></span>.<br/>
+<span class="kwd">Open</span> <span class="kwd">Scope</span> <span class="id">list_scope</span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="kwd">Type</span> <span class="id"><a name="STCORDERED">STCORDERED</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span>   <span class="id"><a href="Velus.Stc.StcOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>      <span class="id"><a href="Velus.Stc.StcOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>    <span class="id"><a href="Velus.Stc.StcOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">Import</span> <span class="id">Syn</span>   : <span class="id"><a href="Velus.Stc.StcSyntax.html#STCSYNTAX">STCSYNTAX</a></span>   <span class="id"><a href="Velus.Stc.StcOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#CESyn">CESyn</a></span>).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Definition</span> <span class="id"><a name="STCORDERED.Ordered_systems">Ordered_systems</a></span> {<span class="id">prefs</span>} := <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program">Ordered_program</a></span> (<span class="kwd">fun</span> <span class="id">f</span> (<span class="id">s</span>: @<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.system">system</a></span> <span class="id">prefs</span>) =&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> <span class="id">f</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#map">map</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">s</span>.(<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.s_subs">s_subs</a></span>))).<br/>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCORDERED.Ordered_systems_append">Ordered_systems_append</a></span> {<span class="id">prefs</span>}:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">P</span> <span class="id">P'</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#list">list</a></span> (@<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.system">system</a></span> <span class="id">prefs</span>)) <span class="id">enums</span> <span class="id">externs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED.Ordered_systems">Ordered_systems</a></span> (<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.Program">Program</a></span> <span class="id">enums</span> <span class="id">externs</span> (<span class="id">P</span> ++ <span class="id">P'</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED.Ordered_systems">Ordered_systems</a></span> (<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.Program">Program</a></span> <span class="id">enums</span> <span class="id">externs</span> <span class="id">P'</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span>; <span class="id">eapply</span> <span class="id">Ordered_program_append'</span> <span class="kwd">in</span> <span class="id">Ord</span> <span class="kwd">as</span> (?&amp;?); <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCORDERED.Ordered_systems_split">Ordered_systems_split</a></span> {<span class="id">prefs</span>}:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">P1</span> (<span class="id">s</span>: @<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.system">system</a></span> <span class="id">prefs</span>) <span class="id">P</span> <span class="id">enums</span> <span class="id">externs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED.Ordered_systems">Ordered_systems</a></span> (<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.Program">Program</a></span> <span class="id">enums</span> <span class="id">externs</span> (<span class="id">P1</span> ++ <span class="id">s</span> :: <span class="id">P</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall">Forall</a></span> (<span class="kwd">fun</span> <span class="id">xb</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.find_system">find_system</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">xb</span>) (<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.Program">Program</a></span> <span class="id">enums</span> <span class="id">externs</span> <span class="id">P1</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">xb</span> &lt;&gt; <span class="id">s</span>.(<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.s_name">s_name</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="kwd">exists</span> <span class="id">s'</span> <span class="id">P'</span>, <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.find_system">find_system</a></span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span> <span class="id">xb</span>) (<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.Program">Program</a></span> <span class="id">enums</span> <span class="id">externs</span> <span class="id">P</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">s'</span>, <span class="id">P'</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">s</span>.(<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.s_subs">s_subs</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Ordered_program_append'</span> <span class="kwd">in</span> <span class="id">Ord</span> <span class="kwd">as</span> (<span class="id">Ndp</span> &amp; <span class="id">Ord</span>); <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion_clear</span> <span class="id">Ord</span> <span class="kwd">as</span> [|?? [<span class="id">Spec</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span> [] <span class="id">Hin</span>; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map">in_map</a></span> <span class="kwd">with</span> (<span class="id">f</span> := <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#snd">snd</a></span>) <span class="kwd">in</span> <span class="id">Hin</span>; <span class="id">apply</span> <span class="id">Spec</span> <span class="kwd">in</span> <span class="id">Hin</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp; <span class="id">Find</span>); <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_spec">find_unit_spec</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp;?); <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_None">find_unit_None</a></span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span>; <span class="id">intros</span> * <span class="id">Hin'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id">Forall'_In</span> <span class="kwd">in</span> <span class="id">Hin'</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp; <span class="id">Hnn</span>); <span class="id">eauto</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_app">Forall_app</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#Forall_cons2">Forall_cons2</a></span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_app">Forall_app</a></span>, <span class="id"><a href="Velus.Common.CommonList.html#Forall_cons2">Forall_cons2</a></span> <span class="kwd">in</span> <span class="id">Hnn</span>; <span class="id">auto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id">apply</span> <span class="id">Spec</span>, <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#in_map_iff">in_map_iff</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eexists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">split</span>; <span class="id">eauto</span> <span class="kwd">with</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">reflexivity</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Corollary</span> <span class="id"><a name="STCORDERED.Ordered_systems_find_In_systems">Ordered_systems_find_In_systems</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">P</span> <span class="id">b</span> (<span class="id">s</span>: @<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.system">system</a></span> <span class="id">prefs</span>) <span class="id">P'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED.Ordered_systems">Ordered_systems</a></span> <span class="id">P</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.find_system">find_system</a></span> <span class="id">b</span> <span class="id">P</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">s</span>, <span class="id">P'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">x</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#In">In</a></span> (<span class="id">x</span>, <span class="id">b</span>) <span class="id">s</span>.(<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.s_subs">s_subs</a></span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">s</span> <span class="id">P''</span>, <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.find_system">find_system</a></span> <span class="id">b</span> <span class="id">P'</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">s</span>, <span class="id">P''</span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Common.CommonProgram.html#equiv_program">equiv_program</a></span> <span class="id">P</span> <span class="id">P'</span>) <span class="kwd">as</span> <span class="id">E</span> <span class="kwd">by</span> (<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_equiv_program">find_unit_equiv_program</a></span>; <span class="id">eauto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">specialize</span> (<span class="id">E</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span>); <span class="id">inv</span> <span class="id">E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_spec">find_unit_spec</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> (?&amp;?&amp;?&amp;?).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">P</span>, <span class="id">P'</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED.Ordered_systems_split">Ordered_systems_split</a></span> <span class="kwd">in</span> <span class="id">Ord</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#Forall_forall">Forall_forall</a></span> <span class="kwd">in</span> <span class="id">Hin</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intuition</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCORDERED.Ordered_systems_find_system">Ordered_systems_find_system</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">P</span> <span class="id">b</span> (<span class="id">s</span>: @<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.system">system</a></span> <span class="id">prefs</span>) <span class="id">P'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED.Ordered_systems">Ordered_systems</a></span> <span class="id">P</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.find_system">find_system</a></span> <span class="id">b</span> <span class="id">P</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">s</span>, <span class="id">P'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED.Ordered_systems">Ordered_systems</a></span> <span class="id">P'</span>.<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.types">types</a></span> <span class="id">P</span> = <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.types">types</a></span> <span class="id">P'</span>) <span class="kwd">as</span> <span class="id">Etypes</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">by</span> (<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_equiv_program">find_unit_equiv_program</a></span> <span class="kwd">in</span> <span class="id">Find</span>; <span class="id">specialize</span> (<span class="id">Find</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span>); <span class="id">inv</span> <span class="id">Find</span>; <span class="id">auto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.externs">externs</a></span> <span class="id">P</span> = <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.externs">externs</a></span> <span class="id">P'</span>) <span class="kwd">as</span> <span class="id">Eexterns</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">by</span> (<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_equiv_program">find_unit_equiv_program</a></span> <span class="kwd">in</span> <span class="id">Find</span>; <span class="id">specialize</span> (<span class="id">Find</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#nil">nil</a></span>); <span class="id">inv</span> <span class="id">Find</span>; <span class="id">auto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#Ordered_program_find_unit">Ordered_program_find_unit</a></span> <span class="kwd">in</span> <span class="id">Ord</span>; <span class="id">simpl</span> <span class="kwd">in</span> *; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> <span class="id">Etypes</span>, <span class="id">Eexterns</span> <span class="kwd">in</span> <span class="id">Ord</span>; <span class="id">now</span> <span class="id">inv</span> <span class="id">Ord</span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCORDERED.find_system_other_not_Is_system_in">find_system_other_not_Is_system_in</a></span> {<span class="id">prefs</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> (<span class="id">s</span>: @<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.system">system</a></span> <span class="id">prefs</span>) <span class="id">P</span> <span class="id">s'</span> <span class="id">P'</span> <span class="id">types</span> <span class="id">externs</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED.Ordered_systems">Ordered_systems</a></span> (<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.Program">Program</a></span> <span class="id">types</span> <span class="id">externs</span> (<span class="id">s</span> :: <span class="id">P</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.find_system">find_system</a></span> <span class="id">f</span> (<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.Program">Program</a></span> <span class="id">types</span> <span class="id">externs</span> <span class="id">P</span>) = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">s'</span>, <span class="id">P'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.Is_system_in">Is_system_in</a></span> <span class="id">s</span>.(<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.s_name">s_name</a></span>) <span class="id">s'</span>.(<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.s_tcs">s_tcs</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_other_not_Is_called_in">find_unit_other_not_Is_called_in</a></span> <span class="kwd">with</span> (<span class="id">u</span> := <span class="id">s</span>) <span class="kwd">in</span> <span class="id">Ord</span>; <span class="id">eauto</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Hin</span>; <span class="id">apply</span> <span class="id">Ord</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.steps_iresets_of_Is_system_in">steps_iresets_of_Is_system_in</a></span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.s_subs_in_tcs">s_subs_in_tcs</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+&nbsp;&nbsp;<span class="kwd">Lemma</span> <span class="id"><a name="STCORDERED.find_system_not_Is_system_in">find_system_not_Is_system_in</a></span> {<span class="id">prefs</span>}:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> (<span class="id">s</span>: @<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.system">system</a></span> <span class="id">prefs</span>) <span class="id">P</span> <span class="id">P'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED.Ordered_systems">Ordered_systems</a></span> <span class="id">P</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.find_system">find_system</a></span> <span class="id">f</span> <span class="id">P</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> (<span class="id">s</span>, <span class="id">P'</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.Is_system_in">Is_system_in</a></span> <span class="id">s</span>.(<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.s_name">s_name</a></span>) <span class="id">s</span>.(<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.s_tcs">s_tcs</a></span>).<br/>
+<details>
+&nbsp;&nbsp;<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Ord</span> <span class="id">Find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#not_Is_called_in_self">not_Is_called_in_self</a></span> <span class="kwd">in</span> <span class="id">Ord</span>; <span class="id">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">assert</span> (<span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.s_name">s_name</a></span> <span class="id">s</span> = <span class="id">f</span>) <span class="kwd">as</span> -&gt; <span class="kwd">by</span> (<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonProgram.html#find_unit_In">find_unit_In</a></span> <span class="kwd">in</span> <span class="id">Find</span> <span class="kwd">as</span> []; <span class="id">auto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">intro</span> <span class="id">Hin</span>; <span class="id">apply</span> <span class="id">Ord</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.steps_iresets_of_Is_system_in">steps_iresets_of_Is_system_in</a></span> <span class="kwd">in</span> <span class="id">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn.s_subs_in_tcs">s_subs_in_tcs</a></span>.<br/>
+&nbsp;&nbsp;Qed.</div></details>
+<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED">STCORDERED</a></span>.<br/>
+<br/>
+<span class="kwd">Module</span> <span class="id"><a name="StcOrderedFun">StcOrderedFun</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Ids</span>   : <span class="id"><a href="Velus.Common.Common.html#IDS">IDS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Op</span>    : <span class="id"><a href="Velus.Operators.html#OPERATORS">OPERATORS</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">OpAux</span> : <span class="id"><a href="Velus.Operators.html#OPERATORS_AUX">OPERATORS_AUX</a></span>   <span class="id"><a href="Velus.Stc.StcOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Op">Op</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Cks</span>   : <span class="id"><a href="Velus.Clocks.html#CLOCKS">CLOCKS</a></span>      <span class="id"><a href="Velus.Stc.StcOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#OpAux">OpAux</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">CESyn</span> : <span class="id"><a href="Velus.CoreExpr.CESyntax.html#CESYNTAX">CESYNTAX</a></span>    <span class="id"><a href="Velus.Stc.StcOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Cks">Cks</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Syn</span>   : <span class="id"><a href="Velus.Stc.StcSyntax.html#STCSYNTAX">STCSYNTAX</a></span>   <span class="id"><a href="Velus.Stc.StcOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#CESyn">CESyn</a></span>)<br/>
+&lt;: <span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED">STCORDERED</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn">Syn</a></span>.<br/>
+&nbsp;&nbsp;<span class="kwd">Include</span> <span class="id"><a href="Velus.Stc.StcOrdered.html#STCORDERED">STCORDERED</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Ids">Ids</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Op">Op</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#OpAux">OpAux</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Cks">Cks</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#CESyn">CESyn</a></span> <span class="id"><a href="Velus.Stc.StcOrdered.html#Syn">Syn</a></span>.<br/>
+<span class="kwd">End</span> <span class="id"><a href="Velus.Stc.StcOrdered.html#StcOrderedFun">StcOrderedFun</a></span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

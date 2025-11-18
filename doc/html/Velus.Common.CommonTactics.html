@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module CommonTactics</title>
+<meta name="description" content="Documentation of Coq module CommonTactics" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module CommonTactics</h1>
+<div class="coq">
+<span class="kwd">Ltac</span> <span class="id">inv</span> <span class="id">H</span> := <span class="id">inversion</span> <span class="id">H</span>; <span class="id">clear</span> <span class="id">H</span>; <span class="id">subst</span>.<br/>
+<br/>
+<span class="kwd">Ltac</span> <span class="id">cases</span> :=<br/>
+&nbsp;&nbsp;<span class="id">repeat</span> <span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: <span class="id">context</span> [ <span class="kwd">match</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> ?<span class="id">x</span> <span class="kwd">with</span> _ =&gt; _ <span class="kwd">end</span> ] |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span>; <span class="id">simpl</span>; <span class="id">try</span> <span class="id">solve</span> [<span class="id">inv</span> <span class="id">H</span>; <span class="id">auto</span>]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: <span class="id">context</span> [ <span class="kwd">match</span> ?<span class="id">x</span> <span class="kwd">with</span> _ =&gt; _ <span class="kwd">end</span> ] |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span>; <span class="id">try</span> <span class="id">solve</span> [<span class="id">inv</span> <span class="id">H</span>; <span class="id">auto</span>]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- <span class="id">context</span> [ <span class="kwd">match</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> ?<span class="id">x</span> <span class="kwd">with</span> _ =&gt; _ <span class="kwd">end</span> ] =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span>; <span class="id">simpl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- <span class="id">context</span> [ <span class="kwd">match</span> ?<span class="id">x</span> <span class="kwd">with</span> _ =&gt; _ <span class="kwd">end</span> ] =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>; <span class="id">auto</span>.<br/>
+<br/>
+<span class="kwd">Ltac</span> <span class="id">cases_eqn</span> <span class="id">E</span> :=<br/>
+&nbsp;&nbsp;<span class="id">repeat</span> <span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: <span class="id">context</span> [ <span class="kwd">match</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> ?<span class="id">x</span> <span class="kwd">with</span> _ =&gt; _ <span class="kwd">end</span> ] |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">E</span> := <span class="id">fresh</span> <span class="id">E</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span> <span class="id">eqn</span>: <span class="id">E</span>; <span class="id">simpl</span>; <span class="id">try</span> <span class="id">solve</span> [<span class="id">inv</span> <span class="id">H</span>; <span class="id">auto</span>]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: <span class="id">context</span> [ <span class="kwd">match</span> ?<span class="id">x</span> <span class="kwd">with</span> _ =&gt; _ <span class="kwd">end</span> ] |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">E</span> := <span class="id">fresh</span> <span class="id">E</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span> <span class="id">eqn</span>: <span class="id">E</span>; <span class="id">try</span> <span class="id">solve</span> [<span class="id">inv</span> <span class="id">H</span>; <span class="id">auto</span>]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- <span class="id">context</span> [ <span class="kwd">match</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> ?<span class="id">x</span> <span class="kwd">with</span> _ =&gt; _ <span class="kwd">end</span> ] =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">E</span> := <span class="id">fresh</span> <span class="id">E</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span> <span class="id">eqn</span>: <span class="id">E</span>; <span class="id">simpl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- <span class="id">context</span> [ <span class="kwd">match</span> ?<span class="id">x</span> <span class="kwd">with</span> _ =&gt; _ <span class="kwd">end</span> ] =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">E</span> := <span class="id">fresh</span> <span class="id">E</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span> <span class="id">eqn</span>: <span class="id">E</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>; <span class="id">auto</span>.<br/>
+<br/>
+<span class="kwd">Ltac</span> <span class="id">cases_in</span> <span class="id">H</span> :=<br/>
+&nbsp;&nbsp;<span class="id">repeat</span> <span class="kwd">match</span> <span class="id">type</span> <span class="id">of</span> <span class="id">H</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">context</span> [ <span class="kwd">match</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#negb">negb</a></span> ?<span class="id">x</span> <span class="kwd">with</span> _ =&gt; _ <span class="kwd">end</span> ] =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span>; <span class="id">simpl</span>; <span class="id">try</span> <span class="id">solve</span> [<span class="id">inv</span> <span class="id">H</span>; <span class="id">auto</span>]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">context</span> [ <span class="kwd">match</span> ?<span class="id">x</span> <span class="kwd">with</span> _ =&gt; _ <span class="kwd">end</span> ] =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">x</span>; <span class="id">try</span> <span class="id">solve</span> [<span class="id">inv</span> <span class="id">H</span>; <span class="id">auto</span>]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>; <span class="id">auto</span>.<br/>
+<br/>
+<span class="id">Create</span> <span class="id">HintDb</span> <span class="id">conjs</span>.<br/>
+<br/>
+<span class="kwd">Ltac</span> <span class="id">destruct_conjs</span> :=<br/>
+&nbsp;&nbsp;<span class="id">autounfold</span> <span class="kwd">with</span> <span class="id">conjs</span> <span class="kwd">in</span> *;<br/>
+&nbsp;&nbsp;<span class="id">repeat</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: <span class="kwd">exists</span> _, _ |- _ =&gt; <span class="id">destruct</span> <span class="id">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: _ /\ _ |- _ =&gt; <span class="id">destruct</span> <span class="id">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">x</span>: _ * _ |- _ =&gt; <span class="id">destruct</span> <span class="id">x</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>; <span class="id">simpl</span> <span class="kwd">in</span> *.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="option_map_inv">option_map_inv</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">f</span>: <span class="id">A</span> -&gt; <span class="id">B</span>) <span class="id">oa</span> <span class="id">b</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="id">f</span> <span class="id">oa</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">exists</span> <span class="id">a</span>, <span class="id">oa</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> <span class="id">a</span> /\ <span class="id">b</span> = <span class="id">f</span> <span class="id">a</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span>; <span class="id">intros</span> * <span class="id">E</span>.<br/>
+&nbsp;&nbsp;<span class="id">cases</span>; <span class="id">inv</span> <span class="id">E</span>; <span class="id">eauto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="option_map_None">option_map_None</a></span>:<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">A</span> <span class="id">B</span>} (<span class="id">f</span>: <span class="id">A</span> -&gt; <span class="id">B</span>) <span class="id">oa</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> <span class="id">f</span> <span class="id">oa</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> &lt;-&gt; <span class="id">oa</span> = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span>; <span class="id">intros</span>; <span class="id">cases</span>; <span class="id">intuition</span>; <span class="id">discriminate</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Ltac</span> <span class="id">inv_equalities</span> :=<br/>
+&nbsp;&nbsp;<span class="id">destruct_conjs</span>; <span class="id">subst</span>;<br/>
+&nbsp;&nbsp;<span class="id">repeat</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: (_, _) = (_, _) |- _ =&gt; <span class="id">inv</span> <span class="id">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> _ _ = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#Some">Some</a></span> _ |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">Hf</span> := <span class="id">fresh</span> <span class="string">"Hf"</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">Heq</span> := <span class="id">fresh</span> <span class="string">"Heq"</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTactics.html#option_map_inv">option_map_inv</a></span> <span class="kwd">in</span> <span class="id">H</span> <span class="kwd">as</span> (?&amp;<span class="id">Hf</span>&amp;<span class="id">Heq</span>); <span class="id">destruct_conjs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id">H</span>: <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#option_map">option_map</a></span> _ _ = <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#None">None</a></span> |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Common.CommonTactics.html#option_map_None">option_map_None</a></span> <span class="kwd">in</span> <span class="id">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">end</span>; <span class="id">subst</span>.<br/>
+<br/>
+<span class="kwd">Tactic</span> <span class="kwd">Notation</span> <span class="string">"summon"</span> <span class="id">uconstr</span>(<span class="id">ty</span>) <span class="string">"as"</span> <span class="id">ident</span>(<span class="id">id</span>) :=<br/>
+&nbsp;&nbsp;<span class="kwd">match</span> <span class="id">goal</span> <span class="kwd">with</span> <span class="id">H</span> : _ |- _ =&gt; <span class="id">pose</span> (<span class="id">id</span> := <span class="id">H</span> : <span class="id">ty</span>); <span class="id">clear</span> <span class="id">id</span>; <span class="id">rename</span> <span class="id">H</span> <span class="id">into</span> <span class="id">id</span> <span class="kwd">end</span>.<br/>
+<br/>
+<span class="kwd">Tactic</span> <span class="kwd">Notation</span> <span class="string">"take"</span> <span class="id">uconstr</span>(<span class="id">ty</span>) <span class="string">"and"</span> <span class="id">tactic</span>(<span class="id">tac</span>) :=<br/>
+&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">new_it</span> := <span class="id">fresh</span> <span class="string">"it"</span><br/>
+&nbsp;&nbsp;<span class="kwd">in</span> <span class="id">try</span> (<span class="id">rename</span> <span class="id">it</span> <span class="id">into</span> <span class="id">new_it</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">summon</span> <span class="id">ty</span> <span class="kwd">as</span> <span class="id">it</span>; <span class="id">tac</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span> (<span class="id">rename</span> <span class="id">new_it</span> <span class="id">into</span> <span class="id">it</span>).<br/>
+<br/>
+<span class="kwd">Tactic</span> <span class="kwd">Notation</span> <span class="string">"take"</span> <span class="id">uconstr</span>(<span class="id">ty1</span>) <span class="string">","</span> <span class="id">uconstr</span>(<span class="id">ty2</span>) <span class="string">"and"</span> <span class="id">tactic</span>(<span class="id">tac</span>) :=<br/>
+&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">it1</span> := <span class="id">fresh</span> <span class="string">"it1"</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;<span class="kwd">let</span> <span class="id">it2</span> := <span class="id">fresh</span> <span class="string">"it2"</span> <span class="kwd">in</span><br/>
+&nbsp;&nbsp;<span class="id">summon</span> <span class="id">ty1</span> <span class="kwd">as</span> <span class="id">it1</span>; <span class="id">summon</span> <span class="id">ty2</span> <span class="kwd">as</span> <span class="id">it2</span>; <span class="id">tac</span>.<br/>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>

@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module Cpo_def_ext</title>
+<meta name="description" content="Documentation of Coq module Cpo_def_ext" />
+<link href="coq2html.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1 class="title">Module Cpo_def_ext</h1>
+<div class="coq">
+<span class="kwd">From</span> <span class="id">Coq</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html">Morphisms</a></span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html">List</a></span>.<br/>
+<span class="kwd">From</span> <span class="id">Velus.Lustre.Denot.Cpo</span> <span class="kwd">Require</span> <span class="kwd">Import</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html">Cpo_def</a></span>.<br/>
+<br/>
+<span class="kwd">Import</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Lists.List.html#ListNotations">ListNotations</a></span>.<br/>
+<br/>
+<h1> Extension of the Cpo library </h1>
+<br/>
+<h2> Cpo_def.v  </h2>
+<br/>
+<br/>
+<span class="id">Create</span> <span class="id">HintDb</span> <span class="id">cpodb</span>.<br/>
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#CURRY_simpl">CURRY_simpl</a></span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#UNCURRY_simpl">UNCURRY_simpl</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Curry_simpl">Curry_simpl</a></span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Uncurry_simpl">Uncurry_simpl</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_comp_simpl">fcont_comp_simpl</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_comp2_simpl">fcont_comp2_simpl</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_comp3_simpl">fcont_comp3_simpl</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#FST_simpl">FST_simpl</a></span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#SND_simpl">SND_simpl</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Fst_simpl">Fst_simpl</a></span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Snd_simpl">Snd_simpl</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#PAIR_simpl">PAIR_simpl</a></span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Pair_simpl">Pair_simpl</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#ID_simpl">ID_simpl</a></span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Id_simpl">Id_simpl</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#PROJ_simpl">PROJ_simpl</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#PROD_map_simpl">PROD_map_simpl</a></span><br/>
+&nbsp;&nbsp;: <span class="id">cpodb</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="fcont_comp4">fcont_comp4</a></span> {<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">D4</span> <span class="id">D5</span> <span class="id">D6</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">F</span>:<span class="id">D2</span> -<span class="id">c</span>&gt; <span class="id">D3</span> -<span class="id">C</span>-&gt;<span class="id">D4</span>-<span class="id">C</span>-&gt;<span class="id">D5</span>-<span class="id">C</span>-&gt;<span class="id">D6</span>)(<span class="id">f</span>:<span class="id">D1</span>-<span class="id">c</span>&gt; <span class="id">D2</span>)(<span class="id">g</span>:<span class="id">D1</span> -<span class="id">c</span>&gt; <span class="id">D3</span>)(<span class="id">h</span>:<span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D4</span>)(<span class="id">i</span>:<span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D5</span>): <span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D6</span><br/>
+&nbsp;&nbsp;:= (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#AP">AP</a></span> _ _ @2_ ((<span class="id">F</span> @3_ <span class="id">f</span>) <span class="id">g</span> <span class="id">h</span>)) <span class="id">i</span>.<br/>
+<br/>
+<span class="kwd">Infix</span> <span class="string">"@4_"</span> := <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#fcont_comp4">fcont_comp4</a></span> (<span class="kwd">at</span> <span class="id">level</span> 35, <span class="id">right</span> <span class="id">associativity</span>) : <span class="id">O_scope</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="fcont_comp4_simpl">fcont_comp4_simpl</a></span> : <span class="kwd">forall</span> (<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">D4</span> <span class="id">D5</span> <span class="id">D6</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">F</span>:<span class="id">D2</span> -<span class="id">c</span>&gt; <span class="id">D3</span> -<span class="id">C</span>-&gt;<span class="id">D4</span>-<span class="id">C</span>-&gt;<span class="id">D5</span>-<span class="id">C</span>-&gt;<span class="id">D6</span>)(<span class="id">f</span>:<span class="id">D1</span>-<span class="id">c</span>&gt; <span class="id">D2</span>)(<span class="id">g</span>:<span class="id">D1</span> -<span class="id">c</span>&gt; <span class="id">D3</span>)(<span class="id">h</span>:<span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D4</span>)(<span class="id">i</span>:<span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D5</span>) (<span class="id">x</span>:<span class="id">D1</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">F</span>@4_ <span class="id">f</span>) <span class="id">g</span> <span class="id">h</span> <span class="id">i</span> <span class="id">x</span> = <span class="id">F</span> (<span class="id">f</span> <span class="id">x</span>) (<span class="id">g</span> <span class="id">x</span>) (<span class="id">h</span> <span class="id">x</span>) (<span class="id">i</span> <span class="id">x</span>).<br/>
+<span class="id">trivial</span>.<br/>
+Qed.
+<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="fcont_comp5">fcont_comp5</a></span> {<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">D4</span> <span class="id">D5</span> <span class="id">D6</span> <span class="id">D7</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">F</span>:<span class="id">D2</span> -<span class="id">c</span>&gt; <span class="id">D3</span> -<span class="id">C</span>-&gt;<span class="id">D4</span>-<span class="id">C</span>-&gt;<span class="id">D5</span>-<span class="id">C</span>-&gt;<span class="id">D6</span>-<span class="id">C</span>-&gt;<span class="id">D7</span>)(<span class="id">f</span>:<span class="id">D1</span>-<span class="id">c</span>&gt; <span class="id">D2</span>)(<span class="id">g</span>:<span class="id">D1</span> -<span class="id">c</span>&gt; <span class="id">D3</span>)(<span class="id">h</span>:<span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D4</span>)(<span class="id">i</span>:<span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D5</span>)(<span class="id">j</span>:<span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D6</span>): <span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D7</span><br/>
+&nbsp;&nbsp;:= (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#AP">AP</a></span> _ _ @2_ ((<span class="id">F</span> @4_ <span class="id">f</span>) <span class="id">g</span> <span class="id">h</span> <span class="id">i</span>)) <span class="id">j</span>.<br/>
+<br/>
+<span class="kwd">Infix</span> <span class="string">"@5_"</span> := <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#fcont_comp5">fcont_comp5</a></span> (<span class="kwd">at</span> <span class="id">level</span> 35, <span class="id">right</span> <span class="id">associativity</span>) : <span class="id">O_scope</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="fcont_comp5_simpl">fcont_comp5_simpl</a></span> : <span class="kwd">forall</span> (<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">D4</span> <span class="id">D5</span> <span class="id">D6</span> <span class="id">D7</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">F</span>:<span class="id">D2</span> -<span class="id">c</span>&gt; <span class="id">D3</span> -<span class="id">C</span>-&gt;<span class="id">D4</span>-<span class="id">C</span>-&gt;<span class="id">D5</span>-<span class="id">C</span>-&gt;<span class="id">D6</span>-<span class="id">C</span>-&gt;<span class="id">D7</span>)(<span class="id">f</span>:<span class="id">D1</span>-<span class="id">c</span>&gt; <span class="id">D2</span>)(<span class="id">g</span>:<span class="id">D1</span> -<span class="id">c</span>&gt; <span class="id">D3</span>)(<span class="id">h</span>:<span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D4</span>)(<span class="id">i</span>:<span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D5</span>)(<span class="id">j</span>:<span class="id">D1</span>-<span class="id">c</span>&gt;<span class="id">D6</span>) (<span class="id">x</span>:<span class="id">D1</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">F</span>@5_ <span class="id">f</span>) <span class="id">g</span> <span class="id">h</span> <span class="id">i</span> <span class="id">j</span> <span class="id">x</span> = <span class="id">F</span> (<span class="id">f</span> <span class="id">x</span>) (<span class="id">g</span> <span class="id">x</span>) (<span class="id">h</span> <span class="id">x</span>) (<span class="id">i</span> <span class="id">x</span>) (<span class="id">j</span> <span class="id">x</span>).<br/>
+<span class="id">trivial</span>.<br/>
+Qed.
+<br/>
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#fcont_comp4_simpl">fcont_comp4_simpl</a></span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#fcont_comp5_simpl">fcont_comp5_simpl</a></span> : <span class="id">cpodb</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="chain_AP">chain_AP</a></span> {<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">D4</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>} :<br/>
+&nbsp;&nbsp;(<span class="id">D1</span> -<span class="id">C</span>-&gt; (<span class="id">D3</span> -<span class="id">C</span>-&gt; <span class="id">D4</span>)) -&gt; (<span class="id">D1</span> -<span class="id">C</span>-&gt; (<span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D3</span>)) -&gt; (<span class="id">D1</span> -<span class="id">C</span>-&gt; (<span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D4</span>)).<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">f</span> <span class="id">g</span>.<br/>
+&nbsp;&nbsp;<span class="id">refine</span> ((_ @2_ <span class="id">f</span>) <span class="id">g</span>).<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#curry">curry</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#curry">curry</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">refine</span> ((<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#AP">AP</a></span> _ _ @2_ _) _).<br/>
+&nbsp;&nbsp;<span class="id">apply</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#FST">FST</a></span> _ _ @_ <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#FST">FST</a></span> _ _).<br/>
+&nbsp;&nbsp;<span class="id">refine</span> ((<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#AP">AP</a></span> _ _ @2_ _) _).<br/>
+&nbsp;&nbsp;<span class="id">apply</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#SND">SND</a></span> _ _ @_ <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#FST">FST</a></span> _ _).<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#SND">SND</a></span>.<br/>
+Defined.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="chain_AP_eq">chain_AP_eq</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">D4</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">f</span> : <span class="id">D1</span> -<span class="id">C</span>-&gt; <span class="id">D3</span> -<span class="id">C</span>-&gt; <span class="id">D4</span>) (<span class="id">g</span> : <span class="id">D1</span> -<span class="id">C</span>-&gt; <span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D3</span>) <span class="id">x</span> <span class="id">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#chain_AP">chain_AP</a></span> <span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">D4</span> <span class="id">f</span> <span class="id">g</span> <span class="id">x</span> <span class="id">y</span> = <span class="id">f</span> <span class="id">x</span> (<span class="id">g</span> <span class="id">x</span> <span class="id">y</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">trivial</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="fcont_app_le_compat">fcont_app_le_compat</a></span> : <span class="kwd">forall</span> (<span class="id">D1</span> <span class="id">D2</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">f</span> <span class="id">g</span> : <span class="id">D1</span> -<span class="id">c</span>&gt; <span class="id">D2</span>) (<span class="id">x</span> <span class="id">y</span> : <span class="id">D1</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f</span> &lt;= <span class="id">g</span> -&gt; <span class="id">x</span> &lt;= <span class="id">y</span> -&gt; <span class="id">f</span> <span class="id">x</span> &lt;= <span class="id">g</span> <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole_trans">Ole_trans</a></span> <span class="kwd">with</span> (<span class="id">f</span> <span class="id">y</span>); <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="fcont_le_compat3">fcont_le_compat3</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">D4</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">f</span> : <span class="id">D1</span>-<span class="id">C</span>-&gt;<span class="id">D2</span>-<span class="id">C</span>-&gt;<span class="id">D3</span>-<span class="id">C</span>-&gt;<span class="id">D4</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">a</span> <span class="id">b</span> : <span class="id">D1</span>) (<span class="id">c</span> <span class="id">d</span> : <span class="id">D2</span>) (<span class="id">x</span> <span class="id">y</span> : <span class="id">D3</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">a</span> &lt;= <span class="id">b</span> -&gt; <span class="id">c</span> &lt;= <span class="id">d</span> -&gt; <span class="id">x</span> &lt;= <span class="id">y</span> -&gt; <span class="id">f</span> <span class="id">a</span> <span class="id">c</span> <span class="id">x</span> &lt;= <span class="id">f</span> <span class="id">b</span> <span class="id">d</span> <span class="id">y</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole_trans">Ole_trans</a></span> <span class="kwd">with</span> (<span class="id">f</span> <span class="id">a</span> <span class="id">c</span> <span class="id">y</span>); <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_le_elim">fcont_le_elim</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole_trans">Ole_trans</a></span> <span class="kwd">with</span> (<span class="id">f</span> <span class="id">a</span> <span class="id">d</span>).<br/>
+&nbsp;&nbsp;- <span class="id">now</span> <span class="id">apply</span> (@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_monotonic">fcont_monotonic</a></span> _ _ (<span class="id">f</span> <span class="id">a</span>) <span class="id">c</span> <span class="id">d</span>).<br/>
+&nbsp;&nbsp;- <span class="id">apply</span> (@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_le_elim">fcont_le_elim</a></span> _ _ (<span class="id">f</span> <span class="id">a</span>) (<span class="id">f</span> <span class="id">b</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> (@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_monotonic">fcont_monotonic</a></span> _ _ <span class="id">f</span> <span class="id">a</span> <span class="id">b</span>).<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="fcont_sub">fcont_sub</a></span> : <span class="kwd">forall</span> (<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">D4</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D4</span>) -&gt; (<span class="id">D3</span> -<span class="id">C</span>-&gt; <span class="id">D1</span>) -&gt; (<span class="id">D1</span> -<span class="id">C</span>-&gt; <span class="id">D2</span>) -<span class="id">C</span>-&gt; (<span class="id">D3</span> -<span class="id">C</span>-&gt; <span class="id">D4</span>).<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">g</span> <span class="id">f</span>.<br/>
+&nbsp;&nbsp;<span class="id">exact</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#curry">curry</a></span> (<span class="id">g</span> @_ (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#AP">AP</a></span> <span class="id">D1</span> <span class="id">D2</span> @2_ <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#FST">FST</a></span> (<span class="id">D1</span> -<span class="id">C</span>-&gt; <span class="id">D2</span>) <span class="id">D3</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">f</span> @_ <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#SND">SND</a></span> (<span class="id">D1</span> -<span class="id">C</span>-&gt; <span class="id">D2</span>) <span class="id">D3</span>))).<br/>
+Defined.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="ford_fcont_shift_simpl">ford_fcont_shift_simpl</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">A</span> <span class="id">D1</span> <span class="id">D2</span> (<span class="id">f</span>: <span class="id">A</span> -<span class="id">o</span>&gt; (<span class="id">D1</span>-<span class="id">c</span>&gt; <span class="id">D2</span>)) (<span class="id">x</span>:<span class="id">D1</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#ford_fcont_shift">ford_fcont_shift</a></span> <span class="id">f</span> <span class="id">x</span> = <span class="kwd">fun</span> <span class="id">a</span> =&gt; <span class="id">f</span> <span class="id">a</span> <span class="id">x</span>.<br/>
+&nbsp;&nbsp;<span class="id">trivial</span>.<br/>
+Qed.
+<br/>
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#ford_fcont_shift_simpl">ford_fcont_shift_simpl</a></span> : <span class="id">cpodb</span>.<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="fcont_ford_shift">fcont_ford_shift</a></span> (<span class="id">A</span>:<span class="kwd">Type</span>) (<span class="id">D1</span> <span class="id">D2</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">f</span>: <span class="id">D1</span> -<span class="id">c</span>&gt; <span class="id">A</span> -<span class="id">O</span>-&gt; <span class="id">D2</span>) : <span class="id">A</span> -<span class="id">o</span>&gt; (<span class="id">D1</span>-<span class="id">c</span>&gt; <span class="id">D2</span>).<br/>
+&nbsp;&nbsp;<span class="id">intro</span> <span class="id">a</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_comp">fcont_comp</a></span> <span class="kwd">with</span> (2 := <span class="id">f</span>).<br/>
+&nbsp;&nbsp;<span class="id">unshelve</span> <span class="id">esplit</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="kwd">fun</span> <span class="id">g</span> =&gt; <span class="id">g</span> <span class="id">a</span>).<br/>
+&nbsp;&nbsp;<span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">red</span>; <span class="id">auto</span>.<br/>
+Defined.
+<br/>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> (<span class="id">D1</span> <span class="id">D2</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) : (@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fconti_fun">fconti_fun</a></span> <span class="id">D1</span> <span class="id">D2</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id">O</span>:=<span class="id">D1</span>-<span class="id">C</span>-&gt;<span class="id">D2</span>) ==&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id">O</span>:=<span class="id">D1</span>) ==&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id">O</span>:=<span class="id">D2</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">funconti_fun_compat1</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> <span class="id">f</span> <span class="id">g</span> <span class="id">Hfg</span> <span class="id">x</span> <span class="id">y</span> <span class="id">Hxy</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> (@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#ford_eq_elim">ford_eq_elim</a></span> _ _ <span class="id">f</span> <span class="id">g</span> <span class="id">Hfg</span> <span class="id">x</span>).<br/>
+&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_stable">fcont_stable</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> (<span class="id">D1</span> <span class="id">D2</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>)(<span class="id">F</span>:<span class="id">D1</span>-<span class="id">C</span>-&gt;<span class="id">D2</span>) : (@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fconti_fun">fconti_fun</a></span> <span class="id">D1</span> <span class="id">D2</span> <span class="id">F</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id">O</span>:=<span class="id">D1</span>) ==&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id">O</span>:=<span class="id">D2</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">funconti_fun_compat2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_stable">fcont_stable</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="fcont_stable2">fcont_stable2</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> :<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">f</span> : <span class="id">D1</span> -<span class="id">C</span>-&gt; <span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D3</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x1</span> <span class="id">x2</span> : <span class="id">D1</span>) (<span class="id">y1</span> <span class="id">y2</span> : <span class="id">D2</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x1</span> == <span class="id">x2</span> -&gt; <span class="id">y1</span> == <span class="id">y2</span> -&gt; <span class="id">f</span> <span class="id">x1</span> <span class="id">y1</span> == <span class="id">f</span> <span class="id">x2</span> <span class="id">y2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * -&gt; -&gt;; <span class="id">reflexivity</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="fcont_stable3">fcont_stable3</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> {<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">D4</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">f</span> : <span class="id">D1</span> -<span class="id">C</span>-&gt; <span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D3</span> -<span class="id">C</span>-&gt; <span class="id">D4</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x1</span> <span class="id">x2</span> : <span class="id">D1</span>) (<span class="id">y1</span> <span class="id">y2</span> : <span class="id">D2</span>) (<span class="id">z1</span> <span class="id">z2</span> : <span class="id">D3</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">x1</span> == <span class="id">x2</span> -&gt; <span class="id">y1</span> == <span class="id">y2</span> -&gt; <span class="id">z1</span> == <span class="id">z2</span> -&gt; <span class="id">f</span> <span class="id">x1</span> <span class="id">y1</span> <span class="id">z1</span> == <span class="id">f</span> <span class="id">x2</span> <span class="id">y2</span> <span class="id">z2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * -&gt; -&gt; -&gt;; <span class="id">reflexivity</span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">like <span class="bracket"><span class="id">fixp_ind</span></span>, with a stronger hypothesis on arguments
+     of F, without having to prove the corresponding admissibility </div>
+<span class="kwd">Lemma</span> <span class="id"><a name="fixp_inv">fixp_inv</a></span> : <span class="kwd">forall</span> (<span class="id">D</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">F</span>:<span class="id">D</span> -<span class="id">m</span>&gt; <span class="id">D</span>) (<span class="id">P</span> <span class="id">P'</span> : <span class="id">D</span> -&gt; <span class="kwd">Prop</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span>, <span class="id">P'</span> <span class="id">x</span> -&gt; <span class="id">P</span> <span class="id">x</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#admissible">admissible</a></span> <span class="id">P</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P'</span> 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="kwd">forall</span> <span class="id">x</span>, <span class="id">P'</span> <span class="id">x</span> -&gt; <span class="id">P'</span> (<span class="id">F</span> <span class="id">x</span>)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">P</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fixp">fixp</a></span> <span class="id">F</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fixp">fixp</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id">X</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#proj2">proj2</a></span> <span class="kwd">with</span> (<span class="id">A</span> := <span class="id">P'</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#iter">iter</a></span> (<span class="id">D</span>:=<span class="id">D</span>) <span class="id">F</span> <span class="id">n</span>)).<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">destruct</span> <span class="id">IHn</span>.<br/>
+&nbsp;&nbsp;<span class="id">firstorder</span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">like <span class="bracket"><span class="id">fixp_ind</span></span>, keeping in mind we are starting from 0 so
+      we can use x &lt;= F x in the reasoning </div>
+<span class="kwd">Lemma</span> <span class="id"><a name="fixp_ind_le">fixp_ind_le</a></span> : <span class="kwd">forall</span> (<span class="id">D</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>)(<span class="id">F</span>:<span class="id">D</span> -<span class="id">m</span>&gt; <span class="id">D</span>)(<span class="id">P</span>:<span class="id">D</span>-&gt;<span class="kwd">Type</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#admissible">admissible</a></span> <span class="id">P</span> -&gt; <span class="id">P</span> 0 -&gt; (<span class="kwd">forall</span> <span class="id">x</span>, <span class="id">P</span> <span class="id">x</span> -&gt; <span class="id">x</span> &lt;= <span class="id">F</span> <span class="id">x</span> -&gt; <span class="id">P</span> (<span class="id">F</span> <span class="id">x</span>)) -&gt; <span class="id">P</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fixp">fixp</a></span> <span class="id">F</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span>; <span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fixp">fixp</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id">X</span>; <span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">assert</span> (<span class="kwd">forall</span> <span class="id">n</span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#iter_">iter_</a></span> <span class="id">F</span> <span class="id">n</span> &lt;= <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#iter_">iter_</a></span> <span class="id">F</span> (<span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Datatypes.html#S">S</a></span> <span class="id">n</span>)).<br/>
+&nbsp;&nbsp;<span class="id">intro</span> <span class="id">m</span>; <span class="id">induction</span> <span class="id">m</span>; <span class="id">simpl</span>; <span class="id">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id">induction</span> <span class="id">n</span>; <span class="id">simpl</span>; <span class="id">firstorder</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="admissible_and">admissible_and</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">D</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">P</span> <span class="id">Q</span> : <span class="id">D</span> -&gt; <span class="kwd">Prop</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#admissible">admissible</a></span> <span class="id">P</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#admissible">admissible</a></span> <span class="id">Q</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#admissible">admissible</a></span> (<span class="kwd">fun</span> <span class="id">x</span> =&gt; <span class="id">P</span> <span class="id">x</span> /\ <span class="id">Q</span> <span class="id">x</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">firstorder</span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">Prop version of admissibility, under which we can rewrite propositional
+    equivalences </div>
+<span class="kwd">Definition</span> <span class="id"><a name="admissibleP">admissibleP</a></span> (<span class="id">D</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">P</span> : <span class="id">D</span> -&gt; <span class="kwd">Prop</span>) :=<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">f</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#natO">natO</a></span> -<span class="id">m</span>&gt; <span class="id">D</span>, (<span class="kwd">forall</span> <span class="id">n</span>, <span class="id">P</span> (<span class="id">f</span> <span class="id">n</span>)) -&gt; <span class="id">P</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#lub">lub</a></span> <span class="id">f</span>).<br/>
+<br/>
+<span class="kwd">Fact</span> <span class="id"><a name="admissiblePT">admissiblePT</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">D</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">P</span> : <span class="id">D</span> -&gt; <span class="kwd">Prop</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#admissibleP">admissibleP</a></span> <span class="id">D</span> <span class="id">P</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#admissible">admissible</a></span> <span class="id">P</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">trivial</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> (<span class="id">D</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) : (@<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#admissibleP">admissibleP</a></span> <span class="id">D</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#pointwise_relation">pointwise_relation</a></span> <span class="id">D</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span> ==&gt; <span class="id"><a href="https://coq.inria.fr/library/Coq.Init.Logic.html#iff">iff</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">admissible_morph</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="https://coq.inria.fr/library/Coq.Classes.Morphisms.html#pointwise_relation">pointwise_relation</a></span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#admissibleP">admissibleP</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Hxy</span>.<br/>
+&nbsp;&nbsp;<span class="id">split</span>; <span class="id">intros</span> <span class="id">HH</span> ??; <span class="id">apply</span> <span class="id">Hxy</span>, <span class="id">HH</span>; <span class="id">firstorder</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="le_admissible">le_admissible</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">D</span> <span class="id">D'</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">f</span> <span class="id">g</span> : <span class="id">D</span> -<span class="id">C</span>-&gt; <span class="id">D'</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#admissible">admissible</a></span> <span class="id">D</span> (<span class="kwd">fun</span> <span class="id">s</span> =&gt; <span class="id">f</span> <span class="id">s</span> &lt;= <span class="id">g</span> <span class="id">s</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> ?????.<br/>
+&nbsp;&nbsp;<span class="id">setoid_rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#lub_comp_eq">lub_comp_eq</a></span>; <span class="id">auto</span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">function that ignore its 2nd argument </div>
+<span class="kwd">Definition</span> <span class="id"><a name="CTE">CTE</a></span> (<span class="id">D1</span> <span class="id">D2</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) : <span class="id">D1</span> -<span class="id">C</span>-&gt; <span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D1</span> := (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#curry">curry</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#FST">FST</a></span> <span class="id">D1</span> <span class="id">D2</span>)).<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="CTE_eq">CTE_eq</a></span> : <span class="kwd">forall</span> (<span class="id">D1</span> <span class="id">D2</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) <span class="id">a</span> <span class="id">b</span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#CTE">CTE</a></span> <span class="id">D1</span> <span class="id">D2</span> <span class="id">a</span> <span class="id">b</span> = <span class="id">a</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">trivial</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#CTE_eq">CTE_eq</a></span> : <span class="id">cpodb</span>.<br/>
+<br/>
+<h3> Continuous version of fcont_app  </h3>
+<span class="kwd">Definition</span> <span class="id"><a name="fcont_app2">fcont_app2</a></span> {<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>} (<span class="id">f</span>: <span class="id">D1</span>-<span class="id">C</span>-&gt; <span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D3</span>) (<span class="id">x</span>:<span class="id">D2</span>) : <span class="id">D1</span> -<span class="id">c</span>&gt; <span class="id">D3</span> :=<br/>
+&nbsp;&nbsp;(<span class="id">f</span> @2_ <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#ID">ID</a></span> <span class="id">D1</span>) (<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#CTE">CTE</a></span> <span class="id">D2</span> <span class="id">D1</span> <span class="id">x</span>).<br/>
+<br/>
+<span class="kwd">Infix</span> <span class="string">"&lt;___&gt;"</span> := <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#fcont_app2">fcont_app2</a></span> (<span class="kwd">at</span> <span class="id">level</span> 70) : <span class="id">O_scope</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="fcont_app2_simpl">fcont_app2_simpl</a></span> : <span class="kwd">forall</span> (<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">f</span>: <span class="id">D1</span>-<span class="id">c</span>&gt; <span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D3</span>) (<span class="id">x</span>:<span class="id">D1</span>)(<span class="id">y</span>:<span class="id">D2</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">f</span> &lt;<span class="id">___</span>&gt; <span class="id">y</span>) <span class="id">x</span> = <span class="id">f</span> <span class="id">x</span> <span class="id">y</span>.<br/>
+<span class="id">trivial</span>.<br/>
+Qed.
+<br/>
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#fcont_app2_simpl">fcont_app2_simpl</a></span> : <span class="id">cpodb</span>.<br/>
+<br/>
+<h3> weaker version of Dmapi </h3>
+<span class="kwd">Definition</span> <span class="id"><a name="wDmapi">wDmapi</a></span> : <span class="kwd">forall</span> (<span class="id">I</span>:<span class="kwd">Type</span>)(<span class="id">Di</span> <span class="id">Dj</span>:<span class="id">I</span>-&gt;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>)(<span class="id">f</span>:<span class="kwd">forall</span> <span class="id">i</span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">Di</span> -<span class="id">m</span>&gt; <span class="id">Dj</span> <span class="id">i</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">Di</span> -<span class="id">m</span>&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">Dj</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span>; <span class="kwd">exists</span> (<span class="kwd">fun</span> <span class="id">p</span> <span class="id">i</span> =&gt; <span class="id">f</span> <span class="id">i</span> <span class="id">p</span>); <span class="id">red</span>; <span class="id">auto</span>.<br/>
+Defined.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="wDmapi_simpl">wDmapi_simpl</a></span> : <span class="kwd">forall</span> (<span class="id">I</span>:<span class="kwd">Type</span>)(<span class="id">Di</span> <span class="id">Dj</span>:<span class="id">I</span>-&gt;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>)(<span class="id">f</span>:<span class="kwd">forall</span> <span class="id">i</span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">Di</span> -<span class="id">m</span>&gt; <span class="id">Dj</span> <span class="id">i</span>) (<span class="id">p</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">Di</span>) (<span class="id">i</span>:<span class="id">I</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#wDmapi">wDmapi</a></span> _ _ _ <span class="id">f</span> <span class="id">p</span> <span class="id">i</span> = <span class="id">f</span> <span class="id">i</span> <span class="id">p</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">trivial</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#wDmapi_simpl">wDmapi_simpl</a></span> : <span class="id">cpodb</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="wDMAPi">wDMAPi</a></span> : <span class="kwd">forall</span> (<span class="id">I</span>:<span class="kwd">Type</span>)(<span class="id">Di</span> <span class="id">Dj</span>:<span class="id">I</span>-&gt;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>)(<span class="id">f</span>:<span class="kwd">forall</span> <span class="id">i</span>, <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">Di</span> -<span class="id">c</span>&gt; <span class="id">Dj</span> <span class="id">i</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">Di</span> -<span class="id">c</span>&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">Dj</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span>; <span class="kwd">exists</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#wDmapi">wDmapi</a></span> _ _ _ (<span class="kwd">fun</span> <span class="id">i</span> =&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcontit">fcontit</a></span> (<span class="id">f</span> <span class="id">i</span>))).<br/>
+&nbsp;&nbsp;<span class="id">red</span>; <span class="id">intros</span>; <span class="id">intro</span> <span class="id">i</span>. <span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#wDmapi_simpl">wDmapi_simpl</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">repeat</span> (<span class="id">rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi_lub_simpl">Dprodi_lub_simpl</a></span>).<br/>
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole_trans">Ole_trans</a></span> <span class="kwd">with</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#lub">lub</a></span> (<span class="id">c</span>:=<span class="id">Dj</span> <span class="id">i</span>) (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Fcontit">Fcontit</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">Di</span>) (<span class="id">Dj</span> <span class="id">i</span>) (<span class="id">f</span> <span class="id">i</span>) @ <span class="id">h</span>)); <span class="id">eauto</span>.<br/>
+Defined.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Dprodi_le_elim">Dprodi_le_elim</a></span> : <span class="kwd">forall</span> (<span class="id">I</span>:<span class="kwd">Type</span>)(<span class="id">D</span>:<span class="id">I</span>-&gt;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">p</span> <span class="id">q</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">D</span>), <span class="id">p</span>&lt;=<span class="id">q</span> -&gt; <span class="kwd">forall</span> <span class="id">i</span>, <span class="id">p</span> <span class="id">i</span> &lt;= <span class="id">q</span> <span class="id">i</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span> ???? <span class="id">H</span>; <span class="id">apply</span> <span class="id">H</span>.<br/>
+Qed.
+<br/>
+<br/>
+<h3> Some kind of distributivity for Dprodi  </h3>
+<span class="kwd">Definition</span> <span class="id"><a name="Dprodi_distr">Dprodi_distr</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">I</span>:<span class="kwd">Type</span>) (<span class="id">Di</span>:<span class="id">I</span>-&gt;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">D</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">f</span>: <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> (<span class="kwd">fun</span> <span class="id">i</span> =&gt; <span class="id">D</span> -<span class="id">C</span>-&gt; <span class="id">Di</span> <span class="id">i</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">D</span> -<span class="id">m</span>&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">Di</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="kwd">fun</span> <span class="id">d</span> <span class="id">i</span> =&gt; <span class="id">f</span> <span class="id">i</span> <span class="id">d</span>); <span class="id">auto</span>.<br/>
+Defined.
+<br/>
+<br/>
+<span class="kwd">Definition</span> <span class="id"><a name="Dprodi_DISTR">Dprodi_DISTR</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">I</span>:<span class="kwd">Type</span>) (<span class="id">Di</span>:<span class="id">I</span>-&gt;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">D</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">f</span>: <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> (<span class="kwd">fun</span> <span class="id">i</span> =&gt; <span class="id">D</span> -<span class="id">C</span>-&gt; <span class="id">Di</span> <span class="id">i</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">D</span> -<span class="id">C</span>-&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> <span class="id">Di</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="kwd">exists</span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#Dprodi_distr">Dprodi_distr</a></span> <span class="id">I</span> <span class="id">Di</span> <span class="id">D</span> <span class="id">f</span>).<br/>
+&nbsp;&nbsp;<span class="id">red</span>; <span class="id">intros</span>; <span class="id">intro</span> <span class="id">i</span>; <span class="id">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id">eapply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole_trans">Ole_trans</a></span>; <span class="id">eauto</span>.<br/>
+Defined.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="Dprodi_DISTR_simpl">Dprodi_DISTR_simpl</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">I</span>:<span class="kwd">Type</span>) (<span class="id">Di</span>:<span class="id">I</span>-&gt;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">D</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">f</span>: <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprodi">Dprodi</a></span> (<span class="kwd">fun</span> <span class="id">i</span> =&gt; <span class="id">D</span> -<span class="id">C</span>-&gt; <span class="id">Di</span> <span class="id">i</span>)) (<span class="id">d</span> : <span class="id">D</span>) (<span class="id">i</span> : <span class="id">I</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#Dprodi_DISTR">Dprodi_DISTR</a></span> <span class="id">I</span> <span class="id">Di</span> <span class="id">D</span> <span class="id">f</span> <span class="id">d</span> <span class="id">i</span> = <span class="id">f</span> <span class="id">i</span> <span class="id">d</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">trivial</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#Dprodi_DISTR_simpl">Dprodi_DISTR_simpl</a></span> : <span class="id">cpodb</span>.<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="FIXP_fixp">FIXP_fixp</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> <span class="id">D</span> (<span class="id">F</span> : <span class="id">D</span> -<span class="id">C</span>-&gt; <span class="id">D</span>), <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#FIXP">FIXP</a></span> _ <span class="id">F</span> = <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fixp">fixp</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcontit">fcontit</a></span> <span class="id">F</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">trivial</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="curry_Curry">curry_Curry</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">f</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprod">Dprod</a></span> <span class="id">D1</span> <span class="id">D2</span> -<span class="id">c</span>&gt; <span class="id">D3</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#curry">curry</a></span> <span class="id">f</span> = <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Curry">Curry</a></span> <span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">f</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">trivial</span>.<br/>
+Qed.</div></details>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#curry_Curry">curry_Curry</a></span> : <span class="id">cpodb</span>.<br/>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> (<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) : (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#curry">curry</a></span> (<span class="id">D1</span>:=<span class="id">D1</span>) (<span class="id">D2</span>:=<span class="id">D2</span>) (<span class="id">D3</span>:=<span class="id">D3</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id">O</span>:=<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprod">Dprod</a></span> <span class="id">D1</span> <span class="id">D2</span> -<span class="id">c</span>&gt; <span class="id">D3</span>) ==&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id">O</span>:=<span class="id">D1</span> -<span class="id">c</span>&gt; <span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D3</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">curry_eq_compat</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#curry">curry</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">H</span>.<br/>
+Qed.
+<br/>
+<br/>
+<span class="kwd">Lemma</span> <span class="id"><a name="uncurry_Uncurry">uncurry_Uncurry</a></span> :<br/>
+&nbsp;&nbsp;<span class="kwd">forall</span> (<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) (<span class="id">f</span>: <span class="id">D1</span> -<span class="id">c</span>&gt; <span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D3</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#uncurry">uncurry</a></span> <span class="id">f</span> = <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Uncurry">Uncurry</a></span> <span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> <span class="id">f</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">trivial</span>.<br/>
+Qed.</div></details>
+<span class="id">Global</span> <span class="kwd">Hint</span> <span class="id">Rewrite</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#uncurry_Uncurry">uncurry_Uncurry</a></span> : <span class="id">cpodb</span>.<br/>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> (<span class="id">D1</span> <span class="id">D2</span> <span class="id">D3</span> : <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) : (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#uncurry">uncurry</a></span> (<span class="id">D1</span>:=<span class="id">D1</span>) (<span class="id">D2</span>:=<span class="id">D2</span>) (<span class="id">D3</span>:=<span class="id">D3</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id">O</span>:=<span class="id">D1</span> -<span class="id">c</span>&gt; <span class="id">D2</span> -<span class="id">C</span>-&gt; <span class="id">D3</span>) ==&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Oeq">Oeq</a></span> (<span class="id">O</span>:=<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Dprod">Dprod</a></span> <span class="id">D1</span> <span class="id">D2</span> -<span class="id">c</span>&gt; <span class="id">D3</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">uncurry_eq_compat</span>.<br/>
+&nbsp;&nbsp;<span class="id">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id">unfold</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#uncurry">uncurry</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">now</span> <span class="id">rewrite</span> <span class="id">H</span>.<br/>
+Qed.
+<br/>
+<br/>
+<div class="doc">Morphisms that allows to rewrite under &lt;= </div>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> (<span class="id">D1</span> <span class="id">D2</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>)(<span class="id">hh</span> : <span class="id">D1</span>-<span class="id">C</span>-&gt;<span class="id">D2</span>) : <span class="id">hh</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole">Ole</a></span> (<span class="id">o</span>:=<span class="id">D1</span>) ++&gt; <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole">Ole</a></span> (<span class="id">o</span>:=<span class="id">D2</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">fcontit_le_morph</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_monotonic">fcont_monotonic</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="id">Add</span> <span class="id">Parametric</span> <span class="id">Morphism</span> (<span class="id">D1</span> <span class="id">D2</span>:<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#cpo">cpo</a></span>) : (@<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fconti_fun">fconti_fun</a></span> <span class="id">D1</span> <span class="id">D2</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">with</span> <span class="id">signature</span> @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole">Ole</a></span> (<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#fcont_cpo">fcont_cpo</a></span> <span class="id">D1</span> <span class="id">D2</span>) ++&gt; @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole">Ole</a></span> <span class="id">D1</span>  ++&gt; @<span class="id"><a href="Velus.Lustre.Denot.Cpo.Cpo_def.html#Ole">Ole</a></span> <span class="id">D2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">as</span> <span class="id">fcontit_le_morph2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+&nbsp;&nbsp;<span class="id">intros</span> * <span class="id">Le1</span> * <span class="id">Le2</span>.<br/>
+&nbsp;&nbsp;<span class="id">now</span> <span class="id">apply</span> <span class="id"><a href="Velus.Lustre.Denot.Cpo_ext.Cpo_def_ext.html#fcont_app_le_compat">fcont_app_le_compat</a></span>.<br/>
+Qed.</div></details>
+
+</div>
+<div class="footer"><hr/>Generated by <a href="https://github.com/xavierleroy/coq2html/">coq2html</a></div>
+</body>
+</html>
