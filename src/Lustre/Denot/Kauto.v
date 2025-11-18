@@ -559,7 +559,7 @@ Qed.
 
 (** ** Transitions fortes avec histoire *)
 
-Definition auto_continue_stongf (i : id_st) :
+Definition auto_continue_strongf (i : id_st) :
   Dprodi (fun _:id_st => env A -C-> DS (option id_st)) -C->
   env A -C->
   Dprod (Dprodi (fun _:id_st => DS id_st)) (DS id_st) -C->
@@ -580,16 +580,16 @@ Definition auto_continue_stongf (i : id_st) :
   refine ((wheni_env j @2_ ts) e).
 Defined.
 
-Lemma auto_continue_stongf_eq :
+Lemma auto_continue_strongf_eq :
   forall i ft e ft' ts,
-    auto_continue_stongf i ft e (ft',ts) =
+    auto_continue_strongf i ft e (ft',ts) =
       (fun i => map (or_default i) (ft i (wheni_env i ts e)),
          cons i (mergei ts ft')).
 Proof.
   reflexivity.
 Qed.
 
-Definition auto_continue_stong (i : id_st) :
+Definition auto_continue_strong (i : id_st) :
   Dprodi (fun _:id_st => env A -C-> env A) -C->
   Dprodi (fun _:id_st => env A -C-> DS (option id_st)) -C->
   env A -C-> env A.
@@ -601,7 +601,7 @@ Definition auto_continue_stong (i : id_st) :
       pose (e := SND pl pr);
       idtac
   end.
-  pose (F := FIXP _ @_ ((auto_continue_stongf i @2_ ft) e)).
+  pose (F := FIXP _ @_ ((auto_continue_strongf i @2_ ft) e)).
   pose (ts := SND _ _ @_ F).
   refine ((mergei_env @2_ REM _ @_ ts) _).
   apply Dprodi_DISTR; intro j.
@@ -609,10 +609,10 @@ Definition auto_continue_stong (i : id_st) :
   refine ((wheni_env j @2_ REM _ @_ ts) e).
 Defined.
 
-Lemma auto_continue_stong_eq :
+Lemma auto_continue_strong_eq :
   forall i fs ft e,
-    auto_continue_stong i fs ft e =
-      let '(_, ts) := FIXP _ (auto_continue_stongf i ft e) in
+    auto_continue_strong i fs ft e =
+      let '(_, ts) := FIXP _ (auto_continue_strongf i ft e) in
       mergei_env (rem ts) (fun i => fs i (wheni_env i (rem ts) e)).
 Proof.
   reflexivity.

@@ -705,7 +705,7 @@ Definition kdenot_transitions (l : list transition) :
                           end) @2_ SND _ _) ts).
 Defined.
 
-(** agrège, dans l'ordre, la listes des transitions en un unique
+(* agrège, dans l'ordre, la listes des transitions en un unique
     flot de transitions. Par exemple sur :
       [ F F F T F F ..., ("S1",T);
         F F T F F F ..., ("S2",F);
