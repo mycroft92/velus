@@ -1,0 +1,80 @@
+diff --git a/cparser/ErrorReports.ml b/cparser/ErrorReports.ml
+index ac1e17ac..8ad92ee4 100644
+--- a/cparser/ErrorReports.ml
++++ b/cparser/ErrorReports.ml
+@@ -16,15 +16,9 @@
+ 
+ open Lexing
+ open Pre_parser.MenhirInterpreter
+-module S = MenhirLib.General (* Streams *)
+ 
+ (* -------------------------------------------------------------------------- *)
+ 
+-(* There are places where we may hit an internal error and we would like to fail
+-   abruptly because "this cannot happen". Yet, it is safer when shipping to
+-   silently cover up for our internal error. Thus, we typically use an idiom of
+-   the form [if debug then assert false else <some default value>]. *)
+-
+ let debug = false
+ 
+ (* -------------------------------------------------------------------------- *)
+@@ -125,12 +119,12 @@ let shorten k text =
+ 
+ (* -------------------------------------------------------------------------- *)
+ 
+-(* [stack checkpoint] extracts the parser's stack out of a checkpoint. *)
++(* [env checkpoint] extracts the parser's environment out of a checkpoint. *)
+ 
+-let stack checkpoint =
++let env checkpoint =
+   match checkpoint with
+   | HandlingError env ->
+-      stack env
++      env
+   | _ ->
+       assert false (* this cannot happen, I promise *)
+ 
+@@ -140,25 +134,7 @@ let stack checkpoint =
+    parser checkpoint. *)
+ 
+ let state checkpoint : int =
+-  match Lazy.force (stack checkpoint) with
+-  | S.Nil ->
+-      (* Hmm... The parser is in its initial state. Its number is
+-         usually 0. This is a BIG HACK. TEMPORARY *)
+-      0
+-  | S.Cons (Element (s, _, _, _), _) ->
+-      number s
+-
+-(* -------------------------------------------------------------------------- *)
+-
+-(* TEMPORARY move to MenhirLib.General *)
+-
+-let rec drop n (xs : 'a S.stream) : 'a S.stream =
+-  match n, xs with
+-  | 0, _
+-  | _, lazy (S.Nil) ->
+-      xs
+-  | _, lazy (S.Cons (_, xs)) ->
+-      drop (n - 1) xs
++  current_state_number (env checkpoint)
+ 
+ (* -------------------------------------------------------------------------- *)
+ 
+@@ -167,13 +143,13 @@ let rec drop n (xs : 'a S.stream) : 'a S.stream =
+    if it isn't. *)
+ 
+ let element checkpoint i : element =
+-  match Lazy.force (drop i (stack checkpoint)) with
+-  | S.Nil ->
++  match get i (env checkpoint) with
++  | None ->
+       (* [i] is out of range. This could happen if the handwritten error
+          messages are out of sync with the grammar, or if a mistake was
+          made. We fail in a non-fatal way. *)
+       raise Not_found
+-  | S.Cons (e, _) ->
++  | Some e ->
+       e
+ 
+ (* -------------------------------------------------------------------------- *)

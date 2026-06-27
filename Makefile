@@ -4,12 +4,30 @@
 
 include variables.mk
 
-.PHONY: all clean compcert parser proof extraction $(VELUS) $(EXAMPLESDIR) documentation
+.PHONY: all clean compcert patch-compcert parser proof extraction $(VELUS) $(EXAMPLESDIR) documentation
 
 all: $(VELUS)
 
+# COMPCERT LOCAL PATCHES
+# Patches in patches/compcert/ are applied to the CompCert submodule and
+# tracked here instead of upstream.  We check on every make invocation so
+# that a plain 'git submodule update' (which resets tracked files) is
+# automatically healed on the next build.
+COMPCERT_PATCHES := $(sort $(wildcard $(MKFILE_DIR)/patches/compcert/*.patch))
+
+.PHONY: patch-compcert
+patch-compcert:
+	@for p in $(COMPCERT_PATCHES); do \
+	  if git -C $(COMPCERTDIR) apply --check --reverse $$p 2>/dev/null; then \
+	    true; \
+	  else \
+	    echo "${bold}Applying $$(basename $$p)...${normal}"; \
+	    git -C $(COMPCERTDIR) apply $$p; \
+	  fi; \
+	done
+
 # COMPCERT COQ
-compcert: $(COMPCERTDIR)/Makefile.config
+compcert: patch-compcert $(COMPCERTDIR)/Makefile.config
 	@echo "${bold}Building CompCert...${normal}"
 	$(MAKE) $(COMPCERTFLAGS) #compcert.ini driver/Version.ml proof
 	@echo "${bold}OK.${normal}"

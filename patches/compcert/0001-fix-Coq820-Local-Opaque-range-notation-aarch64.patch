@@ -1,0 +1,13 @@
+diff --git a/aarch64/Stacklayout.v b/aarch64/Stacklayout.v
+index cdbc64d5..431d70b8 100644
+--- a/aarch64/Stacklayout.v
++++ b/aarch64/Stacklayout.v
+@@ -58,7 +58,7 @@ Lemma frame_env_separated:
+        ** range sp (fe_ofs_callee_save fe) (size_callee_save_area b (fe_ofs_callee_save fe))
+        ** P.
+ Proof.
+-Local Opaque Z.add Z.mul sepconj range.
++Local Opaque Z.add Z.mul sepconj range'.
+   intros; simpl.
+   set (olink := align (4 * b.(bound_outgoing)) 8).
+   set (oretaddr := olink + 8).

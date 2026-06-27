@@ -255,6 +255,9 @@ let _ =
     | "riscV"   -> if Configuration.model = "64"
                    then Machine.rv64
                    else Machine.rv32
+    | "aarch64" -> if Configuration.abi = "apple"
+                   then Machine.aarch64_apple
+                   else Machine.aarch64
     | _         -> assert false
   end;
   (* Builtins.set C2C.builtins; (* ?? *) *)
