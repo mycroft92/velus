@@ -1,5 +1,5 @@
 [submodule "CompCert"]
 	path = CompCert
-	url = https://github.com/inria-parkas/CompCert.git
+	url = git@github.com:mycroft92/CompCert.git
 	ignore = dirty
-	branch = v3.16-velus
+	branch = velus-on-master
